@@ -9,5 +9,11 @@ def time_now():
 def generate_uuid():
     return uuid.uuid4()
 
+
 def camel_to_snake(s):
-    return ''.join(['_'+c.lower() if c.isupper() else c for c in s]).lstrip('_')
+    return ''.join(['_' + c.lower() if c.isupper() else c for c in s]).lstrip('_')
+
+
+def generate_hash(items):
+    frozen = frozenset(items)
+    return hash(frozen)

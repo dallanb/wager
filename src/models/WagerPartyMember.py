@@ -1,11 +1,10 @@
 from sqlalchemy_utils import UUIDType
-from ..common import WagerStatusEnum
 from .. import db
 from .mixins import BaseMixin
 
 
 class WagerPartyMember(db.Model, BaseMixin):
-    member_uuid = db.Column(UUIDType(binary=False), nullable=False)
+    member = db.Column(UUIDType(binary=False), nullable=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -15,5 +14,6 @@ class WagerPartyMember(db.Model, BaseMixin):
 
     # Relationship
     party = db.relationship("WagerParty")
+
 
 WagerPartyMember.register()

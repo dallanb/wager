@@ -1,26 +1,34 @@
+from flask import request
 from flask_restful import marshal_with
 from . import Base
-from ...models import WagerModel, WagerSchema
-from ...common import DataResponse, MessageResponse
+from .schemas import CreateWagerSchema
+from ...models import WagerModel, WagerSchema, WagerPartyModel, WagerPartyMemberModel
+from ...services import Wager as WagerService
+from ...common import DataResponse, MessageResponse, WagerStatusEnum, get_json
 
 
 class Wager(Base):
     def __init__(self):
         Base.__init__(self)
+        self.service = WagerService(cache=self.cache, db=self.db, logger=self.logger, user=self.user)
 
     @marshal_with(DataResponse.marshallable())
     def get(self, uuid=None):
-        filter = [] if uuid is None else [WagerModel.uuid == uuid]
-        wagers = WagerModel.query.filter(*filter).all()
-        self.logger.info(wagers)
-        wagers_result = [] if not wagers else wagersWagerSchema.dump(wagers)
-        self.logger.info(wagers_result)
+        filters = [] if uuid is None else [WagerModel.uuid == uuid]
+        wagers = WagerModel.query.filter(*filters).all()
+        wagers_result = WagerSchema().dump(wagers, many=True)
         return DataResponse(data={'wagers': wagers_result})
 
     @marshal_with(DataResponse.marshallable())
     def post(self):
-        return DataResponse(data=False)
+        # get cleaned request payload
+        data = CreateWagerSchema().load(get_json(request.form['data']))
+        # create wager
+        wager = self.service.create_wager()
+        # dump wager
+        wager_result = self.service.dump_wager(wager)
 
+        return DataResponse(data={'wager': wager_result})
 
     @marshal_with(DataResponse.marshallable())
     def put(self, uuid=None):

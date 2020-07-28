@@ -5,8 +5,8 @@ from .WagerStatus import WagerStatus
 
 
 class Wager(db.Model, BaseMixin):
-    time = db.Column(db.BigInteger)
-    owner = db.Column(UUIDType(binary=False))
+    owner = db.Column(UUIDType(binary=False), nullable=False)
+    time = db.Column(db.BigInteger, nullable=True)
 
     # FK
     stake_uuid = db.Column(UUIDType(binary=False), db.ForeignKey('wager_stake.uuid'), nullable=True)
@@ -22,7 +22,6 @@ class Wager(db.Model, BaseMixin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
 
     @staticmethod
     def find_status(status_enum=None):

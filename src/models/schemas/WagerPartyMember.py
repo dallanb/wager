@@ -9,4 +9,4 @@ class WagerPartyMemberSchema(ma.SQLAlchemySchema):
         load_instance = True
 
     uuid = ma.auto_field()
-    member_uuid = ma.auto_field()
+    member = ma.auto_field()

@@ -13,21 +13,24 @@ class BaseMixin(object):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     uuid = db.Column(UUIDType(binary=False), unique=True, nullable=False)
-    ctime = db.Column(db.BigInteger)
-    mtime = db.Column(db.BigInteger)
+    ctime = db.Column(db.BigInteger, default=time_now)
+    mtime = db.Column(db.BigInteger, onupdate=time_now)
+
+    @staticmethod
+    def init(mapper, connection, target):
+        target['uuid'] = generate_uuid()
+        return
 
     @staticmethod
     def before_insert(mapper, connection, target):
-        target.ctime = time_now()
-        target.uuid = generate_uuid()
         return
 
     @staticmethod
     def before_update(mapper, connection, target):
-        target.mtime = time_now()
         return
 
     @classmethod
     def register(cls):
+        listen(cls, 'init', cls.init)
         listen(cls, 'before_insert', cls.before_insert)
         listen(cls, 'before_update', cls.before_update)

@@ -1,4 +1,4 @@
-from flask import g
+from flask import g, request
 from flask_restful import Resource
 from ...common import ManualException
 from http import HTTPStatus
@@ -10,6 +10,7 @@ class Base(Resource):
         self.cache = g.cache
         self.db = g.db
         self.code = HTTPStatus
+        self.user = self.assign_current_user()
 
     @staticmethod
     def throw_error(http_code, **kwargs):
@@ -18,3 +19,7 @@ class Base(Resource):
         code = http_code.value
         msg = kwargs.get('msg', http_code.phrase)
         raise ManualException(code=code, msg=msg)
+
+    @classmethod
+    def assign_current_user(cls):
+        return request.headers.get('X-Consumer-Custom-ID')

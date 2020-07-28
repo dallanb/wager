@@ -1,1 +1,1 @@
-
+from .wager import CreateWagerSchema
