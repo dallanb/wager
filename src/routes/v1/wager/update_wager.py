@@ -15,13 +15,19 @@ class UpdateWager(Base):
     @marshal_with(DataResponse.marshallable())
     @Base.check_user
     def put(self, **kwargs):
-        # retrieve uuid
-        uuid = kwargs.get('uuid', None)
-        # clean payload
-        data = self.schema.load(get_json(request.form['data']))
-        # update wager
-        wager = self.service.update_wager(uuid=uuid, **data)
-        # dump wager
-        wager_result = self.service.dump_wager(wager)
-
-        return DataResponse(data={'wager': wager_result})
+        try:
+            # retrieve uuid
+            uuid = kwargs.get('uuid', None)
+            # clean payload
+            data = self.schema.load(get_json(request.form['data']))
+            # update wager
+            wager = self.service.update_wager(uuid=uuid, **data)
+            # dump wager
+            wager_result = self.service.dump_wager(wager)
+            return DataResponse(data={'wager': wager_result})
+        except ValueError as e:
+            self.logger.error(e)
+            self.throw_error(http_code=self.code.BAD_REQUEST, msg=e)
+        except Exception as e:
+            self.logger.error(e)
+            self.throw_error(self.code.INTERNAL_SERVER_ERROR)

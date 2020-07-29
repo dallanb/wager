@@ -15,11 +15,17 @@ class CreateWager(Base):
     @marshal_with(DataResponse.marshallable())
     @Base.check_user
     def post(self):
-        # clean payload
-        data = self.schema.load(get_json(request.form['data']))
-        # create wager
-        wager = self.service.create_wager(**data)
-        # dump wager
-        wager_result = self.service.dump_wager(wager)
-
-        return DataResponse(data={'wager': wager_result})
+        try:
+            # clean payload
+            data = self.schema.load(get_json(request.form['data']))
+            # create wager
+            wager = self.service.create_wager(**data)
+            # dump wager
+            wager_result = self.service.dump_wager(wager)
+            return DataResponse(data={'wager': wager_result})
+        except ValueError as e:
+            self.error.info(e)
+            self.throw_error(http_code=self.code.BAD_REQUEST, msg=e)
+        except Exception as e:
+            self.error.info(e)
+            self.throw_error(self.code.INTERNAL_SERVER_ERROR)

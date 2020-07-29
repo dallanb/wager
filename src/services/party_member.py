@@ -1,6 +1,8 @@
 from flask import g
 from .base import Base
 from ..models import PartyMember as PartyMemberModel
+from ..common import advanced_query
+from .. import cache
 
 
 class PartyMember(Base):
@@ -9,7 +11,20 @@ class PartyMember(Base):
         self.logger = g.logger.getLogger(__name__)
 
     @staticmethod
-    def create_members(members, party):
+    @cache.memoize(10)
+    def find_party_member(uuid=None):
+        filters = []
+        if uuid:
+            filters.append(('equal', [('uuid', uuid)]))
+
+        members = advanced_query(model=PartyMemberModel, filters=filters)
+        return members
+
+    @staticmethod
+    def create_party_member(members, party):
+        if not members:
+            raise ValueError('Missing members')
+
         party_members = []
         for member in members:
             party_member = PartyMemberModel(member=member, party=party)

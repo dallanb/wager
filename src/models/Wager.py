@@ -1,9 +1,9 @@
-from sqlalchemy_utils import UUIDType
+from sqlalchemy_utils import UUIDType, generic_repr
 from .. import db
 from .mixins import BaseMixin
-from .WagerStatus import WagerStatus
 
 
+@generic_repr('id', 'uuid')
 class Wager(db.Model, BaseMixin):
     owner = db.Column(UUIDType(binary=False), nullable=False)
     time = db.Column(db.BigInteger, nullable=True)

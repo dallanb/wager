@@ -2,6 +2,7 @@ from flask import g
 from .base import Base
 from ..models import Stake as StakeModel
 from ..common import advanced_query
+from .. import cache
 
 
 class Stake(Base):
@@ -10,6 +11,7 @@ class Stake(Base):
         self.logger = g.logger.getLogger(__name__)
 
     @staticmethod
+    @cache.memoize(10)
     def find_stake(uuid=None):
         filters = []
         if uuid:
@@ -24,7 +26,7 @@ class Stake(Base):
         amount = kwargs.get('amount', None)
 
         if currency is None or amount is None:
-            raise Exception('Missing required parms')
+            raise ValueError('Missing required parms')
 
         stake = StakeModel(currency=currency, amount=amount)
 
@@ -39,7 +41,7 @@ class Stake(Base):
 
         stakes = cls.find_stake(uuid=uuid)
         if not stakes:
-            raise Exception('Invalid UUID')
+            raise ValueError('Invalid UUID')
 
         stake = stakes[0]
 

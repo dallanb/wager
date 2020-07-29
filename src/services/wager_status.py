@@ -12,6 +12,6 @@ class WagerStatus(Base):
     @staticmethod
     def find_status(status_enum):
         if status_enum is None:
-            return None
+            raise ValueError('Missing status')
         status = WagerStatusModel.query.filter(WagerStatusModel.name == status_enum).first()
         return status

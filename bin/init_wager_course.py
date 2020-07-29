@@ -3,7 +3,7 @@ from flask import g
 from csv import reader
 
 
-def init_course():
+def init_wager_course():
     Course = g.src.Course
 
     f = reader(open("statics/csv/golf.csv"))

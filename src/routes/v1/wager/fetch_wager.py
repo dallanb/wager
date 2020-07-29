@@ -11,11 +11,17 @@ class FetchWager(Base):
 
     @marshal_with(DataResponse.marshallable())
     def get(self, **kwargs):
-        # retrieve uuid
-        uuid = kwargs.get('uuid', None)
-        # find wager
-        wagers = self.service.find_wager(uuid=uuid)
-        # dump wager
-        wagers_result = self.service.dump_wager(wagers, many=True)
-
-        return DataResponse(data={'wager': wagers_result})
+        try:
+            # retrieve uuid
+            uuid = kwargs.get('uuid', None)
+            # find wager
+            wagers = self.service.find_wager(uuid=uuid)
+            # dump wager
+            wagers_result = self.service.dump_wager(wagers, many=True)
+            return DataResponse(data={'wager': wagers_result})
+        except ValueError as e:
+            self.logger.error(e)
+            self.throw_error(http_code=self.code.BAD_REQUEST, msg=e)
+        except Exception as e:
+            self.logger.error(e)
+            self.throw_error(self.code.INTERNAL_SERVER_ERROR)
