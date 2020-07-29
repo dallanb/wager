@@ -34,12 +34,11 @@ class Wager(Base):
         wager.status = WagerStatus.find_status(status_enum=WagerStatusEnum.active)
 
         # add party
-        party = Party.find_party_by_members(members=members)
-        if party is not None:
-            wager.party = party
-        else:
+        parties = Party.find_party_by_members(members=members)
+        if not parties:
             wager.party = Party.create_party_by_members(members=members)
-
+        else:
+            wager.party = parties[0]
 
         g.db.session.add(wager)
         g.db.session.commit()
@@ -47,15 +46,15 @@ class Wager(Base):
         return wager
 
     @classmethod
-    def update_wager(cls, uuid, **kwargs):  # PAUSE HERE
+    def update_wager(cls, uuid, **kwargs):
         time = kwargs.get("time", None)
         currency = kwargs.get("currency", None)
         amount = kwargs.get("amount", None)
         course = kwargs.get("course", None)
-        members = kwargs.get("members", [])
+        members = kwargs.get("members", None)
 
         wagers = cls.find_wager(uuid)
-        if wagers is None:
+        if not wagers:
             raise Exception('Invalid UUID')
 
         wager = wagers[0]
@@ -77,10 +76,19 @@ class Wager(Base):
                 raise Exception('Members cannot be updated once set')
             wager.party = Party.create_party_by_members(members=members)
 
+        g.db.session.commit()
         return wager
 
     @classmethod
     def destroy_wager(cls, uuid):
+        wagers = cls.find_wager(uuid)
+        if not wagers:
+            raise Exception('Invalid UUID')
+
+        wager = wagers[0]
+
+        g.db.session.delete(wager)
+        g.db.session.commit()
         return True
 
     @staticmethod

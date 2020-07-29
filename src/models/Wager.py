@@ -15,7 +15,7 @@ class Wager(db.Model, BaseMixin):
     status_uuid = db.Column(UUIDType(binary=False), db.ForeignKey('wager_status.uuid'), nullable=True)
 
     # Relationship
-    stake = db.relationship("Stake")
+    stake = db.relationship("Stake", cascade="all, delete")
     party = db.relationship("Party")
     course = db.relationship("Course")
     status = db.relationship("WagerStatus")

@@ -28,14 +28,20 @@ class Stake(Base):
 
         stake = StakeModel(currency=currency, amount=amount)
 
+        g.db.session.add(stake)
+        g.db.session.commit()
+        return stake
+
     @classmethod
     def update_stake(cls, uuid, **kwargs):
         currency = kwargs.get('currency', None)
         amount = kwargs.get('amount', None)
 
-        stake = cls.find_stake(uuid=uuid)
-        if stake is None:
+        stakes = cls.find_stake(uuid=uuid)
+        if not stakes:
             raise Exception('Invalid UUID')
+
+        stake = stakes[0]
 
         if currency is not None:
             stake.currency = currency
@@ -44,3 +50,4 @@ class Stake(Base):
             stake.amount = amount
 
         g.db.session.commit()
+        return stake

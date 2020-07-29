@@ -15,5 +15,5 @@ class DestroyWager(Base):
         # retrieve uuid
         uuid = kwargs.get('uuid', None)
         # destroy wager
-        wager = self.service.destory_wager(uuid=uuid)
+        wager = self.service.destroy_wager(uuid=uuid)
         return MessageResponse()

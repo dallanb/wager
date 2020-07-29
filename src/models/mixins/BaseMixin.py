@@ -2,7 +2,7 @@ from sqlalchemy_utils import UUIDType
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.event import listen
 from ... import db
-from ..utils import camel_to_snake, generate_uuid, time_now
+from ...common import camel_to_snake, generate_uuid, time_now
 
 
 class BaseMixin(object):

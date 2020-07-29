@@ -8,6 +8,3 @@ from .WagerStatus import WagerStatus
 
 # Schemas
 from .schemas import (CourseSchema, PartySchema, PartyMemberSchema, StakeSchema, WagerSchema, WagerStatusSchema)
-
-# utils
-from .utils import *
