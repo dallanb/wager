@@ -34,8 +34,7 @@ from .routes import *
 # import common
 from .common import (
     ManualException,
-    ErrorResponse,
-    WagerStatusEnum
+    ErrorResponse
 )
 
 if app.config['ENV'] != 'development':

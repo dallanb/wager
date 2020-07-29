@@ -7,3 +7,8 @@ def get_json(myjson):
         return json_object
     except TypeError as e:
         return {}
+
+
+def generate_hash(items):
+    frozen = frozenset(items)
+    return hash(frozen)

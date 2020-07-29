@@ -1,68 +1,88 @@
-from .flask import g
+from flask import g
 from .base import Base
-from ..models import WagerModel, WagerSchema, WagerPartyModel, WagerPartyMemberModel
-from ..common import WagerStatusEnum
+from .party import Party
+from .stake import Stake
+from .wager_status import WagerStatus
+from ..models import Wager as WagerModel, WagerSchema
+from ..common import WagerStatusEnum, advanced_query
 
 
 class Wager(Base):
     def __init__(self):
+        super().__init__()
         self.logger = g.logger.getLogger(__name__)
 
     @staticmethod
-    def find_status(status):
-        return WagerModel.find_status(status)
+    def find_wager(uuid=None):
+        filters = []
+        if uuid:
+            filters.append(('equal', [('uuid', uuid)]))
 
-    @classmethod
-    def find_party(cls, members):
-        if members is None:
-            return None
-
-        # find hash for party
-        party_hash = WagerPartyModel.hash_members(members)
-
-        party = WagerPartyModel.query.filter(WagerPartyModel.hash == party_hash).first()
-        if party:
-            return party
-
-        party = cls.create_party(hash=party_hash)
-        members = cls.create_members(members, party)
-        return party
-
-    @staticmethod
-    def create_party(**kwargs):
-        party = WagerPartyMemberModel(*kwargs)
-        g.db.session.add(party)
-        g.db.session.commit()
-        return party
-
-    @staticmethod
-    def create_members(members, party):
-        party_members = []
-        for member in members:
-            party_member = WagerPartyMemberModel(member=member, party=party)
-            party_members.append(party_member)
-            g.db.session.add(party_member)
-        g.db.session.commit()
-        return party_members
+        wagers = advanced_query(model=WagerModel, filters=filters)
+        return wagers
 
     @classmethod
     def create_wager(cls, **kwargs):
         members = kwargs.get("members", [])
 
-        wager = Wager()
+        wager = WagerModel()
 
         # add owner
         wager.owner = g.user
 
         # add status
-        wager.status = cls.find_status(WagerStatusEnum.active)
+        wager.status = WagerStatus.find_status(status_enum=WagerStatusEnum.active)
 
         # add party
-        wager.party = cls.find_party(members=members)
+        party = Party.find_party_by_members(members=members)
+        if party is not None:
+            wager.party = party
+        else:
+            wager.party = Party.create_party_by_members(members=members)
+
 
         g.db.session.add(wager)
         g.db.session.commit()
 
+        return wager
+
+    @classmethod
+    def update_wager(cls, uuid, **kwargs):  # PAUSE HERE
+        time = kwargs.get("time", None)
+        currency = kwargs.get("currency", None)
+        amount = kwargs.get("amount", None)
+        course = kwargs.get("course", None)
+        members = kwargs.get("members", [])
+
+        wagers = cls.find_wager(uuid)
+        if wagers is None:
+            raise Exception('Invalid UUID')
+
+        wager = wagers[0]
+
+        if time is not None:
+            wager.time = time
+
+        if currency is not None or amount is not None:
+            if wager.stake is None:
+                wager.stake = Stake.create_stake(currency=currency, amount=amount)
+            else:
+                wager.stake = Stake.update_stake(uuid=wager.stake_uuid, currency=currency, amount=amount)
+
+        if course is not None:
+            wager.course = course
+
+        if members is not None:
+            if wager.party is not None:
+                raise Exception('Members cannot be updated once set')
+            wager.party = Party.create_party_by_members(members=members)
+
+        return wager
+
+    @classmethod
+    def destroy_wager(cls, uuid):
+        return True
+
     @staticmethod
-    def dump_wager(wager):
-        return WagerSchema().dump(wager)
+    def dump_wager(wager, **kwargs):
+        return WagerSchema().dump(wager, **kwargs)

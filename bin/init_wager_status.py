@@ -2,9 +2,9 @@ from flask import g
 import logging
 
 
-def init_wager_status():
-    status_enums = g.src.WagerStatusEnum
-    WagerStatus = g.src.WagerStatusModel
+def init_wager_status(status_enums):
+    WagerStatus = g.src.WagerStatus
+    logging.info(WagerStatus)
 
     for status_enum in status_enums:
         status = WagerStatus(name=status_enum)
