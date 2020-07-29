@@ -1,7 +1,7 @@
 from flask import g
 from flask.cli import FlaskGroup
 from src import app, db, common
-from bin import init_wager_status
+from bin import init_course, init_wager_status
 import src
 
 cli = FlaskGroup(app)
@@ -30,6 +30,14 @@ def initialize_statuses():
     with app.app_context():
         g.src = src
         init_wager_status(status_enums=common.WagerStatusEnum)
+        return
+
+
+@cli.command("init_course")
+def initialize_courses():
+    with app.app_context():
+        g.src = src
+        init_course()
         return
 
 
