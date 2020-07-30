@@ -1,34 +1,22 @@
-from flask import g
-from .base import Base
 from ..models import PartyMember as PartyMemberModel
-from ..common import advanced_query
-from .. import cache, db
+from .. import cache
+from .base import *
 
 
-class PartyMember(Base):
-    def __init__(self):
-        super().__init__()
-        self.logger = g.logger.getLogger(__name__)
+@cache.memoize(10)
+def find_party_member_by_uuid(uuid=None):
+    if not uuid:
+        return MissingParamError('uuid')
+    if not is_uuid(uuid):
+        raise InvalidTypeError('uuid', 'uuid')
 
-    @staticmethod
-    @cache.memoize(10)
-    def find_party_member(uuid=None):
-        filters = []
-        if uuid:
-            filters.append(('equal', [('uuid', uuid)]))
+    members = find(model=PartyMemberModel, uuid=uuid, single=True)
+    return members
 
-        members = advanced_query(model=PartyMemberModel, filters=filters)
-        return members
 
-    @staticmethod
-    def create_party_member(members, party):
-        if not members:
-            raise ValueError('Missing members')
+def init_party_member(**kwargs):
+    return init(model=PartyMemberModel, **kwargs)
 
-        party_members = []
-        for member in members:
-            party_member = PartyMemberModel(member=member, party=party)
-            party_members.append(party_member)
-            db.session.add(party_member)
-        db.session.commit()
-        return party_members
+
+def save_party_member(party_member):
+    return save(instance=party_member)

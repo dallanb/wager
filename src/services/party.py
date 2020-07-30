@@ -1,66 +1,69 @@
-from flask import g
-from .base import Base
-from .party_member import PartyMember
 from ..models import Party as PartyModel
-from ..common import generate_hash, advanced_query
-from .. import cache, db
+from ..common import generate_hash
+from .. import cache
+from .base import *
+from .party_member import init_party_member, save_party_member
 
 
-class Party(Base):
-    def __init__(self):
-        super().__init__()
-        self.logger = g.logger.getLogger(__name__)
+# @cache.memoize(10)
+def hash_members(members):
+    if not members:
+        raise MissingParamError('members')
+    if not is_list(members):
+        raise InvalidTypeError('members', 'list')
 
-    @staticmethod
-    @cache.memoize(10)
-    def hash_members(members):
-        return generate_hash(members)
+    return generate_hash(members)
 
-    @staticmethod
-    @cache.memoize(10)
-    def find_party_by_hash(party_hash):
-        if not party_hash:
-            raise ValueError('Missing hash')
 
-        filters = [('equal', [('hash', party_hash)])]
-        parties = advanced_query(model=PartyModel, filters=filters)
-        return parties
+@cache.memoize(10)
+def find_party_by_hash(party_hash):
+    if not party_hash:
+        raise MissingParamError('party_hash')
+    if not is_hash(party_hash):
+        raise InvalidTypeError('party_hash', 'hash')
 
-    @classmethod
-    @cache.memoize(10)
-    def find_party_by_members(cls, members):
-        if not members:
-            return ValueError('Missing members')
+    return find(model=PartyModel, hash=party_hash, single=True)
 
-        # find hash for party
-        party_hash = cls.hash_members(members)
 
-        parties = cls.find_party_by_hash(party_hash)
-        return parties
+@cache.memoize(10)
+def find_party_by_members(members):
+    if not members:
+        return MissingParamError('members')
+    if not is_list(members):
+        raise InvalidTypeError('members', 'list')
 
-    @staticmethod
-    @cache.memoize(10)
-    def find_party(uuid=None):
-        filters = []
-        if uuid is not None:
-            filters.append(('equal', [('uuid', uuid)]))
+    # find hash for party
+    party_hash = hash_members(members=members)
+    return find_party_by_hash(party_hash=party_hash)
 
-        parties = advanced_query(model=PartyModel, filters=filters)
-        return parties
 
-    @staticmethod
-    def create_party(**kwargs):
-        party = PartyModel(**kwargs)
-        db.session.add(party)
-        db.session.commit()
-        return party
+@cache.memoize(10)
+def find_party_by_uuid(uuid):
+    if not uuid:
+        return MissingParamError('uuid')
+    if not is_uuid(uuid):
+        raise InvalidTypeError('uuid', 'uuid')
 
-    @classmethod
-    def create_party_by_members(cls, members):
-        if members is None:
-            raise ValueError('Missing members')
+    return find(model=PartyModel, uuid=uuid, single=True)
 
-        hash_members = cls.hash_members(members)
-        party = cls.create_party(hash=hash_members)
-        members = PartyMember.create_party_member(members=members, party=party)
-        return party
+
+def init_party(**kwargs):
+    return init(model=PartyModel, **kwargs)
+
+
+def init_party_by_members(members):
+    if not members:
+        raise MissingParamError('members')
+    if not is_list(members):
+        raise InvalidTypeError('members', 'list')
+
+    party_hash = hash_members(members=members)
+    party = init_party(hash=party_hash)
+    for member in members:
+        party_member = init_party_member(party=party, member=member)
+        save_party_member(party_member=party_member)
+    return party
+
+
+def save_party(party):
+    return save(instance=party)

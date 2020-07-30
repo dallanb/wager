@@ -1,124 +1,72 @@
-from flask import g
-from .base import Base
-from .course import Course
-from .party import Party
-from .stake import Stake
-from .wager_status import WagerStatus
 from ..models import Wager as WagerModel, WagerSchema
-from ..common import WagerStatusEnum, advanced_query, is_mapped, is_uuid
-from .. import cache, db
+from .. import cache
+from .base import *
+from .party import hash_members, find_party_by_hash, init_party_by_members, save_party
+from .course import find_course_by_uuid
+from .stake import init_stake, save_stake
 
 
-class Wager(Base):
-    def __init__(self):
-        super().__init__()
-        self.logger = g.logger.getLogger(__name__)
+def assign_wager_stake(currency=None, amount=None):
+    stake = init_stake(currency=currency, amount=amount)
+    return save_stake(stake=stake)
 
-    @staticmethod
-    def assign_course(**kwargs):
-        course = kwargs.get("course", None)
 
-        if not course:
-            return None
+def assign_wager_course_by_uuid(uuid):
+    if not uuid:
+        return MissingParamError('uuid')
+    if not is_uuid(uuid):
+        raise InvalidTypeError('uuid', 'uuid')
 
-        if is_mapped(course):
-            return course
-        elif is_uuid(course):
-            courses = Course.find_course(uuid=course)
-            if not courses:
-                raise ValueError('Invalid course')
-            return courses[0]
-        else:
-            raise TypeError('Invalid course')
+    course = find_course_by_uuid(uuid=uuid)
+    if not course:
+        raise InvalidParamError('course')
+    return course
 
-    @staticmethod
-    def assign_owner(**kwargs):
-        return g.user
 
-    @staticmethod
-    def assign_party(**kwargs):
-        members = kwargs.get("members", None)
-        party = kwargs.get("party", None)
+def assign_wager_party_by_members(members):
+    if not members:
+        raise MissingParamError('members')
+    if not is_list(members):
+        raise InvalidTypeError('members', 'list')
 
-        if is_mapped(party):
-            return party
-        elif is_uuid(party):
-            parties = Party.find_party(uuid=party)
-            if not parties:
-                raise ValueError('Invalid party')
-            return parties[0]
-        elif not party:
-            if members is not None:
-                parties = Party.find_party_by_members(members=members)
-                if not parties:
-                    return Party.create_party_by_members(members=members)
-                else:
-                    return parties[0]
-        else:
-            raise TypeError('Invalid party')
+    party_hash = hash_members(members=members)
+    party = find_party_by_hash(party_hash=party_hash)
+    if party:
+        return party
+    party = init_party_by_members(members)
+    return save_party(party)
 
-    @staticmethod
-    def assign_stake(**kwargs):
-        uuid = kwargs.get("uuid", None)
-        currency = kwargs.get("currency", None)
-        amount = kwargs.get("amount", None)
 
-        stake = None
-        if currency is not None or amount is not None:
-            if uuid is None:
-                stake = Stake.create_stake(currency=currency, amount=amount)
-            else:
-                stake = Stake.update_stake(uuid=uuid, currency=currency, amount=amount)
+@cache.memoize(timeout=10)
+def find_wager(**kwargs):
+    return find(model=WagerModel, **kwargs)
 
-        return stake
 
-    @staticmethod
-    def assign_status(**kwargs):
-        status = kwargs.get("status", WagerStatusEnum.active)
-        return WagerStatus.find_status(status_enum=status)
+@cache.memoize(timeout=10)
+def find_wager_by_uuid(uuid):
+    if not uuid:
+        return MissingParamError('uuid')
+    if not is_uuid(uuid):
+        raise InvalidTypeError('uuid', 'uuid')
 
-    @staticmethod
-    def assign_time(**kwargs):
-        return kwargs.get("time", None)
+    return find(model=WagerModel, uuid=uuid, single=True)
 
-    @cache.memoize(timeout=10)
-    def find_wager(self, uuid=None):
-        filters = []
-        if uuid:
-            filters.append(('equal', [('uuid', uuid)]))
 
-        wagers = advanced_query(model=WagerModel, filters=filters)
-        self.logger.info(wagers)
-        return wagers
+def init_wager(**kwargs):
+    return init(model=WagerModel, **kwargs)
 
-    @classmethod
-    def create_wager(cls, **kwargs):
-        wager = WagerModel(**kwargs)
-        return wager
 
-    @classmethod
-    def save_wager(cls, wager):
-        if not is_mapped(wager):
-            raise ValueError('Invalid wager')
+def save_wager(wager):
+    return save(instance=wager)
 
-        if not wager.pending:
-            db.session.add(wager)
 
-        db.session.commit(wager)
-        return wager
+def destroy_wager(wager):
+    return destroy(instance=wager)
 
-    @classmethod
-    def destroy_wager(cls, uuid):
-        wagers = cls.find_wager(uuid)
-        if not wagers:
-            raise ValueError('Invalid UUID')
 
-        wager = wagers[0]
+def count_wager():
+    return count(WagerModel)
 
-        db.session.delete(wager)
-        db.session.commit()
-        return True
 
-    @staticmethod
-    def dump_wager(wager, **kwargs):
-        return WagerSchema().dump(wager, **kwargs)
+def dump_wager(wager, **kwargs):
+    return WagerSchema().dump(wager, **kwargs)

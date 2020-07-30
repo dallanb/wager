@@ -1,55 +1,21 @@
-from flask import g
-from .base import Base
 from ..models import Stake as StakeModel
-from ..common import advanced_query
-from .. import cache, db
+from .. import cache
+from .base import *
 
 
-class Stake(Base):
-    def __init__(self):
-        super().__init__()
-        self.logger = g.logger.getLogger(__name__)
+@cache.memoize(10)
+def find_stake_by_uuid(uuid):
+    if not uuid:
+        return MissingParamError('uuid')
+    if not is_uuid(uuid):
+        raise InvalidTypeError('uuid', 'uuid')
 
-    @staticmethod
-    @cache.memoize(10)
-    def find_stake(uuid=None):
-        filters = []
-        if uuid:
-            filters.append(('equal', [('uuid', uuid)]))
+    return find(model=StakeModel, uuid=uuid, single=True)
 
-        wagers = advanced_query(model=StakeModel, filters=filters)
-        return wagers
 
-    @classmethod
-    def create_stake(cls, **kwargs):
-        currency = kwargs.get('currency', None)
-        amount = kwargs.get('amount', None)
+def init_stake(**kwargs):
+    return init(model=StakeModel, **kwargs)
 
-        if currency is None or amount is None:
-            raise ValueError('Missing required parms')
 
-        stake = StakeModel(currency=currency, amount=amount)
-
-        db.session.add(stake)
-        db.session.commit()
-        return stake
-
-    @classmethod
-    def update_stake(cls, uuid, **kwargs):
-        currency = kwargs.get('currency', None)
-        amount = kwargs.get('amount', None)
-
-        stakes = cls.find_stake(uuid=uuid)
-        if not stakes:
-            raise ValueError('Invalid UUID')
-
-        stake = stakes[0]
-
-        if currency is not None:
-            stake.currency = currency
-
-        if amount is not None:
-            stake.amount = amount
-
-        db.session.commit()
-        return stake
+def save_stake(stake):
+    return save(instance=stake)

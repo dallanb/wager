@@ -1,5 +1,5 @@
 import json
-import uuid
+import uuid as UUID
 from time import time
 
 
@@ -21,7 +21,7 @@ def time_now():
 
 
 def generate_uuid():
-    return uuid.uuid4()
+    return UUID.uuid4()
 
 
 def camel_to_snake(s):

@@ -1,31 +1,23 @@
-from flask import g
-from .base import Base
 from ..models import Course as CourseModel
-from ..common import advanced_query
-from .. import cache, db
+from .. import cache
+from .base import *
 
 
-class Course(Base):
-    def __init__(self):
-        super().__init__()
-        self.logger = g.logger.getLogger(__name__)
+@cache.memoize(10)
+def find_course_by_golf_canada_id(golf_canada_id=None):
+    if not golf_canada_id:
+        raise MissingParamError('golf_canada_id')
+    if not is_id(golf_canada_id):
+        raise InvalidTypeError('golf_canada_id', 'id')
 
-    @staticmethod
-    @cache.memoize(10)
-    def find_course_by_golf_canada_id(golf_canada_id=None):
-        if not golf_canada_id:
-            raise ValueError('Missing golf_canada_id')
+    return find(model=CourseModel, golf_canada_id=golf_canada_id, single=True)
 
-        filters = [('equal', [('golf_canada_id', golf_canada_id)])]
-        courses = advanced_query(model=CourseModel, filters=filters)
-        return courses
 
-    @staticmethod
-    @cache.memoize(10)
-    def find_course(uuid=None):
-        filters = []
-        if uuid:
-            filters.append(('equal', [('uuid', uuid)]))
+@cache.memoize(10)
+def find_course_by_uuid(uuid=None):
+    if not uuid:
+        raise MissingParamError('uuid')
+    if not is_uuid(uuid):
+        raise InvalidTypeError('uuid', 'uuid')
 
-        courses = advanced_query(model=CourseModel, filters=filters)
-        return courses
+    return find(model=CourseModel, uuid=uuid, single=True)

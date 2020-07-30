@@ -1,15 +1,15 @@
-from flask import request
+from flask import request, g
 from flask_restful import marshal_with
 from .schemas import CreateWagerSchema
 from .. import Base
-from ....services import Wager as WagerService
 from ....common import DataResponse, get_json
+from ....common.error import *
+from .... import services
 
 
 class CreateWager(Base):
     def __init__(self):
         Base.__init__(self)
-        self.service = WagerService()
         self.schema = CreateWagerSchema()
 
     @marshal_with(DataResponse.marshallable())
@@ -18,23 +18,52 @@ class CreateWager(Base):
         try:
             # clean payload
             data = self.schema.load(get_json(request.form['data']))
+
             # create wager
-            wager = self.service.create_wager()
-            # assign wager attrs
-            wager.course = self.service.assign_course(course=data.get('course'))
-            wager.owner = self.service.assign_owner()
-            wager.party = self.service.assign_party(members=data.get('members'))
-            wager.stake = self.service.assign_stake(currency=data.get('currency'), amount=data.get('amount'))
-            wager.status = self.service.assign_status()
-            wager.time = self.service.assign_time(time=data.get('time'))
+            wager = services.init_wager()
+
+            # set owner
+            wager.owner = g.user
+
+            # set status
+            status = services.find_wager_status_by_enum(status_enum='active')
+            wager.status_uuid = status.uuid
+
+            # set time
+            if data.get('time'):
+                wager.time = data.get('time')
+
+            # set course
+            if data.get('course'):
+                course = services.assign_wager_course_by_uuid(uuid=data.get('course'))
+                wager.course_uuid = course.uuid
+
+            # set party
+            if data.get('members'):
+                party = services.assign_wager_party_by_members(members=data.get('members'))
+                wager.party_uuid = party.uuid
+
+            # set stake
+            if data.get('currency') or data.get('amount'):
+                stake = services.assign_wager_stake(currency=data.get('currency'), amount=data.get('amount'))
+                wager.stake_uuid = stake.uuid
+
             # save wager
-            wager = self.service.save_wager(wager)
+            wager = services.save_wager(wager)
+
             # dump wager
-            wager_result = self.service.dump_wager(wager)
+            wager_result = services.dump_wager(wager)
+
             return DataResponse(data={'wager': wager_result})
-        except ValueError as e:
-            self.error.info(e)
+        except InvalidParamError as e:
+            self.logger.error(e)
+            self.throw_error(http_code=self.code.BAD_REQUEST, msg=e)
+        except InvalidTypeError as e:
+            self.logger.error(e)
+            self.throw_error(http_code=self.code.BAD_REQUEST, msg=e)
+        except MissingParamError as e:
+            self.logger.error(e)
             self.throw_error(http_code=self.code.BAD_REQUEST, msg=e)
         except Exception as e:
-            self.error.info(e)
+            self.logger.error(e)
             self.throw_error(self.code.INTERNAL_SERVER_ERROR)

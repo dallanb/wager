@@ -1,17 +1,11 @@
-from flask import g
-from .base import Base
 from ..models import WagerStatus as WagerStatusModel
 from ..common import WagerStatusEnum
+from .base import *
 
 
-class WagerStatus(Base):
-    def __init__(self):
-        super().__init__()
-        self.logger = g.logger.getLogger(__name__)
-
-    @staticmethod
-    def find_status(status_enum):
-        if status_enum is None:
-            raise ValueError('Missing status')
-        status = WagerStatusModel.query.filter(WagerStatusModel.name == status_enum).first()
-        return status
+def find_wager_status_by_enum(status_enum):
+    if not status_enum:
+        raise MissingParamError('status_enum')
+    if not is_enum(status_enum, WagerStatusEnum):
+        raise InvalidTypeError('status_enum', 'enum')
+    return find(model=WagerStatusModel, name=status_enum, single=True)

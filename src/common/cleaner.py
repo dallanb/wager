@@ -1,5 +1,5 @@
-import uuid
 import re
+from uuid import UUID, uuid4
 from sqlalchemy.orm.base import object_mapper
 from sqlalchemy.orm.exc import UnmappedInstanceError
 
@@ -37,7 +37,9 @@ def is_int(v, min_count=0, max_count=9999999999):
         v = int(v)
     if not isinstance(v, int):
         return None
-    if v < min_count or v > max_count:
+    if min_count is not None and v < min_count:
+        return None
+    if max_count is not None and v > max_count:
         return None
     return v
 
@@ -58,11 +60,31 @@ def is_enum(v, enum_class):
     return enum_class[v]
 
 
-def is_uuid(v, version=4):
+def is_uuid(v):
     try:
-        uuid_v = uuid(v, version=version)
+        if isinstance(v, UUID):
+            v = str(v)
+        uuid_v = UUID(v)
     except ValueError:
         return None
     if not str(uuid_v) == v:
         return None
     return uuid_v
+
+
+def is_list(v):
+    if not isinstance(v, list):
+        return None
+    return v
+
+
+def is_dict(v):
+    if not isinstance(v, dict):
+        return None
+    return v
+
+
+def is_hash(v):
+    if not is_int(v, min_count=None, max_count=None):
+        return None
+    return v

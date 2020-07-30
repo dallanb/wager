@@ -31,6 +31,8 @@ services:
       interval: 60s
       timeout: 5s
       retries: 5
+    ports:
+      - 80:5000
     depends_on:
       - wager_cache
       - wager_db
@@ -68,18 +70,18 @@ services:
       interval: 10s
       timeout: 5s
       retries: 20
-  wager_proxy:
-    container_name: wager_proxy
-    build:
-      context: ${HUNCHO_DIR}/services/wager/proxy
-      dockerfile: ${HUNCHO_DIR}/services/wager/proxy/build/Dockerfile
-    restart: on-failure
-    volumes:
-      - ${HUNCHO_DIR}/services/wager/statics/.:/usr/share/nginx/
-    ports:
-      - 80:80
-    depends_on:
-      - wager
+  #  wager_proxy:
+  #    container_name: wager_proxy
+  #    build:
+  #      context: ${HUNCHO_DIR}/services/wager/proxy
+  #      dockerfile: ${HUNCHO_DIR}/services/wager/proxy/build/Dockerfile
+  #    restart: on-failure
+  #    volumes:
+  #      - ${HUNCHO_DIR}/services/wager/statics/.:/usr/share/nginx/
+  #    ports:
+  #      - 80:80
+  #    depends_on:
+  #      - wager
   redis-commander:
     container_name: redis-commander
     build:

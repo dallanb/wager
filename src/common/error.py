@@ -14,3 +14,21 @@ class ManualException(Exception):
         rv['msg'] = self.msg
         rv['code'] = self.code
         return rv
+
+
+class MissingParamError(ValueError):
+    def __init__(self, key):
+        self.message = f"Missing param: {key}"
+        super().__init__(self.message)
+
+
+class InvalidTypeError(TypeError):
+    def __init__(self, key, key_type):
+        self.message = f"Invalid type: {key} must be of type {key_type}"
+        super().__init__(self.message)
+
+
+class InvalidParamError(ValueError):
+    def __init__(self, key):
+        self.message = f"Invalid param: {key}"
+        super().__init__(self.message)

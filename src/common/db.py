@@ -1,8 +1,9 @@
 import re
+from sqlalchemy import inspect
 from .. import db
 
 
-def advanced_query(model, filters=[], sort_by=None, limit=None, offset=None):
+def advanced_query(model, filters=[], sort_by=None, limit=None, offset=None, page=None, per_page=None, single=False):
     query = db.session.query(model)
     for k, v in filters:
         if k == 'like':
@@ -35,9 +36,20 @@ def advanced_query(model, filters=[], sort_by=None, limit=None, offset=None):
             query = query.order_by(getattr(model, key).desc())
         else:  # for now, lack of a direction will be interpreted as asc
             query = query.order_by(getattr(model, key).asc())
-    if limit is not None:
-        query = query.limit(limit)
-    if offset is not None:
-        query = query.offset(offset)
+    # if limit is not None:
+    #     query = query.limit(limit)
+    # if offset is not None:
+    #     query = query.offset(offset)
 
-    return query.all()
+    if single:
+        query = query.first()
+    elif page is not None and per_page is not None:
+        query = query.paginate(page, per_page, False).items
+    else:
+        query = query.all()
+    return query
+
+
+def is_pending(instance):
+    inspection = inspect(instance)
+    return inspection.pending

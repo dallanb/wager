@@ -1,8 +1,8 @@
 from flask import g
 from functools import wraps
 from flask_restful import Resource
-from ...common import ManualException, Auth
 from http import HTTPStatus
+from ...common import ManualException, Auth
 
 
 class Base(Resource):
