@@ -5,8 +5,8 @@ from .party import Party
 from .stake import Stake
 from .wager_status import WagerStatus
 from ..models import Wager as WagerModel, WagerSchema
-from ..common import WagerStatusEnum, advanced_query
-from .. import cache
+from ..common import WagerStatusEnum, advanced_query, is_mapped, is_uuid
+from .. import cache, db
 
 
 class Wager(Base):
@@ -18,12 +18,18 @@ class Wager(Base):
     def assign_course(**kwargs):
         course = kwargs.get("course", None)
 
-        if course is not None:
+        if not course:
+            return None
+
+        if is_mapped(course):
+            return course
+        elif is_uuid(course):
             courses = Course.find_course(uuid=course)
             if not courses:
                 raise ValueError('Invalid course')
-            course = courses[0]
-        return course
+            return courses[0]
+        else:
+            raise TypeError('Invalid course')
 
     @staticmethod
     def assign_owner(**kwargs):
@@ -32,15 +38,24 @@ class Wager(Base):
     @staticmethod
     def assign_party(**kwargs):
         members = kwargs.get("members", None)
+        party = kwargs.get("party", None)
 
-        party = None
-        if members is not None:
-            parties = Party.find_party_by_members(members=members)
+        if is_mapped(party):
+            return party
+        elif is_uuid(party):
+            parties = Party.find_party(uuid=party)
             if not parties:
-                party = Party.create_party_by_members(members=members)
-            else:
-                party = parties[0]
-        return party
+                raise ValueError('Invalid party')
+            return parties[0]
+        elif not party:
+            if members is not None:
+                parties = Party.find_party_by_members(members=members)
+                if not parties:
+                    return Party.create_party_by_members(members=members)
+                else:
+                    return parties[0]
+        else:
+            raise TypeError('Invalid party')
 
     @staticmethod
     def assign_stake(**kwargs):
@@ -59,7 +74,8 @@ class Wager(Base):
 
     @staticmethod
     def assign_status(**kwargs):
-        return WagerStatus.find_status(status_enum=WagerStatusEnum.active)
+        status = kwargs.get("status", WagerStatusEnum.active)
+        return WagerStatus.find_status(status_enum=status)
 
     @staticmethod
     def assign_time(**kwargs):
@@ -77,68 +93,18 @@ class Wager(Base):
 
     @classmethod
     def create_wager(cls, **kwargs):
-        wager = WagerModel()
-
-        # add owner
-        wager.owner = cls.assign_owner(**kwargs)
-
-        # add status
-        wager.status = cls.assign_status(**kwargs)
-
-        # add party
-        wager.party = cls.assign_party(**kwargs)
-
-        # add time
-        wager.time = cls.assign_time(**kwargs)
-
-        # add take
-        wager.stake = cls.assign_stake(**kwargs)
-
-        # add course
-        wager.course = cls.assign_course(**kwargs)
-
-        g.db.session.add(wager)
-        g.db.session.commit()
-
+        wager = WagerModel(**kwargs)
         return wager
 
     @classmethod
-    def update_wager(cls, uuid, **kwargs):
-        # find wager by uuid
-        wagers = cls.find_wager(uuid)
-        if not wagers:
-            raise ValueError('Invalid UUID')
+    def save_wager(cls, wager):
+        if not is_mapped(wager):
+            raise ValueError('Invalid wager')
 
-        # def __repr__(self):
-        #         return "%s(%s)" % (self.__class__.__name__, self.id)
+        if not wager.pending:
+            db.session.add(wager)
 
-        wager = wagers[0]
-
-        # validation
-        if kwargs.get('members') is not None and wager.party is not None:
-            raise ValueError('Members cannot be updated once set')
-
-        # update time
-        time = cls.assign_time(**kwargs)
-        if time is not None:
-            wager.time = time
-
-        # update stake
-        stake = cls.assign_stake(uuid=wager.stake_uuid, **kwargs)
-        if stake is not None:
-            wager.stake = stake
-
-        # update course
-        course = cls.assign_course(**kwargs)
-        if course is not None:
-            wager.course = course
-
-        # update party
-        party = cls.assign_party(**kwargs)
-        if party is not None:
-            wager.party = party
-
-        g.db.session.commit()
+        db.session.commit(wager)
         return wager
 
     @classmethod
@@ -149,8 +115,8 @@ class Wager(Base):
 
         wager = wagers[0]
 
-        g.db.session.delete(wager)
-        g.db.session.commit()
+        db.session.delete(wager)
+        db.session.commit()
         return True
 
     @staticmethod

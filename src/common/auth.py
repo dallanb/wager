@@ -1,5 +1,5 @@
 from flask import g, request
-from .response import ErrorResponse
+from .error import ManualException
 
 
 class Auth:
@@ -10,4 +10,4 @@ class Auth:
     def check_user(cls):
         g.user = request.headers.get('X-Consumer-Custom-ID')
         if not g.user:
-            return ErrorResponse(code=400, msg='Missing user data'), 400
+            raise ManualException(code=400, msg='Missing user data')

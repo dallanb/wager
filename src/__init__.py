@@ -1,10 +1,11 @@
 from flask import Flask, g
 from flask_caching import Cache
 from flask_cors import CORS
+from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_restful import Api, marshal_with
+from flask_seeder import FlaskSeeder
 from flask_sqlalchemy import SQLAlchemy
-from flask_marshmallow import Marshmallow
 
 import logging.config
 
@@ -17,11 +18,13 @@ CORS(app)
 # db
 db = SQLAlchemy(app)
 # migrate
-migrate = Migrate(app, db)
+migrate = Migrate(app, db, compare_type=True)
 # ma
 ma = Marshmallow()
 # routes
 api = Api(app)
+# seeder
+seeder = FlaskSeeder(app, db)
 
 # logging
 logging.config.dictConfig(app.config['LOGGING_CONFIG'])

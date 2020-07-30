@@ -3,7 +3,7 @@ from .base import Base
 from .party_member import PartyMember
 from ..models import Party as PartyModel
 from ..common import generate_hash, advanced_query
-from .. import cache
+from .. import cache, db
 
 
 class Party(Base):
@@ -51,8 +51,8 @@ class Party(Base):
     @staticmethod
     def create_party(**kwargs):
         party = PartyModel(**kwargs)
-        g.db.session.add(party)
-        g.db.session.commit()
+        db.session.add(party)
+        db.session.commit()
         return party
 
     @classmethod

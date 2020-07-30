@@ -1,5 +1,5 @@
 from .auth import Auth
-from .cleaner import Cleaner
+from .cleaner import *
 from .db import advanced_query
 from .enums import WagerStatusEnum
 from .error import ManualException

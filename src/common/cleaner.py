@@ -1,6 +1,68 @@
-from flask import g
+import uuid
+import re
+from sqlalchemy.orm.base import object_mapper
+from sqlalchemy.orm.exc import UnmappedInstanceError
 
 
-class Cleaner:
-    def __init__(self):
-        self.logger = g.logger.getLogger(__name__)
+def is_mapped(v):
+    try:
+        object_mapper(v)
+    except UnmappedInstanceError:
+        return None
+    return v
+
+
+def is_id(v):
+    return is_int(v, 1)
+
+
+def is_string(v, min_length=0, max_length=2000):
+    if not isinstance(v, str):
+        return None
+    if len(v) < min_length or len(v) > max_length:
+        return None
+    return v
+
+
+def is_text(v, min_length=0, max_length=4000):
+    if not isinstance(v, str):
+        return None
+    if len(v) < min_length or len(v) > max_length:
+        return None
+    return v
+
+
+def is_int(v, min_count=0, max_count=9999999999):
+    if isinstance(v, str) and v.isdigit():
+        v = int(v)
+    if not isinstance(v, int):
+        return None
+    if v < min_count or v > max_count:
+        return None
+    return v
+
+
+def is_email(v):
+    if v is None:
+        return v
+    if not re.search('^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$', v):
+        return None
+    return v
+
+
+def is_enum(v, enum_class):
+    if v is None:
+        return v
+    if v in enum_class.__members__ is False:
+        return None
+    return enum_class[v]
+
+
+def is_uuid(v, version=4):
+    try:
+        uuid_v = uuid(v, version=version)
+    except ValueError:
+        return None
+    if not str(uuid_v) == v:
+        return None
+    return uuid_v

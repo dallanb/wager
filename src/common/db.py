@@ -1,9 +1,9 @@
 import re
-from flask import g
+from .. import db
 
 
 def advanced_query(model, filters=[], sort_by=None, limit=None, offset=None):
-    query = g.db.session.query(model)
+    query = db.session.query(model)
     for k, v in filters:
         if k == 'like':
             for like_k, like_v in v:

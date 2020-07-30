@@ -2,7 +2,7 @@ from flask import g
 from .base import Base
 from ..models import Stake as StakeModel
 from ..common import advanced_query
-from .. import cache
+from .. import cache, db
 
 
 class Stake(Base):
@@ -30,8 +30,8 @@ class Stake(Base):
 
         stake = StakeModel(currency=currency, amount=amount)
 
-        g.db.session.add(stake)
-        g.db.session.commit()
+        db.session.add(stake)
+        db.session.commit()
         return stake
 
     @classmethod
@@ -51,5 +51,5 @@ class Stake(Base):
         if amount is not None:
             stake.amount = amount
 
-        g.db.session.commit()
+        db.session.commit()
         return stake

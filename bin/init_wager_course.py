@@ -4,6 +4,7 @@ from csv import reader
 
 
 def init_wager_course():
+    logging.info(f"init_wager_course started")
     Course = g.src.Course
 
     f = reader(open("statics/csv/golf.csv"))
@@ -12,6 +13,6 @@ def init_wager_course():
         golf_canada_id = golf_canada_row[0]
         course = Course(golf_canada_id=golf_canada_id)
         g.src.db.session.add(course)
-        logging.info(f"{golf_canada_id} added")
     g.src.db.session.commit()
+    logging.info(f"init_wager_course completed")
     return

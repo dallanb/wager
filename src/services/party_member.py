@@ -2,7 +2,7 @@ from flask import g
 from .base import Base
 from ..models import PartyMember as PartyMemberModel
 from ..common import advanced_query
-from .. import cache
+from .. import cache, db
 
 
 class PartyMember(Base):
@@ -29,6 +29,6 @@ class PartyMember(Base):
         for member in members:
             party_member = PartyMemberModel(member=member, party=party)
             party_members.append(party_member)
-            g.db.session.add(party_member)
-        g.db.session.commit()
+            db.session.add(party_member)
+        db.session.commit()
         return party_members
