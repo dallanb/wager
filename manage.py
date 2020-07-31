@@ -27,6 +27,10 @@ def clear_db():
     db.session.commit()
 
 
+def clear_cache():
+    common.cache.clear()
+
+
 def initialize_statuses():
     with app.app_context():
         g.src = src
@@ -54,6 +58,11 @@ def reset_db():
 @cli.command("delete_db")
 def delete_db():
     clear_db()
+
+
+@cli.command("flush_cache")
+def flush_cache():
+    clear_cache()
 
 
 @cli.command("init_status")

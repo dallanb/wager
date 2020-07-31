@@ -39,6 +39,10 @@ def assign_wager_party_by_members(members):
     return save_party(party)
 
 
+def is_owner(wager, user):
+    return wager.owner == user
+
+
 @cache.memoize(timeout=1000)
 def count_wager():
     return count(WagerModel)

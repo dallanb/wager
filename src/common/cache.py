@@ -17,5 +17,9 @@ def delete(key):
     return cache.cache.delete(key)
 
 
+def clear():
+    return cache.cache.clear()
+
+
 def unmemoize(f, **kwargs):
     return cache.delete_memoized(f, **kwargs)

@@ -16,7 +16,8 @@ class Base(Resource):
             raise ManualException()
         code = http_code.value
         msg = kwargs.get('msg', http_code.phrase)
-        raise ManualException(code=code, msg=msg)
+        err = kwargs.get('err', None)
+        raise ManualException(code=code, msg=msg, err=err)
 
     @staticmethod
     def prepare_metadata(total, page, per_page):

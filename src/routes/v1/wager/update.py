@@ -1,11 +1,11 @@
-from flask import request
+from flask import request, g
 from flask_restful import marshal_with
-from marshmallow import fields, Schema, ValidationError
+from marshmallow import fields, validate, Schema, ValidationError
 from .. import Base
 from .... import services
 from ....common.auth import check_user
 from ....common.response import DataResponse
-from ....common.utils import get_json
+from ....common.utils import get_json, time_now
 
 
 class Update(Base):
@@ -18,11 +18,15 @@ class Update(Base):
         try:
             data = self.body_schema.load(get_json(request.form['data']))
         except ValidationError as e:
-            self.throw_error(http_code=self.code.BAD_REQUEST, msg=e.messages)
+            self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
 
         wager = services.find_wager_by_uuid(uuid=uuid)
         if not wager:
-            raise self.throw_error(http=self.code.NOT_FOUND)
+            raise self.throw_error(http_code=self.code.NOT_FOUND)
+
+        if not services.is_owner(wager, g.user):
+            raise self.throw_error(http_code=self.code.UNAUTHORIZED,
+                                   err={"wager": ["Update is only available to owner"]})
 
         # time
         if data['time']:
@@ -52,7 +56,8 @@ class Update(Base):
 
 
 class UpdateSchema(Schema):
-    time = fields.Int(required=False, missing=None)
+    time = fields.Int(required=False, validate=validate.Range(min=time_now(), min_inclusive=False,
+                                                              error="Must be greater than current time"), missing=None)
     currency = fields.Str(required=False, missing=None)
     amount = fields.Str(required=False, missing=None)
     course = fields.UUID(required=False, missing=None)

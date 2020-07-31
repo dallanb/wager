@@ -14,8 +14,8 @@ class FetchAll(Base):
     def get(self):
         try:
             data = FetchAllSchema().load(request.args)
-        except ValidationError:
-            self.throw_error(http_code=self.code.BAD_REQUEST)
+        except ValidationError as e:
+            self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
         wager = services.find_wager(**data)
         total = services.count_wager()
         wager_result = services.dump_wager(wager, many=True)

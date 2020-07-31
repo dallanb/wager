@@ -1,8 +1,9 @@
 from flask import request, g
 from flask_restful import marshal_with
-from marshmallow import fields, Schema, ValidationError
+from marshmallow import fields, validate, Schema, ValidationError
 from .. import Base
-from ....common import DataResponse, get_json
+from ....common.response import DataResponse
+from ....common.utils import time_now, get_json
 from ....common.auth import check_user
 from .... import services
 
@@ -18,7 +19,7 @@ class Create(Base):
             json_data = get_json(request.form['data'])
             data = CreateSchema().load(json_data)
         except ValidationError as e:
-            self.throw_error(http_code=self.code.BAD_REQUEST, msg=e.messages)
+            self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
 
         wager = services.init_wager()
 
@@ -54,7 +55,8 @@ class Create(Base):
 
 
 class CreateSchema(Schema):
-    time = fields.Int(required=False, missing=None)
+    time = fields.Int(required=False, validate=validate.Range(min=time_now(), min_inclusive=False,
+                                                              error="Must be greater than current time"), missing=None)
     currency = fields.Str(required=False, missing=None)
     amount = fields.Str(required=False, missing=None)
     course = fields.UUID(required=False, missing=None)

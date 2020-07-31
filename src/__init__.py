@@ -51,7 +51,7 @@ if app.config['ENV'] == 'development':
     @app.errorhandler(ManualException)
     @marshal_with(ErrorResponse.marshallable())
     def handle_manual_error(error):
-        return ErrorResponse(code=error.code, msg=error.msg), error.code
+        return ErrorResponse(code=error.code, msg=error.msg, err=error.err), error.code
 
 
 # before each request
