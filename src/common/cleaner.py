@@ -47,7 +47,7 @@ def is_int(v, min_count=0, max_count=9999999999):
 def is_email(v):
     if v is None:
         return v
-    if not re.search('^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$', v):
+    if not re.search('[^@]+@[^@]+\.[^@]+', v):
         return None
     return v
 

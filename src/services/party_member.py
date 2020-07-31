@@ -1,9 +1,11 @@
 from ..models import PartyMember as PartyMemberModel
-from .. import cache
-from .base import *
+from ..common.db import find, init, save
+from ..common.cache import cache, unmemoize
+from ..common.cleaner import is_uuid
+from ..common.error import MissingParamError, InvalidTypeError
 
 
-@cache.memoize(10)
+@cache.memoize(timeout=10)
 def find_party_member_by_uuid(uuid=None):
     if not uuid:
         return MissingParamError('uuid')
@@ -19,4 +21,5 @@ def init_party_member(**kwargs):
 
 
 def save_party_member(party_member):
+    unmemoize(find_party_member_by_uuid, uuid=party_member.uuid)
     return save(instance=party_member)

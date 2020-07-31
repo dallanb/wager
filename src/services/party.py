@@ -1,11 +1,13 @@
 from ..models import Party as PartyModel
-from ..common import generate_hash
-from .. import cache
-from .base import *
+from ..common.error import MissingParamError, InvalidTypeError
+from ..common.cleaner import is_list, is_uuid, is_hash
+from ..common.db import find, init, save
+from ..common.cache import cache, unmemoize
+from ..common.utils import generate_hash
 from .party_member import init_party_member, save_party_member
 
 
-# @cache.memoize(10)
+@cache.memoize(timeout=1000)
 def hash_members(members):
     if not members:
         raise MissingParamError('members')
@@ -15,7 +17,7 @@ def hash_members(members):
     return generate_hash(members)
 
 
-@cache.memoize(10)
+@cache.memoize(timeout=10)
 def find_party_by_hash(party_hash):
     if not party_hash:
         raise MissingParamError('party_hash')
@@ -25,7 +27,6 @@ def find_party_by_hash(party_hash):
     return find(model=PartyModel, hash=party_hash, single=True)
 
 
-@cache.memoize(10)
 def find_party_by_members(members):
     if not members:
         return MissingParamError('members')
@@ -37,7 +38,7 @@ def find_party_by_members(members):
     return find_party_by_hash(party_hash=party_hash)
 
 
-@cache.memoize(10)
+@cache.memoize(timeout=10)
 def find_party_by_uuid(uuid):
     if not uuid:
         return MissingParamError('uuid')
@@ -66,4 +67,6 @@ def init_party_by_members(members):
 
 
 def save_party(party):
+    unmemoize(find_party_by_hash, hash=party.hash)
+    unmemoize(find_party_by_uuid, uuid=party.uuid)
     return save(instance=party)

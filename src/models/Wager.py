@@ -1,5 +1,6 @@
 from sqlalchemy_utils import UUIDType, generic_repr
-from .. import db
+from .. import db, ma
+from ..models import Course, Party, Stake, WagerStatus
 from .mixins import BaseMixin
 
 
@@ -22,6 +23,20 @@ class Wager(db.Model, BaseMixin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+
+class WagerSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = Wager
+        load_instance = True
+
+    uuid = ma.auto_field()
+    time = ma.auto_field()
+    owner = ma.auto_field()
+    stake_uuid = ma.auto_field()
+    party_uuid = ma.auto_field()
+    course_uuid = ma.auto_field()
+    status_uuid = ma.auto_field()
 
 
 Wager.register()

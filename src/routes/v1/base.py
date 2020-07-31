@@ -2,7 +2,7 @@ from flask import g
 from functools import wraps
 from flask_restful import Resource
 from http import HTTPStatus
-from ...common import ManualException, Auth
+from ...common import ManualException
 
 
 class Base(Resource):
@@ -19,12 +19,9 @@ class Base(Resource):
         raise ManualException(code=code, msg=msg)
 
     @staticmethod
-    def check_user(f):
-        @wraps(f)
-        def wrap(*args, **kwargs):
-            Auth().check_user()
-            return f(*args, **kwargs)
-
-        wrap.__doc__ = f.__doc__
-        wrap.__name__ = f.__name__
-        return wrap
+    def prepare_metadata(total, page, per_page):
+        return {
+            'total': total,
+            'page': page,
+            'per_page': per_page
+        }

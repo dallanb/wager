@@ -23,4 +23,7 @@ fi
 
 flask db upgrade --directory=migrations/test
 
+manage delete_db
+manage init
+
 manage run -h 0.0.0.0

@@ -1,9 +1,10 @@
-import re
 from sqlalchemy import inspect
+from src.common.error import *
+from src.common.cleaner import *
 from .. import db
 
 
-def advanced_query(model, filters=[], sort_by=None, limit=None, offset=None, page=None, per_page=None, single=False):
+def _query_builder(model, filters=[], sort_by=None, limit=None, offset=None):
     query = db.session.query(model)
     for k, v in filters:
         if k == 'like':
@@ -36,20 +37,65 @@ def advanced_query(model, filters=[], sort_by=None, limit=None, offset=None, pag
             query = query.order_by(getattr(model, key).desc())
         else:  # for now, lack of a direction will be interpreted as asc
             query = query.order_by(getattr(model, key).asc())
-    # if limit is not None:
-    #     query = query.limit(limit)
-    # if offset is not None:
-    #     query = query.offset(offset)
-
-    if single:
-        query = query.first()
-    elif page is not None and per_page is not None:
-        query = query.paginate(page, per_page, False).items
-    else:
-        query = query.all()
+    if limit is not None:
+        query = query.limit(limit)
+    if offset is not None:
+        query = query.offset(offset)
     return query
 
 
-def is_pending(instance):
+def _is_pending(instance):
     inspection = inspect(instance)
     return inspection.pending
+
+
+def _get_cache_key(model, query):
+    return f"{model.__tablename__}:{str(query)}"
+
+
+def init(model, **kwargs):
+    return model(**kwargs)
+
+
+def count(model):
+    return db.session.query(model).count()
+
+
+def save(instance):
+    if not instance:
+        raise MissingParamError(instance.__tablename__)
+    if not is_mapped(instance):
+        raise InvalidTypeError(instance.__tablename__, 'mapped')
+
+    if not _is_pending(instance):
+        db.session.add(instance)
+
+    db.session.commit()
+    return instance
+
+
+def find(model, single=False, page=None, per_page=None, **kwargs):
+    filters = []
+    for k, v in kwargs.items():
+        filters.append(('equal', [(k, v)]))
+
+    query = _query_builder(model=model, filters=filters)
+
+    if single:
+        instance = query.first()
+    elif page is not None and per_page is not None:
+        instance = query.paginate(page, per_page, False).items
+    else:
+        instance = query.all()
+
+    return instance
+
+
+def destroy(instance):
+    db.session.delete(instance)
+    db.session.commit()
+    return True
+
+
+def tablename(model):
+    return model.__tablename__

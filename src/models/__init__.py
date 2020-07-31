@@ -1,10 +1,6 @@
-# Models
-from .Course import Course
-from .Party import Party
-from .PartyMember import PartyMember
-from .Stake import Stake
-from .Wager import Wager
-from .WagerStatus import WagerStatus
-
-# Schemas
-from .schemas import (CourseSchema, PartySchema, PartyMemberSchema, StakeSchema, WagerSchema, WagerStatusSchema)
+from .Course import Course, CourseSchema
+from .Party import Party, PartySchema
+from .PartyMember import PartyMember, PartyMemberSchema
+from .Stake import Stake, StakeSchema
+from .Wager import Wager, WagerSchema
+from .WagerStatus import WagerStatus, WagerStatusSchema

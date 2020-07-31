@@ -32,3 +32,9 @@ class InvalidParamError(ValueError):
     def __init__(self, key):
         self.message = f"Invalid param: {key}"
         super().__init__(self.message)
+
+
+class MalformedRequestError(Exception):
+    def __init__(self, key):
+        self.message = f"Malformed request: {key}"
+        super().__init__(self.message)

@@ -1,5 +1,5 @@
 from sqlalchemy_utils import generic_repr
-from .. import db
+from .. import db, ma
 from .mixins import BaseMixin
 
 
@@ -10,5 +10,13 @@ class Course(db.Model, BaseMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+
+class CourseSchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = Course
+        load_instance = True
+
+    uuid = ma.auto_field()
+    golf_canada_id = ma.auto_field()
 
 Course.register()

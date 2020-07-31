@@ -1,8 +1,12 @@
 from ..models import WagerStatus as WagerStatusModel
 from ..common import WagerStatusEnum
-from .base import *
+from ..common.db import find
+from ..common.cache import cache
+from ..common.error import MissingParamError, InvalidTypeError
+from ..common.cleaner import is_enum
 
 
+@cache.memoize(timeout=100)
 def find_wager_status_by_enum(status_enum):
     if not status_enum:
         raise MissingParamError('status_enum')

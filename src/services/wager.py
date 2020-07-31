@@ -1,6 +1,8 @@
 from ..models import Wager as WagerModel, WagerSchema
-from .. import cache
-from .base import *
+from ..common.db import find, save, init, destroy, count, tablename
+from ..common.cache import cache, unmemoize
+from ..common.error import MissingParamError, InvalidTypeError, InvalidParamError
+from ..common.cleaner import is_uuid, is_list
 from .party import hash_members, find_party_by_hash, init_party_by_members, save_party
 from .course import find_course_by_uuid
 from .stake import init_stake, save_stake
@@ -37,12 +39,16 @@ def assign_wager_party_by_members(members):
     return save_party(party)
 
 
-@cache.memoize(timeout=10)
+@cache.memoize(timeout=1000)
+def count_wager():
+    return count(WagerModel)
+
+
 def find_wager(**kwargs):
     return find(model=WagerModel, **kwargs)
 
 
-@cache.memoize(timeout=10)
+@cache.memoize(timeout=1000)
 def find_wager_by_uuid(uuid):
     if not uuid:
         return MissingParamError('uuid')
@@ -57,15 +63,15 @@ def init_wager(**kwargs):
 
 
 def save_wager(wager):
+    unmemoize(find_wager_by_uuid, uuid=wager.uuid)
+    unmemoize(count_wager)
     return save(instance=wager)
 
 
 def destroy_wager(wager):
+    unmemoize(find_wager_by_uuid, uuid=wager.uuid)
+    unmemoize(count_wager)
     return destroy(instance=wager)
-
-
-def count_wager():
-    return count(WagerModel)
 
 
 def dump_wager(wager, **kwargs):

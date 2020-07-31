@@ -1,9 +1,11 @@
 from ..models import Course as CourseModel
-from .. import cache
-from .base import *
+from ..common.error import MissingParamError, InvalidTypeError
+from ..common.cleaner import is_id, is_uuid
+from ..common.db import find
+from ..common.cache import cache
 
 
-@cache.memoize(10)
+@cache.memoize(timeout=100)
 def find_course_by_golf_canada_id(golf_canada_id=None):
     if not golf_canada_id:
         raise MissingParamError('golf_canada_id')
@@ -13,7 +15,7 @@ def find_course_by_golf_canada_id(golf_canada_id=None):
     return find(model=CourseModel, golf_canada_id=golf_canada_id, single=True)
 
 
-@cache.memoize(10)
+@cache.memoize(timeout=100)
 def find_course_by_uuid(uuid=None):
     if not uuid:
         raise MissingParamError('uuid')

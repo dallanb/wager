@@ -1,5 +1,5 @@
 from sqlalchemy_utils import generic_repr
-from .. import db
+from .. import db, ma
 from .mixins import BaseMixin
 
 
@@ -11,4 +11,10 @@ class Party(db.Model, BaseMixin):
         super().__init__(*args, **kwargs)
 
 
+class PartySchema(ma.SQLAlchemySchema):
+    class Meta:
+        model = Party
+        load_instance = True
+
+    uuid = ma.auto_field()
 Party.register()

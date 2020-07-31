@@ -1,4 +1,3 @@
-from .base import *
 from .course import *
 from .party import *
 from .party_member import *
