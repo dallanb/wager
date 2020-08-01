@@ -512,6 +512,22 @@ def test_update_wager_w_opponents():
     assert response['msg'] == "OK"
 
 
+def test_update_wager_w_same_values():
+    time = common.time_now()
+    response = app.test_client().post('/', json={'time': time},
+                                      headers={'X-Consumer-Custom-ID': pytest.owner})
+    assert response.status_code == 200
+    response = json.loads(response.data)
+    uuid = response['data']['wager']['uuid']
+    response = app.test_client().put(f'/{uuid}',
+                                     json={'time': time},
+                                     headers={'X-Consumer-Custom-ID': pytest.owner})
+
+    assert response.status_code == 200
+    response = json.loads(response.data)
+    assert response['msg'] == "OK"
+
+
 def test_update_wager_wo_data():
     uuid = pytest.wagers[0].uuid
     owner = pytest.wagers[0].owner
