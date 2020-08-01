@@ -1,17 +1,10 @@
 from ..models import PartyMember as PartyMemberModel
 from ..common.db import find, init, save
 from ..common.cache import cache, unmemoize
-from ..common.cleaner import is_uuid
-from ..common.error import MissingParamError, InvalidTypeError
 
 
 @cache.memoize(timeout=10)
-def find_party_member_by_uuid(uuid=None):
-    if not uuid:
-        return MissingParamError('uuid')
-    if not is_uuid(uuid):
-        raise InvalidTypeError('uuid', 'uuid')
-
+def find_party_member_by_uuid(uuid):
     members = find(model=PartyMemberModel, uuid=uuid, single=True)
     return members
 

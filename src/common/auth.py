@@ -1,14 +1,17 @@
 from flask import g, request
 from functools import wraps
+from http import HTTPStatus
+from .cleaner import is_uuid
 from .error import ManualException
 
 
 def check_user(f):
     @wraps(f)
     def wrap(*args, **kwargs):
-        g.user = request.headers.get('X-Consumer-Custom-ID')
+        consumer_id = request.headers.get('X-Consumer-Custom-ID', None)
+        g.user = is_uuid(consumer_id)
         if not g.user:
-            raise ManualException(code=400, msg='Missing user data')
+            raise ManualException(code=HTTPStatus.UNAUTHORIZED.value, msg=HTTPStatus.UNAUTHORIZED.phrase)
         return f(*args, **kwargs)
 
     wrap.__doc__ = f.__doc__

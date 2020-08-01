@@ -5,7 +5,8 @@ from .. import Base
 from .... import services
 from ....common.auth import check_user
 from ....common.response import DataResponse
-from ....common.utils import get_json, time_now
+from ....common.utils import add_years, time_now
+from ....common.cleaner import is_currency
 
 
 class Update(Base):
@@ -15,8 +16,11 @@ class Update(Base):
     @marshal_with(DataResponse.marshallable())
     @check_user
     def put(self, uuid):
+        json_data = request.get_json()
+        if not json_data:
+            self.throw_error(http_code=self.code.BAD_REQUEST)
         try:
-            data = self.body_schema.load(get_json(request.form['data']))
+            data = UpdateSchema().load(json_data)
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
 
@@ -25,7 +29,7 @@ class Update(Base):
             raise self.throw_error(http_code=self.code.NOT_FOUND)
 
         if not services.is_owner(wager, g.user):
-            raise self.throw_error(http_code=self.code.UNAUTHORIZED,
+            raise self.throw_error(http_code=self.code.FORBIDDEN,
                                    err={"wager": ["Update is only available to owner"]})
 
         # time
@@ -34,15 +38,17 @@ class Update(Base):
 
         # course
         if data['course']:
-            course = services.assign_wager_course_by_uuid(uuid=data['course'])
+            course = services.find_course_by_uuid(uuid=data['course'])
+            if not course:
+                self.throw_error(http_code=self.code.BAD_REQUEST, err={'course': ['Invalid UUID.']})
             wager.course_uuid = course.uuid
 
         # party
-        if data['members']:
+        if data['opponents']:
             # once a party is set it can no longer be updated
-            if wager.party:
+            if wager.party_uuid:
                 self.throw_error(http_code=self.code.BAD_REQUEST)
-            party = services.assign_wager_party_by_members(members=data['members'])
+            party = services.assign_wager_party_by_members(members=[*data['opponents'], wager.owner])
             wager.party_uuid = party.uuid
 
         # stake
@@ -56,9 +62,16 @@ class Update(Base):
 
 
 class UpdateSchema(Schema):
-    time = fields.Int(required=False, validate=validate.Range(min=time_now(), min_inclusive=False,
-                                                              error="Must be greater than current time"), missing=None)
-    currency = fields.Str(required=False, missing=None)
-    amount = fields.Str(required=False, missing=None)
+    time = fields.Int(required=False, validate=[validate.Range(min=time_now(), min_inclusive=False,
+                                                               error="Must be greater than current time."),
+                                                validate.Range(max=add_years(time_now(), 1),
+                                                               error="Must be within the next year.")], missing=None)
+    currency = fields.Str(required=False, missing=None, validate=[lambda currency: is_currency(currency) == currency])
+    amount = fields.Number(required=False, validate=validate.Range(min=0, error="Cannot be a negative value."),
+                           missing=None, as_string=True)
     course = fields.UUID(required=False, missing=None)
-    members = fields.List(fields.Str(required=True), required=False, missing=None)
+    opponents = fields.List(fields.UUID(required=True),
+                            validate=[validate.Length(equal=1),
+                                      lambda opponents: len(set(opponents)) != len({*opponents, g.user}),
+                                      lambda opponents: len(opponents) == len(set(opponents))],
+                            required=False, missing=None)

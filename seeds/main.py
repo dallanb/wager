@@ -18,8 +18,8 @@ class DefaultSeeder(Seeder):
         status = services.find_wager_status_by_enum('active')
 
         for _ in range(5):
-            members = [generate_uuid() for _ in range(3)]
-            party = services.init_party_by_members(members=members)
+            members = [generate_uuid() for _ in range(1)]
+            party = services.init_party_by_members(members=[*members, g.user])
             stake = services.init_stake(currency='CAD', amount=random.randint(0, 100))
             wager = services.init_wager(owner=g.user, party=party, stake=stake, time=time_now(), course=course,
                                         status=status)
