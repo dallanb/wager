@@ -3,10 +3,10 @@ from src import services
 
 
 @pytest.fixture
-def create_party(wager_uuid, name):
-    wager_party = services.init_wager_party()
-    wager_party.wager_uuid = wager_uuid
-    wager_party.name = name
+def create_party():
+    def _method(wager_uuid, name):
+        party = services.init_party(wager_uuid=wager_uuid, name=name)
+        party = services.save_party(party=party)
+        return party
 
-    wager_party.save_wager_party()
-    return wager_party
+    return _method

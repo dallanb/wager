@@ -2,12 +2,12 @@ from sqlalchemy_utils import generic_repr
 from marshmallow_enum import EnumField
 from ..common import WagerStatusEnum
 from .. import db, ma
-from .mixins import BaseMixin
+from .mixins import StatusMixin
 
 
-@generic_repr('id', 'uuid')
-class WagerStatus(db.Model, BaseMixin):
-    name = db.Column(db.Enum(WagerStatusEnum), nullable=False)
+@generic_repr('name')
+class WagerStatus(db.Model, StatusMixin):
+    name = db.Column(db.Enum(WagerStatusEnum), primary_key=True, unique=True, nullable=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -19,8 +19,6 @@ class WagerStatusSchema(ma.SQLAlchemySchema):
     class Meta:
         model = WagerStatus
         load_instance = True
-
-    uuid = ma.auto_field()
 
 
 WagerStatus.register()

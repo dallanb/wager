@@ -14,4 +14,4 @@ class Fetch(Base):
         if not wager:
             self.throw_error(http_code=self.code.NOT_FOUND)
         wager_result = services.dump_wager(wager)
-        return DataResponse(data={'wager': wager_result})
+        return DataResponse(data={'wagers': wager_result})

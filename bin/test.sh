@@ -4,4 +4,4 @@
 manage delete_db
 manage flush_cache
 manage init
-pytest --disable-pytest-warnings -s
+python -m py.test --disable-pytest-warnings -s

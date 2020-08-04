@@ -2,7 +2,7 @@ import os
 from flask import g
 from flask.cli import FlaskGroup
 from src import app, db, common
-from bin import init_wager_course, init_wager_status
+from bin import init_participant_status, init_wager_status
 import src
 
 cli = FlaskGroup(app)
@@ -10,7 +10,6 @@ cli = FlaskGroup(app)
 
 def full_init():
     initialize_statuses()
-    initialize_courses()
     os.system('flask seed run')
 
 
@@ -35,13 +34,7 @@ def initialize_statuses():
     with app.app_context():
         g.src = src
         init_wager_status(status_enums=common.WagerStatusEnum)
-        return
-
-
-def initialize_courses():
-    with app.app_context():
-        g.src = src
-        init_wager_course()
+        init_participant_status(status_enums=common.ParticipantStatusEnum)
         return
 
 
@@ -68,11 +61,6 @@ def flush_cache():
 @cli.command("init_status")
 def init_status():
     initialize_statuses()
-
-
-@cli.command("init_course")
-def init_course():
-    initialize_courses()
 
 
 if __name__ == "__main__":

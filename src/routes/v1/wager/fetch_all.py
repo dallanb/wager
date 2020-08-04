@@ -21,7 +21,7 @@ class FetchAll(Base):
         wager_result = services.dump_wager(wager, many=True)
         _metadata = self.prepare_metadata(total=total, **data)
         return DataResponse(
-            data={'_metadata': _metadata, 'wager': wager_result})
+            data={'_metadata': _metadata, 'wagers': wager_result})
 
 
 class FetchAllSchema(Schema):
