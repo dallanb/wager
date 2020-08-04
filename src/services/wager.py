@@ -3,10 +3,6 @@ from ..common.db import find, save, init, destroy, count, tablename
 from ..common.cache import cache, unmemoize
 
 
-def is_owner(wager, user):
-    return wager.owner == user
-
-
 @cache.memoize(timeout=1000)
 def count_wager():
     return count(WagerModel)

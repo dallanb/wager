@@ -10,7 +10,7 @@ def create_stake():
         stake.currency = kwargs.get('currency', None)
         stake.amount = kwargs.get('amount', None)
 
-        stake.save_stake()
+        stake = services.save_stake(stake)
         return stake
 
     return _method

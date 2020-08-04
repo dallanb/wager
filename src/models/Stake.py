@@ -7,7 +7,7 @@ from .mixins import BaseMixin
 @generic_repr('id', 'uuid')
 class Stake(db.Model, BaseMixin):
     currency = db.Column(CurrencyType)
-    amount = db.Column(db.Integer)
+    amount = db.Column(db.String)
 
     # FK
     participant_uuid = db.Column(UUIDType(binary=False), db.ForeignKey('participant.uuid'), nullable=False)

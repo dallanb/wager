@@ -7,13 +7,13 @@ from ....common.auth import check_user
 from .... import services
 
 
-class Update(Base):
+class Create(Base):
     def __init__(self):
         Base.__init__(self)
 
     @marshal_with(DataResponse.marshallable())
     @check_user
-    def put(self, uuid):
+    def post(self, uuid):
         json_data = request.get_json()
         try:
             data = CreateSchema().load(json_data)
@@ -21,11 +21,14 @@ class Update(Base):
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
 
         party = services.find_party_by_uuid(uuid=uuid)
-        party.name = data['name']
-        party = services.save_party(party)
-        party_result = services.dump_party(party)
-        return DataResponse(data={'parties': party_result})
+        if not party:
+            self.throw_error(http_code=self.code.NOT_FOUND)
+
+        participant = services.init_participant(user_uuid=data['user_uuid'], party_uuid=party.uuid, status="pending")
+        participant = services.save_participant(participant=participant)
+        participant_result = services.dump_participant(participant)
+        return DataResponse(data={'participants': participant_result})
 
 
 class CreateSchema(Schema):
-    name = fields.String(required=True)
+    user_uuid = fields.UUID(required=True)

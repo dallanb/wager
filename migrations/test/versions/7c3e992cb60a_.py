@@ -29,7 +29,7 @@ def upgrade():
     op.drop_constraint('participant_status_uuid_key', 'participant_status', type_='unique')
     op.drop_column('participant_status', 'id')
     op.drop_column('participant_status', 'uuid')
-    op.add_column('wager',
+    op.add_column('wagers',
                   sa.Column('status', sa.Enum('pending', 'active', 'inactive', name='wagerstatusenum'), nullable=True))
     op.drop_constraint('wager_status_uuid_fkey', 'wager', type_='foreignkey')
     op.create_unique_constraint(None, 'wager_status', ['name'])

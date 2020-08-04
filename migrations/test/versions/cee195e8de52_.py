@@ -38,7 +38,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('uuid')
     )
-    op.create_table('stake',
+    op.create_table('stakes',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('uuid', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=False),
     sa.Column('ctime', sa.BigInteger(), nullable=True),
@@ -81,7 +81,7 @@ def upgrade():
     sa.Column('status_uuid', sqlalchemy_utils.types.uuid.UUIDType(binary=False), nullable=True),
     sa.ForeignKeyConstraint(['course_uuid'], ['course.uuid'], ),
     sa.ForeignKeyConstraint(['party_uuid'], ['party.uuid'], ),
-    sa.ForeignKeyConstraint(['stake_uuid'], ['stake.uuid'], ),
+    sa.ForeignKeyConstraint(['stake_uuid'], ['stakes.uuid'], ),
     sa.ForeignKeyConstraint(['status_uuid'], ['wager_status.uuid'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('uuid')
@@ -94,7 +94,7 @@ def downgrade():
     op.drop_table('wager')
     op.drop_table('party_member')
     op.drop_table('wager_status')
-    op.drop_table('stake')
+    op.drop_table('stakes')
     op.drop_table('party')
     op.drop_table('course')
     # ### end Alembic commands ###
