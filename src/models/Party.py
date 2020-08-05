@@ -1,6 +1,5 @@
 from sqlalchemy_utils import generic_repr, UUIDType
-from marshmallow import fields
-from .. import db, ma
+from .. import db
 from ..models.Wager import Wager
 from .mixins import BaseMixin
 
@@ -16,17 +15,6 @@ class Party(db.Model, BaseMixin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-
-#
-# class PartySchema(ma.SQLAlchemySchema):
-#     class Meta:
-#         model = Party
-#         load_instance = True
-#
-#     uuid = ma.auto_field()
-#     name = ma.auto_field()
-#     wager = ma.Nested(WagerSchema)
 
 
 Party.register()

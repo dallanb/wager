@@ -1,7 +1,6 @@
 from ..models import Contest as ContestModel
 from ..common.db import find, save, init, destroy, count, tablename
 from ..common.cache import cache, unmemoize
-from ..schemas import dump_contest_schema, dump_contests_schema
 
 
 @cache.memoize(timeout=1000)
@@ -34,9 +33,9 @@ def destroy_contest(contest):
     return destroy(instance=contest)
 
 
-def dump_contest(contest, **kwargs):
-    return dump_contest_schema.dump(contest, **kwargs)
+def dump_contest(schema, contest, **kwargs):
+    return schema.dump(contest, **kwargs)
 
 
-def dump_contests(contests, **kwargs):
-    return dump_contests_schema.dump(contests, **kwargs)
+def clean_contest(schema, contest, **kwargs):
+    return schema.load(contest, **kwargs)

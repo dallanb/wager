@@ -1,5 +1,5 @@
 from sqlalchemy_utils import CurrencyType, UUIDType, generic_repr
-from .. import db, ma
+from .. import db
 from ..models import Participant
 from .mixins import BaseMixin
 
@@ -16,17 +16,6 @@ class Stake(db.Model, BaseMixin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-#
-# class StakeSchema(ma.SQLAlchemySchema):
-#     class Meta:
-#         model = Stake
-#         load_instance = True
-#
-#     uuid = ma.auto_field()
-#     currency = ma.auto_field()
-#     amount = ma.auto_field()
-#     participant = ma.auto_field()
 
 
 Stake.register()

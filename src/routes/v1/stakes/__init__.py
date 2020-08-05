@@ -1,5 +1,2 @@
-from .create import Create
-from .fetch import Fetch
-from .fetch_all import FetchAll
-from .update import Update
-from .destroy import Destroy
+from .schema import create_schema, dump_schema, dump_many_schema, fetch_all_schema, update_schema
+from .api import StakesAPI, StakesListAPI

@@ -1,7 +1,6 @@
 from ..models import Participant as ParticipantModel, ParticipantStatus as ParticipantStatusModel
 from ..common.db import find, save, init, destroy, count, tablename
 from ..common.cache import cache, unmemoize
-from ..schemas import dump_participant_schema, dump_participants_schema
 
 
 @cache.memoize(timeout=100)
@@ -39,9 +38,9 @@ def destroy_participant(participant):
     return destroy(instance=participant)
 
 
-def dump_participant(participant, **kwargs):
-    return dump_participant_schema.dump(participant, **kwargs)
+def dump_participant(schema, participant, **kwargs):
+    return schema.dump(participant, **kwargs)
 
 
-def dump_participants(participants, **kwargs):
-    return dump_participants_schema.dump(participants, **kwargs)
+def clean_participant(schema, participant, **kwargs):
+    return schema.load(participant, **kwargs)

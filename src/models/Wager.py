@@ -1,6 +1,5 @@
 from sqlalchemy_utils import UUIDType, generic_repr
-from marshmallow_enum import EnumField
-from .. import db, ma
+from .. import db
 from ..models import WagerStatus
 from ..common import WagerStatusEnum
 from .mixins import BaseMixin
@@ -17,19 +16,6 @@ class Wager(db.Model, BaseMixin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-#
-# class WagerSchema(ma.SQLAlchemySchema):
-#     status = EnumField(WagerStatusEnum)
-#
-#     class Meta:
-#         model = Wager
-#         load_instance = True
-#
-#     uuid = ma.auto_field()
-#     ctime = ma.auto_field()
-#     mtime = ma.auto_field()
-#     owner_uuid = ma.auto_field()
 
 
 Wager.register()

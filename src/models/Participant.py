@@ -1,6 +1,5 @@
 from sqlalchemy_utils import UUIDType, generic_repr
-from marshmallow_enum import EnumField
-from .. import db, ma
+from .. import db
 from ..models import Party, ParticipantStatus
 from ..common import ParticipantStatusEnum
 from .mixins import BaseMixin
@@ -19,18 +18,6 @@ class Participant(db.Model, BaseMixin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-#
-# class ParticipantSchema(ma.SQLAlchemySchema):
-#     status = EnumField(ParticipantStatusEnum)
-#
-#     class Meta:
-#         model = Participant
-#         load_instance = True
-#
-#     uuid = ma.auto_field()
-#     user_uuid = ma.auto_field()
-#     party = ma.auto_field()
 
 
 Participant.register()

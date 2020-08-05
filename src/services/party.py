@@ -1,7 +1,6 @@
 from ..models import Party as PartyModel
 from ..common.db import find, init, save, destroy, count
 from ..common.cache import cache, unmemoize
-from ..schemas import dump_party_schema, dump_parties_schema
 
 
 @cache.memoize(timeout=10)
@@ -34,9 +33,12 @@ def destroy_party(party):
     return destroy(instance=party)
 
 
-def dump_party(party, **kwargs):
-    return dump_party_schema.dump(party, **kwargs)
+def dump_party(schema, party, params=None):
+    if params:
+        for k, v in params.items():
+            schema.context[k] = v
+    return schema.dump(party)
 
 
-def dump_parties(parties, **kwargs):
-    return dump_parties_schema.dump(parties, **kwargs)
+def clean_party(schema, party, **kwargs):
+    return schema.load(party, **kwargs)

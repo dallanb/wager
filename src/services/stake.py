@@ -1,8 +1,6 @@
 from ..models import Stake as StakeModel
 from ..common.db import init, save, find, destroy, count
 from ..common.cache import cache, unmemoize
-from ..schemas import dump_stake_schema, dump_stakes_schema
-
 
 @cache.memoize(timeout=1000)
 def count_stake():
@@ -34,9 +32,9 @@ def destroy_stake(stake):
     return destroy(instance=stake)
 
 
-def dump_stake(stake, **kwargs):
-    return dump_stake_schema.dump(stake, **kwargs)
+def dump_stake(schema, stake, **kwargs):
+    return schema.dump(stake, **kwargs)
 
 
-def dump_stakes(stakes, **kwargs):
-    return dump_stakes_schema.dump(stakes, **kwargs)
+def clean_stake(schema, stake, **kwargs):
+    return schema.load(stake, **kwargs)

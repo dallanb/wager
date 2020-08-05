@@ -1,7 +1,5 @@
-from sqlalchemy_utils import generic_repr
-from marshmallow_enum import EnumField
 from ..common import ParticipantStatusEnum
-from .. import db, ma
+from .. import db
 from .mixins import StatusMixin
 
 
@@ -10,14 +8,6 @@ class ParticipantStatus(db.Model, StatusMixin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-#
-# class ParticipantStatusSchema(ma.SQLAlchemySchema):
-#     name = EnumField(ParticipantStatusEnum)
-#
-#     class Meta:
-#         model = ParticipantStatus
-#         load_instance = True
 
 
 ParticipantStatus.register()

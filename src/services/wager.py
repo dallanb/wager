@@ -1,5 +1,4 @@
 from ..models import Wager as WagerModel
-from ..schemas import dump_wager_schema, dump_wagers_schema
 from ..common.db import find, save, init, destroy, count
 from ..common.cache import cache, unmemoize
 
@@ -34,9 +33,9 @@ def destroy_wager(wager):
     return destroy(instance=wager)
 
 
-def dump_wager(wager, **kwargs):
-    return dump_wager_schema.dump(wager, **kwargs)
+def dump_wager(schema, wager, **kwargs):
+    return schema.dump(wager, **kwargs)
 
 
-def dump_wagers(wagers, **kwargs):
-    return dump_wagers_schema.dump(wagers, **kwargs)
+def clean_wager(schema, wager, **kwargs):
+    return schema.load(wager, **kwargs)
