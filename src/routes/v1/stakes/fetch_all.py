@@ -1,9 +1,10 @@
 from flask import request
 from flask_restful import marshal_with
-from marshmallow import fields, Schema, ValidationError
+from marshmallow import ValidationError
 from .. import Base
 from .... import services
 from ....common import DataResponse
+from ....schemas import fetch_all_stake_schema
 
 
 class FetchAll(Base):
@@ -13,17 +14,12 @@ class FetchAll(Base):
     @marshal_with(DataResponse.marshallable())
     def get(self):
         try:
-            data = FetchAllSchema().load(request.args)
+            data = fetch_all_stake_schema.load(request.args)
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
-        stake = services.find_stake(**data)
+        stakes = services.find_stake(**data)
         total = services.count_stake()
-        stake_result = services.dump_stake(stake=stake, many=True)
+        stake_result = services.dump_stakes(stakes=stakes, many=True)
         _metadata = self.prepare_metadata(total=total, **data)
         return DataResponse(
             data={'_metadata': _metadata, 'stakes': stake_result})
-
-
-class FetchAllSchema(Schema):
-    page = fields.Int(required=False, missing=1)
-    per_page = fields.Int(required=False, missing=10)

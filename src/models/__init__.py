@@ -1,7 +1,7 @@
-from .Contest import Contest, ContestSchema
-from .Party import Party, PartySchema
-from .Participant import Participant, ParticipantSchema
-from .ParticipantStatus import ParticipantStatus, ParticipantStatusSchema
-from .Stake import Stake, StakeSchema
-from .Wager import Wager, WagerSchema
-from .WagerStatus import WagerStatus, WagerStatusSchema
+from .Contest import Contest
+from .Party import Party
+from .Participant import Participant
+from .ParticipantStatus import ParticipantStatus
+from .Stake import Stake
+from .Wager import Wager
+from .WagerStatus import WagerStatus

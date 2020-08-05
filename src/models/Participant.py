@@ -6,7 +6,6 @@ from ..common import ParticipantStatusEnum
 from .mixins import BaseMixin
 
 
-@generic_repr('id', 'uuid')
 class Participant(db.Model, BaseMixin):
     user_uuid = db.Column(UUIDType(binary=False), nullable=False)
 
@@ -21,16 +20,17 @@ class Participant(db.Model, BaseMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-
-class ParticipantSchema(ma.SQLAlchemySchema):
-    status = EnumField(ParticipantStatusEnum)
-
-    class Meta:
-        model = Participant
-        load_instance = True
-
-    uuid = ma.auto_field()
-    user_uuid = ma.auto_field()
+#
+# class ParticipantSchema(ma.SQLAlchemySchema):
+#     status = EnumField(ParticipantStatusEnum)
+#
+#     class Meta:
+#         model = Participant
+#         load_instance = True
+#
+#     uuid = ma.auto_field()
+#     user_uuid = ma.auto_field()
+#     party = ma.auto_field()
 
 
 Participant.register()

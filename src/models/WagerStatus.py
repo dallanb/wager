@@ -5,7 +5,6 @@ from .. import db, ma
 from .mixins import StatusMixin
 
 
-@generic_repr('name')
 class WagerStatus(db.Model, StatusMixin):
     name = db.Column(db.Enum(WagerStatusEnum), primary_key=True, unique=True, nullable=False)
 
@@ -13,12 +12,12 @@ class WagerStatus(db.Model, StatusMixin):
         super().__init__(*args, **kwargs)
 
 
-class WagerStatusSchema(ma.SQLAlchemySchema):
-    name = EnumField(WagerStatusEnum)
-
-    class Meta:
-        model = WagerStatus
-        load_instance = True
+# class WagerStatusSchema(ma.SQLAlchemySchema):
+#     name = EnumField(WagerStatusEnum)
+#
+#     class Meta:
+#         model = WagerStatus
+#         load_instance = True
 
 
 WagerStatus.register()

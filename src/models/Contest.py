@@ -4,7 +4,6 @@ from ..models import Wager
 from .mixins import BaseMixin
 
 
-@generic_repr('id', 'uuid')
 class Contest(db.Model, BaseMixin):
     contest_uuid = db.Column(UUIDType(binary=False), nullable=False)
 
@@ -17,14 +16,15 @@ class Contest(db.Model, BaseMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-
-class ContestSchema(ma.SQLAlchemySchema):
-    class Meta:
-        model = Contest
-        load_instance = True
-
-    uuid = ma.auto_field()
-    contest_uuid = ma.auto_field()
+#
+# class ContestSchema(ma.SQLAlchemySchema):
+#     class Meta:
+#         model = Contest
+#         load_instance = True
+#
+#     uuid = ma.auto_field()
+#     contest_uuid = ma.auto_field()
+#     wager = ma.auto_field()
 
 
 Contest.register()

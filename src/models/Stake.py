@@ -4,7 +4,6 @@ from ..models import Participant
 from .mixins import BaseMixin
 
 
-@generic_repr('id', 'uuid')
 class Stake(db.Model, BaseMixin):
     currency = db.Column(CurrencyType)
     amount = db.Column(db.String)
@@ -18,15 +17,16 @@ class Stake(db.Model, BaseMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-
-class StakeSchema(ma.SQLAlchemySchema):
-    class Meta:
-        model = Stake
-        load_instance = True
-
-    uuid = ma.auto_field()
-    currency = ma.auto_field()
-    amount = ma.auto_field()
+#
+# class StakeSchema(ma.SQLAlchemySchema):
+#     class Meta:
+#         model = Stake
+#         load_instance = True
+#
+#     uuid = ma.auto_field()
+#     currency = ma.auto_field()
+#     amount = ma.auto_field()
+#     participant = ma.auto_field()
 
 
 Stake.register()
