@@ -29,12 +29,14 @@ class ParticipantsListAPI(Base):
     def get(self):
         try:
             data = services.clean_participant(schema=fetch_all_schema, participant=request.args)
+            self.logger.info(data)
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
         participants = services.find_participant(**data)
         total = services.count_participant()
-        participant_result = services.dump_participant(schema=dump_many_schema, participant=participants)
-        _metadata = self.prepare_metadata(total=total, **data)
+        participant_result = services.dump_participant(schema=dump_many_schema, participant=participants,
+                                                       params={'expand': data['expand']})
+        _metadata = self.prepare_metadata(total=total, page=data['page'], per_page=data['per_page'])
         return DataResponse(
             data={'_metadata': _metadata, 'participant': participant_result})
 

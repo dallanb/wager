@@ -38,8 +38,11 @@ def destroy_participant(participant):
     return destroy(instance=participant)
 
 
-def dump_participant(schema, participant, **kwargs):
-    return schema.dump(participant, **kwargs)
+def dump_participant(schema, participant, params=None):
+    if params:
+        for k, v in params.items():
+            schema.context[k] = v
+    return schema.dump(participant)
 
 
 def clean_participant(schema, participant, **kwargs):

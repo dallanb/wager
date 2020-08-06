@@ -44,7 +44,6 @@ class PartiesListAPI(Base):
     def get(self):
         try:
             data = services.clean_party(schema=fetch_all_schema, party=request.args)
-            self.logger.info(data)
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
         parties = services.find_party(page=data['page'], per_page=data['per_page'])

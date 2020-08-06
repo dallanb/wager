@@ -4,7 +4,7 @@ from src.common.cleaner import *
 from .. import db
 
 
-def _query_builder(model, filters=[], sort_by=None, limit=None, offset=None):
+def _query_builder(model, filters=[], expand=[], sort_by=None, limit=None, offset=None):
     query = db.session.query(model)
     for k, v in filters:
         if k == 'like':
@@ -26,6 +26,8 @@ def _query_builder(model, filters=[], sort_by=None, limit=None, offset=None):
         if k == 'lte':
             for lte_k, lte_v in v:
                 query = query.filter(getattr(model, lte_k) <= lte_v)
+    # for k, v in expand:
+    #     if k
     if sort_by is not None:
         direction = re.search('[.](a|de)sc', sort_by)
         if direction is not None:
@@ -74,12 +76,12 @@ def save(instance):
     return instance
 
 
-def find(model, single=False, page=None, per_page=None, **kwargs):
+def find(model, single=False, page=None, per_page=None, expand=[], **kwargs):
     filters = []
     for k, v in kwargs.items():
         filters.append(('equal', [(k, v)]))
 
-    query = _query_builder(model=model, filters=filters)
+    query = _query_builder(model=model, filters=filters, expand=expand)
 
     if single:
         instance = query.first()

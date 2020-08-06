@@ -1,7 +1,6 @@
 from marshmallow import validate, Schema, post_load, post_dump
 from webargs import fields
 from ..wagers.schema import DumpSchema as DumpWagerSchema
-import logging
 
 
 class CreateSchema(Schema):
@@ -13,7 +12,7 @@ class DumpSchema(Schema):
     ctime = fields.Integer()
     mtime = fields.Integer()
     name = fields.String()
-    wager = fields.Nested(DumpWagerSchema(only=["uuid"]))
+    wager = fields.Nested(DumpWagerSchema())
 
     def get_attribute(self, obj, attr, default):
         if attr == 'wager':
@@ -23,7 +22,7 @@ class DumpSchema(Schema):
 
     @post_dump
     def make_obj(self, data, **kwargs):
-        if not data['wager']:
+        if data.get('wager', False) is None:
             del data['wager']
         return data
 
@@ -31,7 +30,7 @@ class DumpSchema(Schema):
 class FetchAllSchema(Schema):
     page = fields.Int(required=False, missing=1)
     per_page = fields.Int(required=False, missing=10)
-    expand = fields.DelimitedList(fields.String(), required=False)
+    expand = fields.DelimitedList(fields.String(), required=False, missing=[])
 
 
 class UpdateSchema(Schema):
