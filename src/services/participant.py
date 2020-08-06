@@ -1,7 +1,7 @@
 from ..models import Participant as ParticipantModel, ParticipantStatus as ParticipantStatusModel
 from ..common.db import find, save, init, destroy, count, tablename
 from ..common.cache import cache, unmemoize
-
+import logging
 
 @cache.memoize(timeout=100)
 def find_participant_status_by_enum(status_enum):

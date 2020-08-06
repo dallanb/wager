@@ -13,12 +13,13 @@ class DumpSchema(Schema):
     ctime = fields.Integer()
     mtime = fields.Integer()
     name = fields.String()
-    wager = fields.Nested(DumpWagerSchema())
+    wager = fields.Nested(DumpWagerSchema)
 
     def get_attribute(self, obj, attr, default):
-        logging.info(attr)
         if attr == 'wager':
-            return getattr(obj, attr, default) if attr in self.context.get('expand', []) else None
+            logging.info(self.context.get('expand', []))
+            return getattr(obj, attr, default) if any(
+                attr in expand for expand in self.context.get('expand', [])) else None
         else:
             return getattr(obj, attr, default)
 
