@@ -14,9 +14,11 @@ class ParticipantsAPI(Base):
 
     @marshal_with(DataResponse.marshallable())
     def get(self, uuid):
-        participant = services.find_participant(uuid=uuid, single=True)
-        if not participant:
+        participants = services.find_participants(uuid=uuid)
+        if not participants.total:
             self.throw_error(http_code=self.code.NOT_FOUND)
+
+        participant = participants.items[0]
         participant_result = services.dump_participant(schema=dump_schema, participant=participant)
         return DataResponse(data={'participants': participant_result})
 
@@ -31,11 +33,13 @@ class ParticipantsListAPI(Base):
             data = services.clean_participant(schema=fetch_all_schema, participant=request.args)
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
-        participants = services.find_participant(**data)
-        total = services.count_participant()
-        participant_result = services.dump_participant(schema=dump_many_schema, participant=participants,
-                                                       params={'expand': data['expand']})
-        _metadata = self.prepare_metadata(total=total, page=data['page'], per_page=data['per_page'])
+
+        participants = services.find_participants(**data)
+        participant_result = services.dump_participant(schema=dump_many_schema, participant=participants.items,
+                                                       params={'expand': data['expand'], 'include': data['include']})
+        _metadata = self.prepare_metadata(total_count=participants.total, page_count=len(participants.items),
+                                          page=data['page'],
+                                          per_page=data['per_page'])
         return DataResponse(
             data={'_metadata': _metadata, 'participants': participant_result})
 
@@ -48,11 +52,13 @@ class ParticipantsListAPI(Base):
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
 
-        party = services.find_party_by_uuid(uuid=uuid)
-        if not party:
+        parties = services.find_parties(uuid=uuid)
+        if not parties.total:
             self.throw_error(http_code=self.code.NOT_FOUND)
 
-        participant = services.init_participant(user_uuid=data['user_uuid'], party_uuid=party.uuid, status="pending")
+        party = parties.items[0]
+        participant = services.init_participant(user_uuid=data['user_uuid'], party_uuid=party.uuid,
+                                                status="pending")
         participant = services.save_participant(participant=participant)
         participant_result = services.dump_participant(schema=dump_schema, participant=participant)
         return DataResponse(data={'participants': participant_result})

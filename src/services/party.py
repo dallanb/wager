@@ -8,13 +8,8 @@ def count_party():
     return count(PartyModel)
 
 
-def find_party(**kwargs):
+def find_parties(**kwargs):
     return find(model=PartyModel, **kwargs)
-
-
-# @cache.memoize(timeout=10)
-def find_party_by_uuid(uuid):
-    return find(model=PartyModel, uuid=uuid, single=True)
 
 
 def init_party(**kwargs):
@@ -22,13 +17,11 @@ def init_party(**kwargs):
 
 
 def save_party(party):
-    # unmemoize(find_party_by_uuid, uuid=party.uuid)
     unmemoize(count_party)
     return save(instance=party)
 
 
 def destroy_party(party):
-    # unmemoize(find_party_by_uuid, uuid=party.uuid)
     unmemoize(count_party)
     return destroy(instance=party)
 

@@ -14,9 +14,11 @@ class PartiesAPI(Base):
 
     @marshal_with(DataResponse.marshallable())
     def get(self, uuid):
-        party = services.find_party_by_uuid(uuid=uuid)
-        if not party:
+        parties = services.find_parties(uuid=uuid)
+        if not parties.total:
             self.throw_error(http_code=self.code.NOT_FOUND)
+
+        party = parties.items[0]
         party_result = services.dump_party(schema=dump_schema, party=party)
         return DataResponse(data={'parties': party_result})
 
@@ -29,8 +31,13 @@ class PartiesAPI(Base):
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
 
-        party = services.find_party_by_uuid(uuid=uuid)
-        party.name = data['name']
+        parties = services.find_parties(uuid=uuid)
+        if not parties.total:
+            self.throw_error(http_code=self.code.NOT_FOUND)
+
+        party = parties.items[0]
+        for k, v in data.items():
+            party.__setattr__(k, v)
         party = services.save_party(party)
         party_result = services.dump_party(schema=dump_schema, party=party)
         return DataResponse(data={'parties': party_result})
@@ -46,10 +53,11 @@ class PartiesListAPI(Base):
             data = services.clean_party(schema=fetch_all_schema, party=request.args)
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
-        parties = services.find_party(page=data['page'], per_page=data['per_page'])
-        total = services.count_party()
-        party_result = services.dump_party(schema=dump_many_schema, party=parties, params={'expand': data['expand']})
-        _metadata = self.prepare_metadata(total=total, page=data['page'], per_page=data['per_page'])
+        parties = services.find_parties(**data)
+        party_result = services.dump_party(schema=dump_many_schema, party=parties.items,
+                                           params={'expand': data['expand'], 'include': data['include']})
+        _metadata = self.prepare_metadata(total_count=parties.total, page_count=len(parties.items), page=data['page'],
+                                          per_page=data['per_page'])
         return DataResponse(
             data={'_metadata': _metadata, 'parties': party_result})
 
@@ -62,10 +70,11 @@ class PartiesListAPI(Base):
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
 
-        wager = services.find_wager_by_uuid(uuid=uuid)
-        if not wager:
+        wagers = services.find_wagers(uuid=uuid)
+        if not wagers.total:
             self.throw_error(http_code=self.code.NOT_FOUND)
 
+        wager = wagers.items[0]
         party = services.init_party(name=data['name'], wager=wager)
         party = services.save_party(party=party)
         party_result = services.dump_party(schema=dump_schema, party=party)

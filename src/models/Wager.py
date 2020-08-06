@@ -1,6 +1,5 @@
 from sqlalchemy_utils import UUIDType, generic_repr
 from .. import db
-from ..models import WagerStatus
 from ..common import WagerStatusEnum
 from .mixins import BaseMixin
 
@@ -13,6 +12,7 @@ class Wager(db.Model, BaseMixin):
 
     # Relationship
     wager_status = db.relationship("WagerStatus")
+    parties = db.relationship("Party", back_populates='wager', lazy="noload")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

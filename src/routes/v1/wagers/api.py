@@ -14,9 +14,11 @@ class WagersAPI(Base):
 
     @marshal_with(DataResponse.marshallable())
     def get(self, uuid):
-        wager = services.find_wager_by_uuid(uuid=uuid)
-        if not wager:
+        wagers = services.find_wagers(uuid=uuid)
+        if not wagers.total:
             self.throw_error(http_code=self.code.NOT_FOUND)
+
+        wager = wagers.items[0]
         wager_result = services.dump_wager(schema=dump_schema, wager=wager)
         return DataResponse(data={'wagers': wager_result})
 
@@ -31,10 +33,12 @@ class WagersListAPI(Base):
             data = services.clean_wager(schema=fetch_all_schema, wager=request.args)
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
-        wagers = services.find_wager(**data)
-        total = services.count_wager()
-        wager_result = services.dump_wager(schema=dump_many_schema, wager=wagers)
-        _metadata = self.prepare_metadata(total=total, **data)
+
+        wagers = services.find_wagers(**data)
+        wager_result = services.dump_wager(schema=dump_many_schema, wager=wagers.items,
+                                           params={'include': data['include']})
+        _metadata = self.prepare_metadata(total_count=wagers.total, page_count=len(wagers.items), page=data['page'],
+                                          per_page=data['per_page'])
         return DataResponse(
             data={'_metadata': _metadata, 'wagers': wager_result})
 

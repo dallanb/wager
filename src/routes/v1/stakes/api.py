@@ -14,9 +14,11 @@ class StakesAPI(Base):
 
     @marshal_with(DataResponse.marshallable())
     def get(self, uuid):
-        stake = services.find_stake_by_uuid(uuid=uuid)
-        if not stake:
+        stakes = services.find_stakes(uuid=uuid)
+        if not stakes.total:
             self.throw_error(http_code=self.code.NOT_FOUND)
+
+        stake = stakes.items[0]
         stake_result = services.dump_stake(schema=dump_schema, stake=stake)
         return DataResponse(data={'stakes': stake_result})
 
@@ -28,7 +30,12 @@ class StakesAPI(Base):
             data = services.clean_stake(schema=update_schema, stake=json_data)
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
-        stake = services.find_stake_by_uuid(uuid=uuid)
+
+        stakes = services.find_stakes(uuid=uuid)
+        if not stakes.total:
+            self.throw_error(http_code=self.code.NOT_FOUND)
+
+        stake = stakes.items[0]
         for k, v in data.items():
             stake.__setattr__(k, v)
         stake = services.save_stake(stake)
@@ -37,10 +44,11 @@ class StakesAPI(Base):
 
     @marshal_with(MessageResponse.marshallable())
     def delete(self, uuid):
-        stake = services.find_stake_by_uuid(uuid=uuid)
-        if not stake:
+        stakes = services.find_stakes(uuid=uuid)
+        if not stakes.total:
             self.throw_error(http_code=self.code.NOT_FOUND)
-        services.destroy_stake(stake)
+
+        services.destroy_stake(stakes.items[0])
         return MessageResponse()
 
 
@@ -54,10 +62,12 @@ class StakesListAPI(Base):
             data = services.clean_stake(schema=fetch_all_schema, stake=request.args)
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
-        stakes = services.find_stake(**data)
-        total = services.count_stake()
-        stake_result = services.dump_stake(schema=dump_many_schema, stake=stakes)
-        _metadata = self.prepare_metadata(total=total, **data)
+
+        stakes = services.find_stakes(**data)
+        stake_result = services.dump_stake(schema=dump_many_schema, stake=stakes.items,
+                                           params={'expand': data['expand']})
+        _metadata = self.prepare_metadata(total_count=stakes.total, page_count=len(stakes.items), page=data['page'],
+                                          per_page=data['per_page'])
         return DataResponse(
             data={'_metadata': _metadata, 'stakes': stake_result})
 
@@ -70,10 +80,11 @@ class StakesListAPI(Base):
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
 
-        participant = services.find_participant(uuid=uuid, single=True)
-        if not participant:
+        participants = services.find_participants(uuid=uuid)
+        if not participants.total:
             self.throw_error(http_code=self.code.NOT_FOUND)
 
+        participant = participants.items[0]
         stake = services.init_stake(currency=data['currency'], amount=data['amount'], participant_uuid=participant.uuid)
         stake = services.save_stake(stake=stake)
         stake_result = services.dump_stake(schema=dump_schema, stake=stake)

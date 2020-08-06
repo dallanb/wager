@@ -1,11 +1,14 @@
+import collections
+import inflect
 from sqlalchemy import inspect
-from src.common.error import *
-from src.common.cleaner import *
+from ..common.error import *
+from ..common.cleaner import *
 from .. import db
 import logging
 
 
-def _query_builder(model, filters=[], expand=[], sort_by=None, limit=None, offset=None):
+# Helpers
+def _query_builder(model, filters=[], expand=[], include=[], sort_by=None, limit=None, offset=None):
     query = db.session.query(model)
     for k, v in filters:
         if k == 'like':
@@ -27,14 +30,26 @@ def _query_builder(model, filters=[], expand=[], sort_by=None, limit=None, offse
         if k == 'lte':
             for lte_k, lte_v in v:
                 query = query.filter(getattr(model, lte_k) <= lte_v)
-    for k in expand:
+    for i, k in enumerate(expand):
         tables = k.split('.')
-        for i, table in enumerate(tables):
-            if i == 0:
-                query = query.join(getattr(model, table))
+        for j, table in enumerate(tables):
+            if j == 0:
+                options = db.lazyload(getattr(model, table))
             else:
-                nested_class = _get_class_by_tablename(tables[i - 1])
-                query = query.join(getattr(nested_class, table))
+                nested_class = _get_class_by_tablename(tables[j - 1])
+                options = options.lazyload(getattr(nested_class, table))
+        if i == len(expand) - 1:
+            query = query.options(options)
+    for i, k in enumerate(include):
+        tables = k.split('.')
+        for j, table in enumerate(tables):
+            if j == 0:
+                options = db.lazyload(getattr(model, table))
+            else:
+                nested_class = _get_class_by_tablename(_singularize(tables[j - 1]))
+                options = options.lazyload(getattr(nested_class, table))
+        if i == len(include) - 1:
+            query = query.options(options)
     if sort_by is not None:
         direction = re.search('[.](a|de)sc', sort_by)
         if direction is not None:
@@ -69,6 +84,17 @@ def _get_cache_key(model, query):
     return f"{model.__tablename__}:{str(query)}"
 
 
+def _pluralize(tablename):
+    p = inflect.engine()
+    return p.plural_noun(tablename)
+
+
+def _singularize(tablename):
+    p = inflect.engine()
+    return p.singular_noun(tablename)
+
+
+# Methods
 def init(model, **kwargs):
     return model(**kwargs)
 
@@ -90,28 +116,27 @@ def save(instance):
     return instance
 
 
-def find(model, single=False, page=None, per_page=None, expand=[], **kwargs):
+# TODO: Consider using dataclass instead of a named tuple
+def find(model, page=None, per_page=None, expand=[], include=[], **kwargs):
     filters = []
     for k, v in kwargs.items():
         filters.append(('equal', [(k, v)]))
 
-    query = _query_builder(model=model, filters=filters, expand=expand)
+    query = _query_builder(model=model, filters=filters, include=include, expand=expand)
 
-    if single:
-        instance = query.first()
-    elif page is not None and per_page is not None:
-        instance = query.paginate(page, per_page, False).items
+    if page is not None and per_page is not None:
+        paginate = query.paginate(page, per_page, False)
+        items = paginate.items
+        total = paginate.total
     else:
-        instance = query.all()
+        items = query.all()
+        total = len(items)
 
-    return instance
+    Find = collections.namedtuple('Find', ['items', 'total'])
+    return Find(items=items, total=total)
 
 
 def destroy(instance):
     db.session.delete(instance)
     db.session.commit()
     return True
-
-
-def tablename(model):
-    return model.__tablename__

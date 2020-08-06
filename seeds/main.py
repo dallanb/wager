@@ -16,11 +16,12 @@ class DefaultSeeder(Seeder):
     def run():
         g.user = generate_uuid()
 
-        for _ in range(5):
+        for _ in range(20):
             wager = services.init_wager(owner_uuid=g.user, status='pending')
             wager = services.save_wager(wager=wager)
             party = services.init_party(name=''.join(random.choice(string.ascii_letters) for i in range(10)),
                                         wager=wager)
             party = services.save_party(party=party)
-            participant = services.init_participant(user_uuid=generate_uuid(), status='pending', party=party)
-            participant = services.save_participant(participant=participant)
+            for _ in range(2):
+                participant = services.init_participant(user_uuid=generate_uuid(), status='pending', party=party)
+                participant = services.save_participant(participant=participant)

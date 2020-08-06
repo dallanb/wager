@@ -19,9 +19,10 @@ class Base(Resource):
         raise ManualException(code=code, msg=msg, err=err)
 
     @staticmethod
-    def prepare_metadata(total, page, per_page):
+    def prepare_metadata(total_count, page_count, page, per_page):
         return {
-            'total': total,
+            'total_count': total_count,
+            'page_count': page_count,
             'page': page,
             'per_page': per_page
         }

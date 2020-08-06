@@ -1,6 +1,5 @@
 from sqlalchemy_utils import UUIDType, generic_repr
 from .. import db, ma
-from ..models import Wager
 from .mixins import BaseMixin
 
 

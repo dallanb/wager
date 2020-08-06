@@ -1,24 +1,26 @@
 from marshmallow import validate, Schema, post_load, post_dump
 from webargs import fields
-from ..wagers.schema import DumpSchema as DumpWagerSchema
-import logging
 
 
-class CreateSchema(Schema):
+class CreatePartySchema(Schema):
     name = fields.String(required=True)
 
 
-class DumpSchema(Schema):
+class DumpPartySchema(Schema):
     uuid = fields.UUID()
     ctime = fields.Integer()
     mtime = fields.Integer()
     name = fields.String()
-    wager = fields.Nested(DumpWagerSchema)
+    wager = fields.Nested('DumpWagerSchema', only=("uuid", "ctime", "mtime", "status", "owner_uuid"))
+    participants = fields.List(fields.Nested('DumpParticipantSchema', exclude=('party',)))
 
     def get_attribute(self, obj, attr, default):
         if attr == 'wager':
             return getattr(obj, attr, default) if any(
                 attr in expand for expand in self.context.get('expand', [])) else None
+        if attr == 'participants':
+            return getattr(obj, attr, default) if any(
+                attr in include for include in self.context.get('include', [])) else None
         else:
             return getattr(obj, attr, default)
 
@@ -26,21 +28,25 @@ class DumpSchema(Schema):
     def make_obj(self, data, **kwargs):
         if data.get('wager', False) is None:
             del data['wager']
+        if data.get('participants', False) is None:
+            del data['participants']
         return data
 
 
-class FetchAllSchema(Schema):
+class FetchAllPartySchema(Schema):
     page = fields.Int(required=False, missing=1)
     per_page = fields.Int(required=False, missing=10)
     expand = fields.DelimitedList(fields.String(), required=False, missing=[])
+    include = fields.DelimitedList(fields.String(), required=False, missing=[])
+    name = fields.String(required=False)
 
 
-class UpdateSchema(Schema):
+class UpdatePartySchema(Schema):
     name = fields.String(required=True)
 
 
-create_schema = CreateSchema()
-dump_schema = DumpSchema()
-dump_many_schema = DumpSchema(many=True)
-fetch_all_schema = FetchAllSchema()
-update_schema = UpdateSchema()
+create_schema = CreatePartySchema()
+dump_schema = DumpPartySchema()
+dump_many_schema = DumpPartySchema(many=True)
+fetch_all_schema = FetchAllPartySchema()
+update_schema = UpdatePartySchema()
