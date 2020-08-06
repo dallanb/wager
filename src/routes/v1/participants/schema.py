@@ -24,7 +24,6 @@ class DumpSchema(Schema):
 
     def get_attribute(self, obj, attr, default):
         if attr == 'party':
-            logging.info(self.context.get('expand', []))
             return getattr(obj, attr, default) if any(
                 attr in expand for expand in self.context.get('expand', [])) else None
         else:
