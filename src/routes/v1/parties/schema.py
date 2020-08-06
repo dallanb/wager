@@ -1,6 +1,7 @@
 from marshmallow import validate, Schema, post_load, post_dump
 from webargs import fields
 from ..wagers.schema import DumpSchema as DumpWagerSchema
+import logging
 
 
 class CreateSchema(Schema):
@@ -15,6 +16,7 @@ class DumpSchema(Schema):
     wager = fields.Nested(DumpWagerSchema())
 
     def get_attribute(self, obj, attr, default):
+        logging.info(attr)
         if attr == 'wager':
             return getattr(obj, attr, default) if attr in self.context.get('expand', []) else None
         else:

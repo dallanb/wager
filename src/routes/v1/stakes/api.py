@@ -70,7 +70,7 @@ class StakesListAPI(Base):
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
 
-        participant = services.find_participant_by_uuid(uuid=uuid)
+        participant = services.find_participant(uuid=uuid, single=True)
         if not participant:
             self.throw_error(http_code=self.code.NOT_FOUND)
 

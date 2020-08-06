@@ -17,11 +17,6 @@ def find_participant(**kwargs):
     return find(model=ParticipantModel, **kwargs)
 
 
-# @cache.memoize(timeout=1000)
-def find_participant_by_uuid(uuid):
-    return find(model=ParticipantModel, uuid=uuid, single=True)
-
-
 def init_participant(**kwargs):
     return init(model=ParticipantModel, **kwargs)
 
@@ -42,7 +37,7 @@ def dump_participant(schema, participant, params=None):
     if params:
         for k, v in params.items():
             schema.context[k] = v
-    return schema.dump(participant)
+    return schema.dump(participant, many=True)
 
 
 def clean_participant(schema, participant, **kwargs):

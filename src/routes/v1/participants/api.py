@@ -14,7 +14,7 @@ class ParticipantsAPI(Base):
 
     @marshal_with(DataResponse.marshallable())
     def get(self, uuid):
-        participant = services.find_participant_by_uuid(uuid=uuid)
+        participant = services.find_participant(uuid=uuid, single=True)
         if not participant:
             self.throw_error(http_code=self.code.NOT_FOUND)
         participant_result = services.dump_participant(schema=dump_schema, participant=participant)
@@ -33,12 +33,13 @@ class ParticipantsListAPI(Base):
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
         participants = services.find_participant(**data)
+        self.logger.info(participants)
         total = services.count_participant()
         participant_result = services.dump_participant(schema=dump_many_schema, participant=participants,
                                                        params={'expand': data['expand']})
         _metadata = self.prepare_metadata(total=total, page=data['page'], per_page=data['per_page'])
         return DataResponse(
-            data={'_metadata': _metadata, 'participant': participant_result})
+            data={'_metadata': _metadata, 'participants': participant_result})
 
     @marshal_with(DataResponse.marshallable())
     @check_user

@@ -2,6 +2,7 @@ from sqlalchemy import inspect
 from src.common.error import *
 from src.common.cleaner import *
 from .. import db
+import logging
 
 
 def _query_builder(model, filters=[], expand=[], sort_by=None, limit=None, offset=None):
@@ -26,8 +27,14 @@ def _query_builder(model, filters=[], expand=[], sort_by=None, limit=None, offse
         if k == 'lte':
             for lte_k, lte_v in v:
                 query = query.filter(getattr(model, lte_k) <= lte_v)
-    # for k, v in expand:
-    #     if k
+    for k in expand:
+        tables = k.split('.')
+        for i, table in enumerate(tables):
+            if i == 0:
+                query = query.join(getattr(model, table))
+            else:
+                nested_class = _get_class_by_tablename(tables[i - 1])
+                query = query.join(getattr(nested_class, table))
     if sort_by is not None:
         direction = re.search('[.](a|de)sc', sort_by)
         if direction is not None:
@@ -43,7 +50,14 @@ def _query_builder(model, filters=[], expand=[], sort_by=None, limit=None, offse
         query = query.limit(limit)
     if offset is not None:
         query = query.offset(offset)
+    logging.info(query)
     return query
+
+
+def _get_class_by_tablename(tablename):
+    for c in db.Model._decl_class_registry.values():
+        if hasattr(c, '__tablename__') and c.__tablename__ == tablename:
+            return c
 
 
 def _is_pending(instance):

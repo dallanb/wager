@@ -1,4 +1,5 @@
 import random
+import string
 from flask import g
 from flask_seeder import Seeder
 from src.common import generate_uuid, time_now
@@ -17,5 +18,9 @@ class DefaultSeeder(Seeder):
 
         for _ in range(5):
             wager = services.init_wager(owner_uuid=g.user, status='pending')
-
-            services.save_wager(wager=wager)
+            wager = services.save_wager(wager=wager)
+            party = services.init_party(name=''.join(random.choice(string.ascii_letters) for i in range(10)),
+                                        wager=wager)
+            party = services.save_party(party=party)
+            participant = services.init_participant(user_uuid=generate_uuid(), status='pending', party=party)
+            participant = services.save_participant(participant=participant)

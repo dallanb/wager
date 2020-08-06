@@ -3,7 +3,6 @@ from marshmallow_enum import EnumField
 from webargs import fields
 from ....common import ParticipantStatusEnum
 from ..parties.schema import DumpSchema as DumpPartySchema
-from ..wagers.schema import DumpSchema as DumpWagerSchema
 import logging
 
 
@@ -22,25 +21,19 @@ class DumpSchema(Schema):
     mtime = fields.Integer()
     user_uuid = fields.UUID()
     party = fields.Nested(DumpPartySchema())
-    wager = fields.Nested(DumpWagerSchema())
 
     def get_attribute(self, obj, attr, default):
         logging.info(attr)
-        logging.info(self.context)
+        logging.info("PARTICIPANTS")
         if attr == 'party':
             return getattr(obj, attr, default) if attr in self.context.get('expand', []) else None
-        if attr == 'wager':
-            logging.info(getattr(obj, attr, default)) if 'party.wager' in self.context.get('expand', []) else None
-            return getattr(obj, attr, default) if 'party.wager' in self.context.get('expand', []) else None
         else:
             return getattr(obj, attr, default)
 
     @post_dump
     def make_obj(self, data, **kwargs):
-        # if data.get('party', False) is None:
-        #     del data['party']
-        # if data.get('wager', False) is None:
-        #     del data['wager']
+        if data.get('party', False) is None:
+            del data['party']
         return data
 
 
