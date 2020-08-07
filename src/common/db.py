@@ -33,11 +33,11 @@ def _query_builder(model, filters=[], expand=[], include=[], sort_by=None, limit
         tables = k.split('.')
         for j, table in enumerate(tables):
             if j == 0:
-                query = query.join(getattr(model, table))
+                # query = query.join(getattr(model, table))
                 options = db.lazyload(getattr(model, table))
             else:
                 nested_class = _get_class_by_tablename(tables[j - 1])
-                query = query.join(getattr(nested_class, table))
+                # query = query.join(getattr(nested_class, table))
                 options = options.lazyload(getattr(nested_class, table))
         if i == len(expand) - 1:
             query = query.options(options)
@@ -45,12 +45,12 @@ def _query_builder(model, filters=[], expand=[], include=[], sort_by=None, limit
         tables = k.split('.')
         for j, table in enumerate(tables):
             if j == 0:
-                query = query.join(getattr(model, table))
-                options = db.lazyload(getattr(model, table))
+                # query = query.join(getattr(model, table))
+                options = db.joinedload(getattr(model, table))
             else:
                 nested_class = _get_class_by_tablename(_singularize(tables[j - 1]))
-                query = query.join(getattr(nested_class, table))
-                options = options.lazyload(getattr(nested_class, table))
+                # query = query.join(getattr(nested_class, table))
+                options = options.joinedload(getattr(nested_class, table))
         if i == len(include) - 1:
             query = query.options(options)
     if sort_by is not None:

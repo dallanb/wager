@@ -1,11 +1,10 @@
 from flask import request
 from flask_restful import marshal_with
-from marshmallow import ValidationError
 from .schema import *
 from ..base import Base
 from ....common.response import DataResponse, MessageResponse
 from ....common.auth import check_user
-from .... import services
+from ....models import Stake, Participant
 
 
 class StakesAPI(Base):
@@ -15,30 +14,23 @@ class StakesAPI(Base):
     @marshal_with(DataResponse.marshallable())
     @check_user
     def put(self, uuid):
-        json_data = request.get_json()
-        try:
-            data = services.clean_stake(schema=update_schema, stake=json_data)
-        except ValidationError as e:
-            self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
-
-        stakes = services.find_stakes(uuid=uuid)
-        if not stakes.total:
-            self.throw_error(http_code=self.code.NOT_FOUND)
-
-        stake = stakes.items[0]
-        for k, v in data.items():
-            stake.__setattr__(k, v)
-        stake = services.save_stake(stake)
-        stake_result = services.dump_stake(schema=dump_schema, stake=stake)
-        return DataResponse(data={'stakes': stake_result})
+        data = self.clean(schema=update_schema, instance=request.get_json())
+        stakes = self.find(model=Stake, uuid=uuid, not_found=self.code.NOT_FOUND)
+        stake = self.assign_attr(instance=stakes.items[0], attr=data)
+        stake = self.save(instance=stake)
+        return DataResponse(
+            data={
+                'stakes': self.dump(
+                    schema=dump_schema,
+                    instance=stake
+                )
+            }
+        )
 
     @marshal_with(MessageResponse.marshallable())
     def delete(self, uuid):
-        stakes = services.find_stakes(uuid=uuid)
-        if not stakes.total:
-            self.throw_error(http_code=self.code.NOT_FOUND)
-
-        services.destroy_stake(stakes.items[0])
+        stakes = self.find(model=Stake, uuid=uuid, not_found=self.code.NOT_FOUND)
+        _ = self.destroy(instance=stakes.items[0])
         return MessageResponse()
 
 
@@ -49,17 +41,16 @@ class StakesListAPI(Base):
     @marshal_with(DataResponse.marshallable())
     @check_user
     def post(self, uuid):
-        json_data = request.get_json()
-        try:
-            data = services.clean_stake(schema=create_schema, stake=json_data)
-        except ValidationError as e:
-            self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
-
-        participants = services.find_participants(uuid=uuid)
-        if not participants.total:
-            self.throw_error(http_code=self.code.NOT_FOUND)
-
-        stake = services.init_stake(currency=data['currency'], amount=data['amount'], participant=participants.items[0])
-        stake = services.save_stake(stake=stake)
-        stake_result = services.dump_stake(schema=dump_schema, stake=stake)
-        return DataResponse(data={'stakes': stake_result})
+        data = self.clean(schema=create_schema, instance=request.get_json())
+        participants = self.find(model=Participant, uuid=uuid, not_found=self.code.NOT_FOUND)
+        stake = self.init(model=Stake, currency=data['currency'], amount=data['amount'],
+                          participant=participants.items[0])
+        stake = self.save(instance=stake)
+        return DataResponse(
+            data={
+                'stakes': self.dump(
+                    schema=dump_schema,
+                    instance=stake
+                )
+            }
+        )
