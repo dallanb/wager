@@ -1,6 +1,7 @@
 from ..models import Participant as ParticipantModel
 from ..common.db import find, save, init, destroy, count
 from ..common.cache import cache, unmemoize
+import logging
 
 
 @cache.memoize(timeout=1000)
@@ -34,4 +35,15 @@ def dump_participant(schema, participant, params=None):
 
 
 def clean_participant(schema, participant, **kwargs):
-    return schema.load(participant, **kwargs)
+    clean = {}
+    for k, v in participant.items():
+        *tables, key = k.split('.')
+        if len(tables):
+            table = tables[0]
+            if not clean.get(table):
+                clean[table] = {}
+            clean[table][key] = v
+        else:
+            clean[key] = v
+    logging.info(clean)
+    return schema.load(clean, **kwargs)

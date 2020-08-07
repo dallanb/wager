@@ -41,6 +41,11 @@ class FetchAllPartySchema(Schema):
     name = fields.String(required=False)
 
 
+class QueryPartySchema(Schema):
+    uuid = fields.UUID(required=False)
+    name = fields.String(required=False)
+
+
 class UpdatePartySchema(Schema):
     name = fields.String(required=True)
 
@@ -49,4 +54,5 @@ create_schema = CreatePartySchema()
 dump_schema = DumpPartySchema()
 dump_many_schema = DumpPartySchema(many=True)
 fetch_all_schema = FetchAllPartySchema()
+query_schema = QueryPartySchema()
 update_schema = UpdatePartySchema()

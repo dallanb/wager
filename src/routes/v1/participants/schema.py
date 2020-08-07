@@ -47,9 +47,16 @@ class FetchAllParticipantSchema(Schema):
     expand = fields.DelimitedList(fields.String(), required=False, missing=[])
     include = fields.DelimitedList(fields.String(), required=False, missing=[])
     user_uuid = fields.UUID(required=False)
+    party = fields.Nested('QueryPartySchema', attribute='nested.party', required=False)
+
+
+class QueryParticipantSchema(Schema):
+    uuid = fields.UUID(required=False)
+    user_uuid = fields.UUID(required=False)
 
 
 create_schema = CreateParticipantSchema()
 dump_schema = DumpParticipantSchema()
 dump_many_schema = DumpParticipantSchema(many=True)
 fetch_all_schema = FetchAllParticipantSchema()
+query_schema = QueryParticipantSchema()

@@ -13,29 +13,31 @@ def _query_builder(model, filters=[], expand=[], include=[], sort_by=None, limit
         if k == 'like':
             for like_k, like_v in v:
                 search = "%{}%".format(like_v)
-                query = query.filter(getattr(model, like_k).like(search))
+                query = query.filter(like_k.like(search))
         if k == 'equal':
             for equal_k, equal_v in v:
-                query = query.filter(getattr(model, equal_k) == equal_v)
+                query = query.filter(equal_k == equal_v)
         if k == 'gt':
             for gt_k, gt_v in v:
-                query = query.filter(getattr(model, gt_k) > gt_v)
+                query = query.filter(gt_k > gt_v)
         if k == 'gte':
             for gte_k, gte_v in v:
-                query = query.filter(getattr(model, gte_k) >= gte_v)
+                query = query.filter(gte_k >= gte_v)
         if k == 'lt':
             for lt_k, lt_v in v:
-                query = query.filter(getattr(model, lt_k) < lt_v)
+                query = query.filter(lt_k < lt_v)
         if k == 'lte':
             for lte_k, lte_v in v:
-                query = query.filter(getattr(model, lte_k) <= lte_v)
+                query = query.filter(lte_k <= lte_v)
     for i, k in enumerate(expand):
         tables = k.split('.')
         for j, table in enumerate(tables):
             if j == 0:
+                query = query.join(getattr(model, table))
                 options = db.lazyload(getattr(model, table))
             else:
                 nested_class = _get_class_by_tablename(tables[j - 1])
+                query = query.join(getattr(nested_class, table))
                 options = options.lazyload(getattr(nested_class, table))
         if i == len(expand) - 1:
             query = query.options(options)
@@ -43,9 +45,11 @@ def _query_builder(model, filters=[], expand=[], include=[], sort_by=None, limit
         tables = k.split('.')
         for j, table in enumerate(tables):
             if j == 0:
+                query = query.join(getattr(model, table))
                 options = db.lazyload(getattr(model, table))
             else:
                 nested_class = _get_class_by_tablename(_singularize(tables[j - 1]))
+                query = query.join(getattr(nested_class, table))
                 options = options.lazyload(getattr(nested_class, table))
         if i == len(include) - 1:
             query = query.options(options)
@@ -115,10 +119,15 @@ def save(instance):
 
 
 # TODO: Consider using dataclass instead of a named tuple
-def find(model, page=None, per_page=None, expand=[], include=[], **kwargs):
+def find(model, page=None, per_page=None, expand=[], include=[], nested={}, **kwargs):
     filters = []
     for k, v in kwargs.items():
-        filters.append(('equal', [(k, v)]))
+        filters.append(('equal', [(getattr(model, k), v)]))
+
+    for k, v in nested.items():
+        nested_class = _get_class_by_tablename(k)
+        for nested_k, nested_v in v.items():
+            filters.append(('equal', [(getattr(nested_class, nested_k), nested_v)]))
 
     query = _query_builder(model=model, filters=filters, include=include, expand=expand)
 
