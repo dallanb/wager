@@ -1,7 +1,6 @@
-from ..models import Participant as ParticipantModel, ParticipantStatus as ParticipantStatusModel
+from ..models import Participant as ParticipantModel
 from ..common.db import find, save, init, destroy, count
 from ..common.cache import cache, unmemoize
-import logging
 
 
 @cache.memoize(timeout=1000)

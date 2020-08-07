@@ -13,16 +13,6 @@ class StakesAPI(Base):
         Base.__init__(self)
 
     @marshal_with(DataResponse.marshallable())
-    def get(self, uuid):
-        stakes = services.find_stakes(uuid=uuid)
-        if not stakes.total:
-            self.throw_error(http_code=self.code.NOT_FOUND)
-
-        stake = stakes.items[0]
-        stake_result = services.dump_stake(schema=dump_schema, stake=stake)
-        return DataResponse(data={'stakes': stake_result})
-
-    @marshal_with(DataResponse.marshallable())
     @check_user
     def put(self, uuid):
         json_data = request.get_json()
@@ -55,21 +45,6 @@ class StakesAPI(Base):
 class StakesListAPI(Base):
     def __init__(self):
         Base.__init__(self)
-
-    @marshal_with(DataResponse.marshallable())
-    def get(self):
-        try:
-            data = services.clean_stake(schema=fetch_all_schema, stake=request.args)
-        except ValidationError as e:
-            self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
-
-        stakes = services.find_stakes(**data)
-        stake_result = services.dump_stake(schema=dump_many_schema, stake=stakes.items,
-                                           params={'expand': data['expand']})
-        _metadata = self.prepare_metadata(total_count=stakes.total, page_count=len(stakes.items), page=data['page'],
-                                          per_page=data['per_page'])
-        return DataResponse(
-            data={'_metadata': _metadata, 'stakes': stake_result})
 
     @marshal_with(DataResponse.marshallable())
     @check_user

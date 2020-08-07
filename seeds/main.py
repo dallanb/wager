@@ -19,9 +19,14 @@ class DefaultSeeder(Seeder):
         for _ in range(20):
             wager = services.init_wager(owner_uuid=g.user, status='pending')
             wager = services.save_wager(wager=wager)
-            party = services.init_party(name=''.join(random.choice(string.ascii_letters) for i in range(10)),
-                                        wager=wager)
-            party = services.save_party(party=party)
             for _ in range(2):
-                participant = services.init_participant(user_uuid=generate_uuid(), status='pending', party=party)
-                participant = services.save_participant(participant=participant)
+                party = services.init_party(name=''.join(random.choice(string.ascii_letters) for i in range(10)),
+                                            wager=wager)
+                party = services.save_party(party=party)
+                for _ in range(2):
+                    participant = services.init_participant(user_uuid=generate_uuid(), status='pending', party=party)
+                    participant = services.save_participant(participant=participant)
+                    for _ in range(1):
+                        stake = services.init_stake(currency='CAD', amount=random.randint(1, 100),
+                                                    participant=participant)
+                        _ = services.save_stake(stake)

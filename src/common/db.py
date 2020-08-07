@@ -4,7 +4,6 @@ from sqlalchemy import inspect
 from ..common.error import *
 from ..common.cleaner import *
 from .. import db
-import logging
 
 
 # Helpers
@@ -65,7 +64,6 @@ def _query_builder(model, filters=[], expand=[], include=[], sort_by=None, limit
         query = query.limit(limit)
     if offset is not None:
         query = query.offset(offset)
-    logging.info(query)
     return query
 
 
