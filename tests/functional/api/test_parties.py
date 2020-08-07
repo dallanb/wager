@@ -81,6 +81,44 @@ def test_fetch_all_party(get_user_uuid):
     assert response['msg'] == "OK"
 
 
+def test_fetch_all_party_expand_wager(get_user_uuid):
+    user_uuid = get_user_uuid()
+
+    # Headers
+    headers = {'X-Consumer-Custom-ID': user_uuid}
+
+    # Request
+    response = app.test_client().get('/parties?expand=wager',
+                                     headers=headers)
+
+    # Response
+    assert response.status_code == 200
+    response = json.loads(response.data)
+    assert response['msg'] == "OK"
+    assert response['data'] is not None
+    assert response['data']['parties'] is not None
+    assert response['data']['parties'][0]['wager'] is not None
+
+
+def test_fetch_all_party_include_participants(get_user_uuid):
+    user_uuid = get_user_uuid()
+
+    # Headers
+    headers = {'X-Consumer-Custom-ID': user_uuid}
+
+    # Request
+    response = app.test_client().get('/parties?include=participants',
+                                     headers=headers)
+
+    # Response
+    assert response.status_code == 200
+    response = json.loads(response.data)
+    assert response['msg'] == "OK"
+    assert response['data'] is not None
+    assert response['data']['parties'] is not None
+    assert response['data']['parties'][0]['participants'] is not None
+
+
 ###########
 # Update
 ###########
