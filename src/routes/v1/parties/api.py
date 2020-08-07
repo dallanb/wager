@@ -17,10 +17,14 @@ class PartiesAPI(Base):
         parties = services.find_parties(uuid=uuid)
         if not parties.total:
             self.throw_error(http_code=self.code.NOT_FOUND)
-
-        party = parties.items[0]
-        party_result = services.dump_party(schema=dump_schema, party=party)
-        return DataResponse(data={'parties': party_result})
+        return DataResponse(
+            data={
+                'parties': services.dump_party(
+                    schema=dump_schema,
+                    party=parties.items[0]
+                )
+            }
+        )
 
     @marshal_with(DataResponse.marshallable())
     @check_user
@@ -39,8 +43,14 @@ class PartiesAPI(Base):
         for k, v in data.items():
             party.__setattr__(k, v)
         party = services.save_party(party)
-        party_result = services.dump_party(schema=dump_schema, party=party)
-        return DataResponse(data={'parties': party_result})
+        return DataResponse(
+            data={
+                'parties': services.dump_party(
+                    schema=dump_schema,
+                    party=party
+                )
+            }
+        )
 
 
 class PartiesListAPI(Base):
@@ -54,12 +64,24 @@ class PartiesListAPI(Base):
         except ValidationError as e:
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
         parties = services.find_parties(**data)
-        party_result = services.dump_party(schema=dump_many_schema, party=parties.items,
-                                           params={'expand': data['expand'], 'include': data['include']})
-        _metadata = self.prepare_metadata(total_count=parties.total, page_count=len(parties.items), page=data['page'],
-                                          per_page=data['per_page'])
         return DataResponse(
-            data={'_metadata': _metadata, 'parties': party_result})
+            data={
+                '_metadata': self.prepare_metadata(
+                    total_count=parties.total,
+                    page_count=len(parties.items),
+                    page=data['page'],
+                    per_page=data['per_page']
+                ),
+                'parties': services.dump_party(
+                    schema=dump_many_schema,
+                    party=parties.items,
+                    params={
+                        'expand': data['expand'],
+                        'include': data['include']
+                    }
+                )
+            }
+        )
 
     @marshal_with(DataResponse.marshallable())
     @check_user
@@ -74,8 +96,13 @@ class PartiesListAPI(Base):
         if not wagers.total:
             self.throw_error(http_code=self.code.NOT_FOUND)
 
-        wager = wagers.items[0]
-        party = services.init_party(name=data['name'], wager=wager)
+        party = services.init_party(name=data['name'], wager=wagers.items[0])
         party = services.save_party(party=party)
-        party_result = services.dump_party(schema=dump_schema, party=party)
-        return DataResponse(data={'parties': party_result})
+        return DataResponse(
+            data={
+                'parties': services.dump_party(
+                    schema=dump_schema,
+                    party=party
+                )
+            }
+        )

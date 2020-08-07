@@ -17,10 +17,14 @@ class WagersAPI(Base):
         wagers = services.find_wagers(uuid=uuid)
         if not wagers.total:
             self.throw_error(http_code=self.code.NOT_FOUND)
-
-        wager = wagers.items[0]
-        wager_result = services.dump_wager(schema=dump_schema, wager=wager)
-        return DataResponse(data={'wagers': wager_result})
+        return DataResponse(
+            data={
+                'wagers': services.dump_wager(
+                    schema=dump_schema,
+                    wager=wagers.items[0]
+                )
+            }
+        )
 
 
 class WagersListAPI(Base):
@@ -35,12 +39,22 @@ class WagersListAPI(Base):
             self.throw_error(http_code=self.code.BAD_REQUEST, err=e.messages)
 
         wagers = services.find_wagers(**data)
-        wager_result = services.dump_wager(schema=dump_many_schema, wager=wagers.items,
-                                           params={'include': data['include']})
-        _metadata = self.prepare_metadata(total_count=wagers.total, page_count=len(wagers.items), page=data['page'],
-                                          per_page=data['per_page'])
         return DataResponse(
-            data={'_metadata': _metadata, 'wagers': wager_result})
+            data={
+                '_metadata': self.prepare_metadata(
+                    total_count=wagers.total,
+                    page_count=len(wagers.items),
+                    page=data['page'],
+                    per_page=data['per_page']),
+                'wagers': services.dump_wager(
+                    schema=dump_many_schema,
+                    wager=wagers.items,
+                    params={
+                        'include': data['include']
+                    }
+                )
+            }
+        )
 
     @marshal_with(DataResponse.marshallable())
     @check_user
@@ -56,5 +70,11 @@ class WagersListAPI(Base):
         contest = services.init_contest(contest_uuid=contest_data['contest_uuid'], wager=wager)
         wager = services.save_wager(wager)
         contest = services.save_contest(contest=contest)
-        wager_result = services.dump_wager(schema=dump_schema, wager=wager)
-        return DataResponse(data={'wagers': wager_result})
+        return DataResponse(
+            data={
+                'wagers': services.dump_wager(
+                    schema=dump_schema,
+                    wager=wager
+                )
+            }
+        )

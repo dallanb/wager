@@ -59,8 +59,7 @@ class StakesListAPI(Base):
         if not participants.total:
             self.throw_error(http_code=self.code.NOT_FOUND)
 
-        participant = participants.items[0]
-        stake = services.init_stake(currency=data['currency'], amount=data['amount'], participant_uuid=participant.uuid)
+        stake = services.init_stake(currency=data['currency'], amount=data['amount'], participant=participants.items[0])
         stake = services.save_stake(stake=stake)
         stake_result = services.dump_stake(schema=dump_schema, stake=stake)
         return DataResponse(data={'stakes': stake_result})
