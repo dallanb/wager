@@ -7,8 +7,6 @@ from flask_restful import Api, marshal_with
 from flask_seeder import FlaskSeeder
 from flask_sqlalchemy import SQLAlchemy
 
-import logging.config
-
 app = Flask(__name__)
 app.config.from_object("src.config.Config")
 # cache
@@ -27,6 +25,8 @@ api = Api(app)
 seeder = FlaskSeeder(app, db)
 
 # logging
+import logging.config
+
 logging.config.dictConfig(app.config['LOGGING_CONFIG'])
 
 # import models
@@ -40,7 +40,7 @@ from .common import (
     ErrorResponse
 )
 
-if app.config['ENV'] == 'development':
+if app.config['ENV'] != 'development':
     # error handling
     @app.errorhandler(Exception)
     @marshal_with(ErrorResponse.marshallable())
