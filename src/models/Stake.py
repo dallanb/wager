@@ -1,4 +1,4 @@
-from sqlalchemy_utils import CurrencyType, UUIDType, generic_repr
+from sqlalchemy_utils import CurrencyType, UUIDType
 from .. import db
 from .mixins import BaseMixin
 

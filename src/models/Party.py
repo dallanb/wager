@@ -1,4 +1,4 @@
-from sqlalchemy_utils import generic_repr, UUIDType
+from sqlalchemy_utils import UUIDType
 from .. import db
 from .mixins import BaseMixin
 

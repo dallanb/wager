@@ -1,4 +1,4 @@
-from sqlalchemy_utils import UUIDType, generic_repr
+from sqlalchemy_utils import UUIDType
 from .. import db
 from ..common import WagerStatusEnum
 from .mixins import BaseMixin

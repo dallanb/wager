@@ -1,37 +1,13 @@
-from ..models import Party as PartyModel
-from ..common.db import find, init, save, destroy, count
-from ..common.cache import cache, unmemoize
+import logging
+from .base import Base
 
 
-@cache.memoize(timeout=10)
-def count_party():
-    return count(PartyModel)
+class Party(Base):
+    def __init__(self):
+        Base.__init__(self)
+        self.logger = logging.getLogger(__name__)
 
-
-def find_parties(**kwargs):
-    return find(model=PartyModel, **kwargs)
-
-
-def init_party(**kwargs):
-    return init(model=PartyModel, **kwargs)
-
-
-def save_party(party):
-    unmemoize(count_party)
-    return save(instance=party)
-
-
-def destroy_party(party):
-    unmemoize(count_party)
-    return destroy(instance=party)
-
-
-def dump_party(schema, party, params=None):
-    if params:
-        for k, v in params.items():
-            schema.context[k] = v
-    return schema.dump(party)
-
-
-def clean_party(schema, party, **kwargs):
-    return schema.load(party, **kwargs)
+    def handle_event(self, key, data):
+        self.logger.info(key)
+        self.logger.info(data)
+        return key

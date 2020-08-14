@@ -29,6 +29,17 @@ import logging.config
 
 logging.config.dictConfig(app.config['LOGGING_CONFIG'])
 
+# import libs
+from .lib import *
+
+# event
+producer = Producer(host=app.config['KAFKA_HOST'], port=app.config['KAFKA_PORT'])
+
+from .event import new_event_listener
+
+consumer = Consumer(host=app.config['KAFKA_HOST'], port=app.config['KAFKA_PORT'],
+                    topics=app.config['KAFKA_TOPICS'], event_listener=new_event_listener)
+
 # import models
 from .models import *
 # import routes
