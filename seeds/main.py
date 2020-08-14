@@ -3,7 +3,7 @@ import string
 from flask import g
 from flask_seeder import Seeder
 from src.common import generate_uuid, time_now
-from src import services
+from src import services, models
 
 
 # All seeders inherit from Seeder
@@ -15,18 +15,20 @@ class DefaultSeeder(Seeder):
     @staticmethod
     def run():
         g.user = generate_uuid()
-
+        base = services.Base()
         for _ in range(20):
-            wager = services.init_wager(owner_uuid=g.user, status='pending')
-            wager = services.save_wager(wager=wager)
+            wager = base.init(model=models.Wager, owner_uuid=g.user, status='pending')
+            wager = base.save(instance=wager)
             for _ in range(2):
-                party = services.init_party(name=''.join(random.choice(string.ascii_letters) for i in range(10)),
-                                            wager=wager)
-                party = services.save_party(party=party)
+                party = base.init(model=models.Party,
+                                  name=''.join(random.choice(string.ascii_letters) for i in range(10)),
+                                  wager=wager)
+                party = base.save(instance=party)
                 for _ in range(2):
-                    participant = services.init_participant(user_uuid=generate_uuid(), status='pending', party=party)
-                    participant = services.save_participant(participant=participant)
+                    participant = base.init(model=models.Participant, user_uuid=generate_uuid(),
+                                            status='pending', party=party)
+                    participant = base.save(instance=participant)
                     for _ in range(1):
-                        stake = services.init_stake(currency='CAD', amount=random.randint(1, 100),
-                                                    participant=participant)
-                        _ = services.save_stake(stake)
+                        stake = base.init(model=models.Stake, currency='CAD', amount=random.randint(1, 100),
+                                          participant=participant)
+                        _ = base.save(instance=stake)

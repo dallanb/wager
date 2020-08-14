@@ -110,7 +110,7 @@ class DB:
     def save(cls, instance):
         if not instance:
             raise MissingParamError(instance.__tablename__)
-        if not Cleaner().is_mapped(instance):
+        if not Cleaner.is_mapped(instance):
             raise InvalidTypeError(instance.__tablename__, 'mapped')
 
         if not cls._is_pending(instance):

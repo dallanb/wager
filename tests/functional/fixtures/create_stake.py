@@ -1,16 +1,17 @@
 import pytest
-from src import services
+from src import services, models
 
 
 @pytest.fixture
 def create_stake():
     def _method(participant_uuid, **kwargs):
-        stake = services.init_stake()
+        base = services.Base()
+        stake = base.init(model=models.Stake)
         stake.participant_uuid = participant_uuid
         stake.currency = kwargs.get('currency', None)
         stake.amount = kwargs.get('amount', None)
 
-        stake = services.save_stake(stake)
+        stake = base.save(instance=stake)
         return stake
 
     return _method
