@@ -1,2 +1,2 @@
-fiimport pytest
+import pytest
 from .fixtures import *

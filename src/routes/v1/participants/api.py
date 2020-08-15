@@ -4,16 +4,19 @@ from .schema import *
 from ..base import Base
 from ....common.response import DataResponse
 from ....common.auth import check_user
-from ....models import Participant, Party
+from ....services import Participant, Party
 
 
 class ParticipantsAPI(Base):
     def __init__(self):
         Base.__init__(self)
+        self.participant = Participant()
 
     @marshal_with(DataResponse.marshallable())
     def get(self, uuid):
-        participants = self.find(model=Participant, uuid=uuid, not_found=self.code.NOT_FOUND)
+        participants = self.participant.find(uuid=uuid)
+        if not participants.total:
+            self.throw_error(http_code=self.code.NOT_FOUND)
         return DataResponse(
             data={
                 'participants': self.dump(
@@ -27,11 +30,13 @@ class ParticipantsAPI(Base):
 class ParticipantsListAPI(Base):
     def __init__(self):
         Base.__init__(self)
+        self.participant = Participant()
+        self.party = Party()
 
     @marshal_with(DataResponse.marshallable())
     def get(self):
         data = self.clean(schema=fetch_all_schema, instance=request.args)
-        participants = self.find(model=Participant, **data)
+        participants = self.participant.find(**data)
         return DataResponse(
             data={
                 '_metadata': self.prepare_metadata(
@@ -55,10 +60,11 @@ class ParticipantsListAPI(Base):
     @check_user
     def post(self, uuid):
         data = self.clean(schema=create_schema, instance=request.get_json())
-        parties = self.find(model=Party, uuid=uuid, not_found=self.code.NOT_FOUND)
-        participant = self.init(model=Participant, user_uuid=data['user_uuid'], party=parties.items[0],
-                                status="pending")
-        participant = self.save(instance=participant)
+        parties = self.party.find(uuid=uuid)
+        if not parties.total:
+            self.throw_error(http_code=self.code.NOT_FOUND)
+        participant = self.participant.create(user_uuid=data['user_uuid'], party=parties.items[0],
+                                              status="pending")
         return DataResponse(
             data={
                 'participants': self.dump(

@@ -10,7 +10,14 @@ class Contest(Base):
         Base.__init__(self)
         self.logger = logging.getLogger(__name__)
         self.contest_external = ContestExternal()
-        self.contest_model = ContestModel()
+        self.contest_model = ContestModel
+
+    def find(self, **kwargs):
+        return Base.find(self, model=self.contest_model, **kwargs)
+
+    def create(self, **kwargs):
+        contest = self.init(model=self.contest_model, **kwargs)
+        return self.save(instance=contest)
 
     def handle_event(self, key, data):
         if key == 'contest_created':
@@ -20,7 +27,3 @@ class Contest(Base):
             owner_uuid = contest['data']['contests']['owner_uuid']
             wager = Wager().create(owner_uuid=owner_uuid, status='active')
             _ = self.create(contest_uuid=contest_uuid, wager=wager)
-
-    def create(self, **kwargs):
-        contest = self.init(model=self.contest_model, **kwargs)
-        return self.save(instance=contest)

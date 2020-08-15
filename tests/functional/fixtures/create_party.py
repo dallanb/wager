@@ -1,13 +1,10 @@
 import pytest
-from src import services, models
+from src import services
 
 
 @pytest.fixture
 def create_party():
     def _method(wager_uuid, name):
-        base = services.Base()
-        party = base.init(model=models.Party, wager_uuid=wager_uuid, name=name)
-        party = base.save(instance=party)
-        return party
+        return services.Party().create(wager_uuid=wager_uuid, name=name)
 
     return _method

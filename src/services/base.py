@@ -1,5 +1,6 @@
 import logging
 from ..common import Cache, DB, Event
+from ..common.error import ManualException
 
 
 class Base:
@@ -44,3 +45,12 @@ class Base:
 
     def notify(self, topic, value, key):
         self.event.send(topic=topic, value=value, key=key)
+
+    @staticmethod
+    def error(code, **kwargs):
+        if code is None:
+            raise ManualException()
+        code = code.value
+        msg = kwargs.get('msg', code.phrase)
+        err = kwargs.get('err', None)
+        raise ManualException(code=code, msg=msg, err=err)
