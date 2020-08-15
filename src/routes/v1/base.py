@@ -12,24 +12,6 @@ class Base(Resource):
         self.logger = g.logger.getLogger(__name__)
         self.code = HTTPStatus
 
-    def count(self, model):
-        return self.service.count(model=model)
-
-    def find(self, model, not_found=None, **kwargs):
-        instance = self.service.find(model=model, **kwargs)
-        if not instance.total and not_found:
-            Base.throw_error(http_code=not_found)
-        return instance
-
-    def init(self, model, **kwargs):
-        return self.service.init(model=model, **kwargs)
-
-    def save(self, instance):
-        return self.service.save(instance=instance)
-
-    def destroy(self, instance):
-        return self.service.destroy(instance=instance)
-
     def dump(self, schema, instance, params=None):
         return self.service.dump(schema=schema, instance=instance, params=params)
 
@@ -38,12 +20,6 @@ class Base(Resource):
             return self.service.clean(schema=schema, instance=instance, **kwargs)
         except ValidationError as err:
             Base.throw_error(http_code=self.code.BAD_REQUEST, err=err.messages)
-
-    def assign_attr(self, instance, attr):
-        return self.service.assign_attr(instance=instance, attr=attr)
-
-    def notify(self, topic, value, key):
-        self.service.notify(topic=topic, value=value, key=key)
 
     @staticmethod
     def throw_error(http_code, **kwargs):

@@ -1,3 +1,4 @@
+import json
 import multiprocessing
 
 from kafka import KafkaConsumer
@@ -16,7 +17,8 @@ class Consumer(multiprocessing.Process):
         self.stop_event.set()
 
     def run(self):
-        consumer = KafkaConsumer(bootstrap_servers=f"{self.host}:{self.port}")
+        consumer = KafkaConsumer(bootstrap_servers=f"{self.host}:{self.port}", key_deserializer=bytes.decode,
+                                 value_deserializer=lambda v: json.loads(v.decode('utf-8')))
         consumer.subscribe(self.topics)
 
         while not self.stop_event.is_set():

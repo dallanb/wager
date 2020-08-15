@@ -4,16 +4,19 @@ from .schema import *
 from ..base import Base
 from ....common.response import DataResponse
 from ....common.auth import check_user
-from ....models import Wager, Contest
+from ....services import Wager, Contest
 
 
 class WagersAPI(Base):
     def __init__(self):
         Base.__init__(self)
+        self.wager = Wager()
 
     @marshal_with(DataResponse.marshallable())
     def get(self, uuid):
-        wagers = self.find(model=Wager, uuid=uuid, not_found=self.code.NOT_FOUND)
+        wagers = self.wager.find(uuid=uuid)
+        if not wagers.total:
+            self.throw_error(http_code=self.code.NOT_FOUND)
         return DataResponse(
             data={
                 'wagers': self.dump(
@@ -27,11 +30,12 @@ class WagersAPI(Base):
 class WagersListAPI(Base):
     def __init__(self):
         Base.__init__(self)
+        self.wager = Wager()
 
     @marshal_with(DataResponse.marshallable())
     def get(self):
         data = self.clean(schema=fetch_all_schema, instance=request.args)
-        wagers = self.find(model=Wager, **data)
+        wagers = self.wager.find(**data)
         return DataResponse(
             data={
                 '_metadata': self.prepare_metadata(
@@ -53,10 +57,8 @@ class WagersListAPI(Base):
     @check_user
     def post(self):
         data = self.clean(schema=create_schema, instance=request.get_json())
-        wager = self.init(model=Wager, status='pending', owner_uuid=g.user)
-        contest = self.init(model=Contest, contest_uuid=data['contest_uuid'], wager=wager)
-        wager = self.save(instance=wager)
-        _ = self.save(instance=contest)
+        wager = self.wager.create(status='pending', owner_uuid=g.user)
+        _ = Contest().create(contest_uuid=data['contest_uuid'], wager=wager)
         return DataResponse(
             data={
                 'wagers': self.dump(
