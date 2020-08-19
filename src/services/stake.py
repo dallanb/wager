@@ -17,7 +17,7 @@ class Stake(Base):
         stake = self.init(model=self.stake_model, **kwargs)
         return self.save(instance=stake)
 
-    def update(self, uuid, **kwargs):
+    def update(self, uuid, instance, **kwargs):
         stakes = self.find(uuid=uuid)
         if not stakes.total:
             self.error(code=HTTPStatus.NOT_FOUND)
