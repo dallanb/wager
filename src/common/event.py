@@ -13,6 +13,6 @@ class Event:
         if producer.producer:
             producer.send(
                 topic=topic,
-                value=cls._generate_endpoint(topic=topic, value=value),
+                value=value,
                 key=key
             )

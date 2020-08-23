@@ -13,7 +13,7 @@ class Wager(Base):
         wager = self.init(model=self.wager_model, **kwargs)
         _ = self.notify(
             topic='wagers',
-            value=wager.uuid,
+            value={'uuid': str(wager.uuid)},
             key='wager_created'
         )
         return self.save(instance=wager)

@@ -18,7 +18,7 @@ def test_create_stake(party_name, stake_currency, stake_amount, get_user_uuid, g
     user_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
     participant_uuid = get_participant_uuid()
-    wager = create_wager(owner_uuid=user_uuid, contest_uuid=contest_uuid)
+    wager = create_wager(contest_uuid=contest_uuid)
     wager_uuid = wager.uuid
     wager_party = create_party(wager_uuid=wager_uuid, name=party_name)
     party_uuid = wager_party.uuid
@@ -57,7 +57,7 @@ def test_update_stake(party_name, stake_currency, stake_amount, get_user_uuid, g
                       create_stake):
     user_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
-    wager = create_wager(owner_uuid=user_uuid, contest_uuid=contest_uuid)
+    wager = create_wager(contest_uuid=contest_uuid)
     wager_uuid = wager.uuid
     party = create_party(wager_uuid=wager_uuid, name=party_name)
     party_uuid = party.uuid
@@ -98,7 +98,7 @@ def test_destroy_stake(party_name, stake_currency, stake_amount, get_user_uuid, 
                        create_stake):
     user_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
-    wager = create_wager(owner_uuid=user_uuid, contest_uuid=contest_uuid)
+    wager = create_wager(contest_uuid=contest_uuid)
     wager_uuid = wager.uuid
     party = create_party(wager_uuid=wager_uuid, name=party_name)
     party_uuid = party.uuid

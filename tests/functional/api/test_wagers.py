@@ -9,7 +9,7 @@ def test_fetch_wager(get_user_uuid, get_contest_uuid, create_wager):
     user_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
 
-    wager = create_wager(owner_uuid=user_uuid, contest_uuid=contest_uuid)
+    wager = create_wager(contest_uuid=contest_uuid)
     wager_uuid = wager.uuid
 
     # Headers

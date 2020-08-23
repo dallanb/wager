@@ -12,7 +12,6 @@ class DumpWagerSchema(Schema):
     uuid = fields.UUID()
     ctime = fields.Integer()
     mtime = fields.Integer()
-    owner_uuid = fields.UUID()
     status = EnumField(ParticipantStatusEnum)
     parties = fields.List(fields.Nested('DumpPartySchema', exclude=('wager',)))
 
@@ -34,7 +33,6 @@ class FetchAllWagerSchema(Schema):
     page = fields.Int(required=False, missing=1)
     per_page = fields.Int(required=False, missing=10)
     include = fields.DelimitedList(fields.String(), required=False, missing=[])
-    owner_uuid = fields.UUID(required=False)
 
 
 create_schema = CreateWagerSchema()

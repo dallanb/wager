@@ -12,7 +12,7 @@ def test_create_participant(party_name, get_user_uuid, get_contest_uuid, get_par
                             create_party):
     user_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
-    wager = create_wager(owner_uuid=user_uuid, contest_uuid=contest_uuid)
+    wager = create_wager(contest_uuid=contest_uuid)
     wager_uuid = wager.uuid
     party = create_party(wager_uuid=wager_uuid, name=party_name)
     party_uuid = party.uuid
@@ -45,7 +45,7 @@ def test_fetch_participant(party_name, get_user_uuid, get_contest_uuid, get_part
                            create_party, create_participant):
     user_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
-    wager = create_wager(owner_uuid=user_uuid, contest_uuid=contest_uuid)
+    wager = create_wager(contest_uuid=contest_uuid)
     wager_uuid = wager.uuid
     party = create_party(wager_uuid=wager_uuid, name=party_name)
     party_uuid = party.uuid

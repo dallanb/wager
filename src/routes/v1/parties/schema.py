@@ -11,7 +11,7 @@ class DumpPartySchema(Schema):
     ctime = fields.Integer()
     mtime = fields.Integer()
     name = fields.String()
-    wager = fields.Nested('DumpWagerSchema', only=("uuid", "ctime", "mtime", "status", "owner_uuid"))
+    wager = fields.Nested('DumpWagerSchema', only=("uuid", "ctime", "mtime", "status"))
     participants = fields.List(fields.Nested('DumpParticipantSchema', exclude=('party',)))
 
     def get_attribute(self, obj, attr, default):
