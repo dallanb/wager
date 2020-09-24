@@ -10,7 +10,8 @@ from flask_sqlalchemy import SQLAlchemy
 app = Flask(__name__)
 app.config.from_object("src.config.Config")
 # cache
-cache = Cache(app, config=app.config['REDIS_CONFIG'])
+# cache = Cache(app, config=app.config['REDIS_CONFIG'])
+cache = None
 # cors
 CORS(app)
 # db
