@@ -8,7 +8,9 @@ services:
       dockerfile: ${HUNCHO_DIR}/services/adminer/build/Dockerfile
     restart: always
     ports:
-      - 8090:8080
+      - 8080:8080
+    networks:
+      - app-net
   wager:
     container_name: wager
     build:
@@ -32,24 +34,26 @@ services:
       timeout: 5s
       retries: 5
     depends_on:
-      - wager_cache
+#      - wager_cache
       - wager_db
-  wager_cache:
-    container_name: wager_cache
-    build:
-      context: ${HUNCHO_DIR}/services/redis
-      dockerfile: ${HUNCHO_DIR}/services/redis/build/Dockerfile
-    restart: unless-stopped
-    volumes:
-      - ${HUNCHO_DIR}/data/dev/wager_cache/redis_data:/var/lib/redis
-      - ${HUNCHO_DIR}/data/dev/wager_cache/redis.conf:/usr/local/etc/redis/redis.conf
-    env_file:
-      - ${HUNCHO_DIR}/env/dev/.env.wager_cache
-    healthcheck:
-      test: ["CMD", "redis-cli","ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
+    networks:
+      - app-net
+#  wager_cache:
+#    container_name: wager_cache
+#    build:
+#      context: ${HUNCHO_DIR}/services/redis
+#      dockerfile: ${HUNCHO_DIR}/services/redis/build/Dockerfile
+#    restart: unless-stopped
+#    volumes:
+#      - ${HUNCHO_DIR}/data/dev/wager_cache/redis_data:/var/lib/redis
+#      - ${HUNCHO_DIR}/data/dev/wager_cache/redis.conf:/usr/local/etc/redis/redis.conf
+#    env_file:
+#      - ${HUNCHO_DIR}/env/dev/.env.wager_cache
+#    healthcheck:
+#      test: ["CMD", "redis-cli","ping"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 5
   wager_db:
     container_name: wager_db
     build:
@@ -68,6 +72,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 20
+    networks:
+      - app-net
   wager_proxy:
     container_name: wager_proxy
     build:
@@ -80,15 +86,9 @@ services:
       - 80:80
     depends_on:
       - wager
-  redis-commander:
-    container_name: redis-commander
-    build:
-      context: ${HUNCHO_DIR}/services/redis-commander
-      dockerfile: ${HUNCHO_DIR}/services/redis-commander/build/Dockerfile
-    restart: unless-stopped
-    ports:
-      - 8081:8081
-    env_file:
-      - ${HUNCHO_DIR}/env/dev/.env.redis-commander
-    depends_on:
-      - wager_cache
+    networks:
+      - app-net
+networks:
+    app-net:
+        external:
+            name: build_app-net
