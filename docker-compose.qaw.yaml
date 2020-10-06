@@ -61,8 +61,6 @@ services:
       dockerfile: ${HUNCHO_DIR}/services/postgresql/build/Dockerfile
       args:
         POSTGRES_VERSION: 9.6
-    ports:
-      - 5432:5432
     volumes:
       - ${HUNCHO_DIR}/data/qaw/wager_db/data:/var/lib/postgresql/data/
     env_file:

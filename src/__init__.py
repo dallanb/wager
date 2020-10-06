@@ -13,7 +13,7 @@ app.config.from_object("src.config.Config")
 # cache = Cache(app, config=app.config['REDIS_CONFIG'])
 cache = None
 # cors
-CORS(app)
+CORS(app, supports_credentials=True)
 # db
 db = SQLAlchemy(app)
 # migrate
