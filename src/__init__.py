@@ -66,10 +66,10 @@ if app.config['ENV'] != 'development':
         return ErrorResponse(code=error.code, msg=error.msg, err=error.err), error.code
 
 
-# @app.before_first_request
-# def handle_first_request():
-#     consumer.start()
-#     producer.start()
+@app.before_first_request
+def handle_first_request():
+    consumer.start()
+    producer.start()
 
 
 # before each request
