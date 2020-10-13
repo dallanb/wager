@@ -1,9 +1,12 @@
 import collections
+import logging
+
 import inflect
 from sqlalchemy import inspect
-from ..common.error import *
-from ..common.cleaner import Cleaner
+
 from .. import db
+from ..common.cleaner import Cleaner
+from ..common.error import *
 
 
 class DB:
@@ -33,28 +36,20 @@ class DB:
                     query = query.filter(lte_k <= lte_v)
         for i, k in enumerate(expand):
             tables = k.split('.')
+            options = db.lazyload(getattr(model, tables[0]))
             for j, table in enumerate(tables):
-                if j == 0:
-                    # query = query.join(getattr(model, table))
-                    options = db.lazyload(getattr(model, table))
-                else:
+                if j > 0:
                     nested_class = cls._get_class_by_tablename(tables[j - 1])
-                    # query = query.join(getattr(nested_class, table))
                     options = options.lazyload(getattr(nested_class, table))
-            if i == len(expand) - 1:
-                query = query.options(options)
+            query = query.options(options)
         for i, k in enumerate(include):
             tables = k.split('.')
+            options = db.joinedload(getattr(model, tables[0]))
             for j, table in enumerate(tables):
-                if j == 0:
-                    # query = query.join(getattr(model, table))
-                    options = db.joinedload(getattr(model, table))
-                else:
+                if j > 0:
                     nested_class = cls._get_class_by_tablename(cls._singularize(tables[j - 1]))
-                    # query = query.join(getattr(nested_class, table))
                     options = options.joinedload(getattr(nested_class, table))
-            if i == len(include) - 1:
-                query = query.options(options)
+            query = query.options(options)
         if sort_by is not None:
             direction = re.search('[.](a|de)sc', sort_by)
             if direction is not None:
@@ -70,6 +65,7 @@ class DB:
             query = query.limit(limit)
         if offset is not None:
             query = query.offset(offset)
+        logging.info(query)
         return query
 
     @classmethod
