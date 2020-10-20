@@ -1,14 +1,14 @@
 version: "3.2"
 
 services:
-#  adminer:
-#    container_name: adminer
-#    image: adminer:latest
-#    restart: always
-#    ports:
-#      - 8080:8080
-#    networks:
-#      - app-net
+  adminer:
+    container_name: adminer
+    image: adminer:latest
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      - app-net
   wager:
     container_name: wager
     build:

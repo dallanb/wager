@@ -10,15 +10,9 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite://")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.getenv("SECRET_KEY")
-    KONG_HOST = os.getenv("KONG_HOST")
-    KONG_PORT = os.getenv("KONG_PORT")
-    MAILER_HOST = os.getenv("MAILER_HOST")
-    MAILER_PORT = os.getenv("MAILER_PORT")
-    KAFKA_HOST = os.getenv("KAFKA_HOST")
-    KAFKA_PORT = os.getenv("KAFKA_PORT")
+    KAFKA_URL = os.getenv("KAFKA_URL")
     KAFKA_TOPICS = os.getenv("KAFKA_TOPICS").split(",")
-    CONTEST_HOST = os.getenv("CONTEST_HOST")
-    CONTEST_PORT = os.getenv("CONTEST_PORT")
+    CONTEST_URL = os.getenv("CONTEST_URL")
     REDIS_CONFIG = {
         'CACHE_TYPE': 'redis',
         'CACHE_REDIS_HOST': os.getenv("CACHE_HOST"),
