@@ -1,9 +1,9 @@
 import os
-from flask import g
+
 from flask.cli import FlaskGroup
-from src import app, db, common
+
 from bin import init_participant_status, init_wager_status
-import src
+from src import app, db, common
 
 cli = FlaskGroup(app)
 
@@ -31,11 +31,9 @@ def clear_cache():
 
 
 def initialize_statuses():
-    with app.app_context():
-        g.src = src
-        init_wager_status(status_enums=common.WagerStatusEnum)
-        init_participant_status(status_enums=common.ParticipantStatusEnum)
-        return
+    init_wager_status(status_enums=common.WagerStatusEnum)
+    init_participant_status(status_enums=common.ParticipantStatusEnum)
+    return
 
 
 @cli.command("init")
