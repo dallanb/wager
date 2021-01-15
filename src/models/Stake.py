@@ -4,7 +4,6 @@ from .mixins import BaseMixin
 
 
 class Stake(db.Model, BaseMixin):
-    currency = db.Column(CurrencyType)
     amount = db.Column(db.String)
 
     # FK

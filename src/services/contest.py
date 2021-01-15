@@ -1,8 +1,8 @@
 import logging
+
 from .base import Base
 from ..external import Contest as ContestExternal
 from ..models import Contest as ContestModel
-from .wager import Wager
 
 
 class Contest(Base):
@@ -18,9 +18,3 @@ class Contest(Base):
     def create(self, **kwargs):
         contest = self.init(model=self.contest_model, **kwargs)
         return self.save(instance=contest)
-
-    def handle_event(self, key, data):
-        if key == 'contest_created':
-            # create a wager
-            wager = Wager().create(status='active')
-            _ = self.create(contest_uuid=data['uuid'], wager=wager)

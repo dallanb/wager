@@ -1,16 +1,17 @@
-import pytest
 import json
-from tests.functional.helpers import generate_name, generate_number
+
+import pytest
+
 from src import app
+from tests.functional.helpers import generate_name, generate_number
 
 
 ###########
 # Create
 ###########
 @pytest.mark.parametrize("party_name", [generate_name()])
-@pytest.mark.parametrize("stake_currency", ["CAD"])
 @pytest.mark.parametrize("stake_amount", [generate_number()])
-def test_create_stake(party_name, stake_currency, stake_amount, get_user_uuid, get_contest_uuid,
+def test_create_stake(party_name, stake_amount, get_user_uuid, get_contest_uuid,
                       get_participant_uuid,
                       create_wager,
                       create_party,
@@ -29,7 +30,7 @@ def test_create_stake(party_name, stake_currency, stake_amount, get_user_uuid, g
     headers = {'X-Consumer-Custom-ID': user_uuid}
 
     # Payload
-    payload = {'currency': stake_currency, 'amount': stake_amount}
+    payload = {'amount': stake_amount}
 
     # Request
     response = app.test_client().post(f'/participants/{participant_uuid}/stakes',
@@ -47,9 +48,8 @@ def test_create_stake(party_name, stake_currency, stake_amount, get_user_uuid, g
 # Update
 ###########
 @pytest.mark.parametrize("party_name", [generate_name()])
-@pytest.mark.parametrize("stake_currency", ["CAD"])
 @pytest.mark.parametrize("stake_amount", [generate_number()])
-def test_update_stake(party_name, stake_currency, stake_amount, get_user_uuid, get_contest_uuid,
+def test_update_stake(party_name, stake_amount, get_user_uuid, get_contest_uuid,
                       get_participant_uuid,
                       create_wager,
                       create_party,
@@ -63,14 +63,14 @@ def test_update_stake(party_name, stake_currency, stake_amount, get_user_uuid, g
     party_uuid = party.uuid
     participant = create_participant(party_uuid=party_uuid, user_uuid=user_uuid)
     participant_uuid = participant.uuid
-    stake = create_stake(participant_uuid=participant_uuid, currency=stake_currency, amount=stake_amount)
+    stake = create_stake(participant_uuid=participant_uuid, amount=stake_amount)
     stake_uuid = stake.uuid
 
     # Headers
     headers = {'X-Consumer-Custom-ID': user_uuid}
 
     # Payload
-    payload = {'currency': 'CAD', 'amount': 49.99}
+    payload = {'amount': 49.99}
 
     # Request
     response = app.test_client().put(f'/stakes/{stake_uuid}',
@@ -88,9 +88,8 @@ def test_update_stake(party_name, stake_currency, stake_amount, get_user_uuid, g
 # Destroy
 ###########
 @pytest.mark.parametrize("party_name", [generate_name()])
-@pytest.mark.parametrize("stake_currency", ["CAD"])
 @pytest.mark.parametrize("stake_amount", [generate_number()])
-def test_destroy_stake(party_name, stake_currency, stake_amount, get_user_uuid, get_contest_uuid,
+def test_destroy_stake(party_name, stake_amount, get_user_uuid, get_contest_uuid,
                        get_participant_uuid,
                        create_wager,
                        create_party,
@@ -104,7 +103,7 @@ def test_destroy_stake(party_name, stake_currency, stake_amount, get_user_uuid, 
     party_uuid = party.uuid
     participant = create_participant(party_uuid=party_uuid, user_uuid=user_uuid)
     participant_uuid = participant.uuid
-    stake = create_stake(participant_uuid=participant_uuid, currency=stake_currency, amount=stake_amount)
+    stake = create_stake(participant_uuid=participant_uuid, amount=stake_amount)
     stake_uuid = stake.uuid
 
     # Headers

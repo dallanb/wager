@@ -1,11 +1,8 @@
 from marshmallow import validate, Schema, post_dump
 from webargs import fields
-from sqlalchemy_utils import CurrencyType
-from ....common import Cleaner
 
 
 class CreateStakeSchema(Schema):
-    currency = fields.Str(required=True, validate=[lambda currency: Cleaner.is_currency(currency) == currency])
     amount = fields.Number(required=True, validate=validate.Range(min=0, error="Cannot be a negative value."),
                            as_string=True)
 
@@ -14,7 +11,6 @@ class DumpStakeSchema(Schema):
     uuid = fields.UUID()
     ctime = fields.Integer()
     mtime = fields.Integer()
-    currency = CurrencyType()
     amount = fields.String()
     participant = fields.Nested('DumpParticipantSchema', only=("uuid", "ctime", "mtime", "status", "user_uuid"))
 
@@ -33,8 +29,6 @@ class DumpStakeSchema(Schema):
 
 
 class UpdateStakeSchema(Schema):
-    currency = fields.Str(required=False, missing=None,
-                          validate=[lambda currency: Cleaner.is_currency(currency) == currency])
     amount = fields.Number(required=False, missing=None,
                            validate=validate.Range(min=0, error="Cannot be a negative value."),
                            as_string=True)

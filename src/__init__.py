@@ -31,6 +31,8 @@ logging.config.dictConfig(app.config['LOGGING_CONFIG'])
 
 # import models
 from .models import *
+# import services
+from .services import *
 # import routes
 from .routes import *
 

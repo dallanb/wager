@@ -1,6 +1,7 @@
 from .base import Base
-from .contest import Contest
-from .party import Party
-from .participant import Participant
-from .stake import Stake
-from .wager import Wager
+from .contest import Contest as ContestService
+from .participant import Participant as ParticipantService
+from .party import Party as PartyService
+from .payout import Payout as PayoutService
+from .stake import Stake as StakeService
+from .wager import Wager as WagerService
