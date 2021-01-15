@@ -1,15 +1,12 @@
 from marshmallow import Schema, post_dump
 from marshmallow_enum import EnumField
 from webargs import fields
+
 from ....common import ParticipantStatusEnum
 
 
 class CreateParticipantSchema(Schema):
     user_uuid = fields.UUID(required=True)
-    uuid = fields.UUID()
-    ctime = fields.Integer()
-    mtime = fields.Integer()
-    party = fields.Nested('DumpPartySchema')
 
 
 class DumpParticipantSchema(Schema):

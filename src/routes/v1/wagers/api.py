@@ -1,15 +1,16 @@
 from flask import request
 from flask_restful import marshal_with
+
 from .schema import *
 from ..base import Base
 from ....common.response import DataResponse
-from ....services import Wager
+from ....services import WagerService
 
 
 class WagersAPI(Base):
     def __init__(self):
         Base.__init__(self)
-        self.wager = Wager()
+        self.wager = WagerService()
 
     @marshal_with(DataResponse.marshallable())
     def get(self, uuid):
@@ -29,7 +30,7 @@ class WagersAPI(Base):
 class WagersListAPI(Base):
     def __init__(self):
         Base.__init__(self)
-        self.wager = Wager()
+        self.wager = WagerService()
 
     @marshal_with(DataResponse.marshallable())
     def get(self):
