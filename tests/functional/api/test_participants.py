@@ -8,22 +8,22 @@ from src import app
 # Create
 ###########
 @pytest.mark.parametrize("party_name", [generate_name()])
-def test_create_participant(party_name, get_user_uuid, get_contest_uuid, get_participant_uuid, create_wager,
+def test_create_participant(party_name, get_member_uuid, get_contest_uuid, get_participant_uuid, create_wager,
                             create_party):
-    user_uuid = get_user_uuid()
+    member_uuid = get_member_uuid()
     contest_uuid = get_contest_uuid()
     wager = create_wager(contest_uuid=contest_uuid)
     wager_uuid = wager.uuid
     party = create_party(wager_uuid=wager_uuid, name=party_name)
     party_uuid = party.uuid
 
-    participant_user_uuid = generate_uuid()
+    participant_member_uuid = generate_uuid()
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': user_uuid}
+    headers = {'X-Consumer-Custom-ID': member_uuid}
 
     # Payload
-    payload = {'user_uuid': participant_user_uuid}
+    payload = {'member_uuid': participant_member_uuid}
 
     # Request
     response = app.test_client().post(f'parties/{party_uuid}/participants', json=payload,
@@ -41,19 +41,19 @@ def test_create_participant(party_name, get_user_uuid, get_contest_uuid, get_par
 # Fetch
 ###########
 @pytest.mark.parametrize("party_name", [generate_name()])
-def test_fetch_participant(party_name, get_user_uuid, get_contest_uuid, get_participant_uuid, create_wager,
+def test_fetch_participant(party_name, get_member_uuid, get_contest_uuid, get_participant_uuid, create_wager,
                            create_party, create_participant):
-    user_uuid = get_user_uuid()
+    member_uuid = get_member_uuid()
     contest_uuid = get_contest_uuid()
     wager = create_wager(contest_uuid=contest_uuid)
     wager_uuid = wager.uuid
     party = create_party(wager_uuid=wager_uuid, name=party_name)
     party_uuid = party.uuid
-    participant = create_participant(party_uuid=party_uuid, user_uuid=user_uuid)
+    participant = create_participant(party_uuid=party_uuid, member_uuid=member_uuid)
     participant_uuid = participant.uuid
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': user_uuid}
+    headers = {'X-Consumer-Custom-ID': member_uuid}
 
     # Request
     response = app.test_client().get(f'/participants/{participant_uuid}',
@@ -69,11 +69,11 @@ def test_fetch_participant(party_name, get_user_uuid, get_contest_uuid, get_part
 ###########
 # Fetch All
 ###########
-def test_fetch_all_participant(get_user_uuid):
-    user_uuid = get_user_uuid()
+def test_fetch_all_participant(get_member_uuid):
+    member_uuid = get_member_uuid()
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': user_uuid}
+    headers = {'X-Consumer-Custom-ID': member_uuid}
 
     # Request
     response = app.test_client().get('/participants',
@@ -85,11 +85,11 @@ def test_fetch_all_participant(get_user_uuid):
     assert response['msg'] == "OK"
 
 
-def test_fetch_all_participant_expand_party(get_user_uuid):
-    user_uuid = get_user_uuid()
+def test_fetch_all_participant_expand_party(get_member_uuid):
+    member_uuid = get_member_uuid()
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': user_uuid}
+    headers = {'X-Consumer-Custom-ID': member_uuid}
 
     # Request
     response = app.test_client().get('/participants?expand=party',
@@ -104,11 +104,11 @@ def test_fetch_all_participant_expand_party(get_user_uuid):
     assert response['data']['participants'][0]['party'] is not None
 
 
-def test_fetch_all_participant_expand_wager(get_user_uuid):
-    user_uuid = get_user_uuid()
+def test_fetch_all_participant_expand_wager(get_member_uuid):
+    member_uuid = get_member_uuid()
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': user_uuid}
+    headers = {'X-Consumer-Custom-ID': member_uuid}
 
     # Request
     response = app.test_client().get('/participants?expand=party.wager',
@@ -124,11 +124,11 @@ def test_fetch_all_participant_expand_wager(get_user_uuid):
     assert response['data']['participants'][0]['party']['wager'] is not None
 
 
-def test_fetch_all_participant_include_stakes(get_user_uuid):
-    user_uuid = get_user_uuid()
+def test_fetch_all_participant_include_stakes(get_member_uuid):
+    member_uuid = get_member_uuid()
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': user_uuid}
+    headers = {'X-Consumer-Custom-ID': member_uuid}
 
     # Request
     response = app.test_client().get('/participants?include=stakes',

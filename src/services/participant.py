@@ -11,15 +11,19 @@ class Participant(Base):
         self.participant_model = ParticipantModel
 
     def find(self, **kwargs):
-        return Base.find(self, model=self.participant_model, **kwargs)
+        return self._find(self, model=self.participant_model, **kwargs)
+
+    def add(self, **kwargs):
+        participant = self._init(model=self.participant_model, **kwargs)
+        return self._add(instance=participant)
 
     def create(self, **kwargs):
-        participant = self.init(model=self.participant_model, **kwargs)
-        return self.save(instance=participant)
+        participant = self._init(model=self.participant_model, **kwargs)
+        return self._save(instance=participant)
 
     def update(self, uuid, **kwargs):
         participants = self.find(uuid=uuid)
         if not participants.total:
             self.error(code=HTTPStatus.NOT_FOUND)
         participant = self.assign_attr(instance=participants.items[0], attr=kwargs)
-        return self.save(instance=participant)
+        return self._save(instance=participant)

@@ -1,8 +1,6 @@
-import random
-import string
 from flask_seeder import Seeder
-from src.common import generate_uuid, time_now
-from src import services, models
+
+from src import services
 
 
 # All seeders inherit from Seeder
@@ -23,10 +21,10 @@ class DefaultSeeder(Seeder):
         #                           wager=wager)
         #         party = base.save(instance=party)
         #         for _ in range(2):
-        #             participant = base.init(model=models.Participant, user_uuid=generate_uuid(),
+        #             participant = base.init(model=models.Participant, member_uuid=generate_uuid(),
         #                                     status='pending', party=party)
         #             participant = base.save(instance=participant)
         #             for _ in range(1):
-        #                 stake = base.init(model=models.Stake, currency='CAD', amount=random.randint(1, 100),
+        #                 stake = base.init(model=models.Stake, amount=random.randint(1, 100),
         #                                   participant=participant)
         #                 _ = base.save(instance=stake)

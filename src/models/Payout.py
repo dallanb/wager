@@ -4,9 +4,9 @@ from .mixins import BaseMixin
 from .. import db
 
 
-class Contest(db.Model, BaseMixin):
-    buy_in = db.Column(db.String)
-    contest_uuid = db.Column(UUIDType(binary=False), nullable=False)
+class Payout(db.Model, BaseMixin):
+    rank = db.Column(db.Integer, nullable=False)
+    proportion = db.Column(db.Float, nullable=False)
     # FK
     wager_uuid = db.Column(UUIDType(binary=False), db.ForeignKey('wager.uuid'), nullable=False)
 
@@ -17,4 +17,4 @@ class Contest(db.Model, BaseMixin):
         super().__init__(*args, **kwargs)
 
 
-Contest.register()
+Payout.register()

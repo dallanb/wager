@@ -11,15 +11,19 @@ class Party(Base):
         self.party_model = PartyModel
 
     def find(self, **kwargs):
-        return Base.find(self, model=self.party_model, **kwargs)
+        return self._find(self, model=self.party_model, **kwargs)
+
+    def add(self, **kwargs):
+        party = self._init(model=self.party_model, **kwargs)
+        return self._add(instance=party)
 
     def create(self, **kwargs):
-        party = self.init(model=self.party_model, **kwargs)
-        return self.save(instance=party)
+        party = self._init(model=self.party_model, **kwargs)
+        return self._save(instance=party)
 
     def update(self, uuid, **kwargs):
         parties = self.find(uuid=uuid)
         if not parties.total:
             self.error(code=HTTPStatus.NOT_FOUND)
         party = self.assign_attr(instance=parties.items[0], attr=kwargs)
-        return self.save(instance=party)
+        return self._save(instance=party)

@@ -8,7 +8,7 @@ class Contest(Base):
         Base.__init__(self)
         self.base_url = app.config['CONTEST_URL']
 
-    def get_contest(self, uuid):
+    def get_contest(self, uuid, params=None):
         url = f'{self.base_url}/contests/{uuid}'
-        res = self.get(url=url)
+        res = self.get(url=url, params=params)
         return res.json()
