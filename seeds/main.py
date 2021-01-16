@@ -21,7 +21,7 @@ class DefaultSeeder(Seeder):
         #                           wager=wager)
         #         party = base.save(instance=party)
         #         for _ in range(2):
-        #             participant = base.init(model=models.Participant, user_uuid=generate_uuid(),
+        #             participant = base.init(model=models.Participant, member_uuid=generate_uuid(),
         #                                     status='pending', party=party)
         #             participant = base.save(instance=participant)
         #             for _ in range(1):

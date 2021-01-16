@@ -63,7 +63,7 @@ class ParticipantsListAPI(Base):
         parties = self.party.find(uuid=uuid)
         if not parties.total:
             self.throw_error(http_code=self.code.NOT_FOUND)
-        participant = self.participant.create(user_uuid=data['user_uuid'], party=parties.items[0],
+        participant = self.participant.create(member_uuid=data['member_uuid'], party=parties.items[0],
                                               status="pending")
         return DataResponse(
             data={

@@ -12,7 +12,7 @@ class DumpStakeSchema(Schema):
     ctime = fields.Integer()
     mtime = fields.Integer()
     amount = fields.String()
-    participant = fields.Nested('DumpParticipantSchema', only=("uuid", "ctime", "mtime", "status", "user_uuid"))
+    participant = fields.Nested('DumpParticipantSchema', only=("uuid", "ctime", "mtime", "status", "member_uuid"))
 
     def get_attribute(self, obj, attr, default):
         if attr == 'participant':

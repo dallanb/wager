@@ -25,5 +25,5 @@ class Contest:
             self.logger.info('contest updated')
         if key == 'contest_ready':
             self.logger.info('contest ready')
-            contest = self.contest_external.get_contest(uuid=data['uuid'], )
-
+            contest = self.contest_service.fetch_contest(uuid=data['uuid'], params={"include": "participants"})
+            # add parties, participants, stakes to existing wager

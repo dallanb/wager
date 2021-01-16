@@ -18,3 +18,8 @@ class Contest(Base):
     def create(self, **kwargs):
         contest = self.init(model=self.contest_model, **kwargs)
         return self.save(instance=contest)
+
+    # add caching to this method to avoid chatty api
+    def fetch_contest(self, uuid, params=None):
+        res = self.contest_external.get_contest(uuid=uuid, params=params)
+        return res['data']['contests']
