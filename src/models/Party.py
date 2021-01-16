@@ -4,7 +4,7 @@ from .mixins import BaseMixin
 
 
 class Party(db.Model, BaseMixin):
-    name = db.Column(db.String, nullable=False, unique=True)
+    name = db.Column(db.String, nullable=True)
 
     # FK
     wager_uuid = db.Column(UUIDType(binary=False), db.ForeignKey('wager.uuid'), nullable=False)

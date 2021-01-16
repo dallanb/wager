@@ -1,7 +1,8 @@
 import logging
 
 from ..external import Contest as ContestExternal
-from ..services import ContestService, WagerService, PayoutService
+from ..services import ContestService, StakeService \
+    , WagerService, PayoutService, ParticipantService, PartyService
 
 
 class Contest:
@@ -10,6 +11,9 @@ class Contest:
         self.contest_service = ContestService()
         self.wager_service = WagerService()
         self.payout_service = PayoutService()
+        self.participant_service = ParticipantService()
+        self.party_service = PartyService()
+        self.stake_service = StakeService()
         self.contest_external = ContestExternal()
 
     def handle_event(self, key, data):
@@ -21,9 +25,19 @@ class Contest:
             for i, payout in enumerate(data['payout']):
                 _ = self.payout_service.create(rank=i + 1, proportion=payout, wager=wager)
 
-        elif key == 'contest_ready' or key == 'contest_active' or key == 'contest_inactive' or key == 'contest_completed':
-            self.logger.info('contest updated')
-        if key == 'contest_ready':
+        # elif key == 'contest_ready' or key == 'contest_active' or key == 'contest_inactive' or key == 'contest_completed':
+        #     self.logger.info('contest updated')
+        elif key == 'contest_ready':
             self.logger.info('contest ready')
-            contest = self.contest_service.fetch_contest(uuid=data['uuid'], params={"include": "participants"})
-            # add parties, participants, stakes to existing wager
+            contests = self.contest_service.find(contest_uuid=data['uuid'])
+            if contests.total:
+                external_contest = self.contest_service.fetch_contest(uuid=data['uuid'],
+                                                                      params={"include": "participants"})
+                # add parties, participants, stakes to existing wager
+                external_participants = external_contest['participants']
+                for external_participant in external_participants:
+                    party = self.party_service.add(wager=contests.items[0].wager)
+                    participant = self.participant_service.add(member_uuid=external_participant['member_uuid'],
+                                                               status='active', party=party)
+                    _ = self.stake_service.add(amount=contests.items[0].buy_in, participant=participant)
+                self.contest_service.commit()

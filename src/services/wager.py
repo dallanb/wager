@@ -9,14 +9,18 @@ class Wager(Base):
         self.logger = logging.getLogger(__name__)
         self.wager_model = WagerModel
 
+    def add(self, **kwargs):
+        wager = self._init(model=self.wager_model, **kwargs)
+        return self._add(instance=wager)
+
     def create(self, **kwargs):
-        wager = self.init(model=self.wager_model, **kwargs)
+        wager = self._init(model=self.wager_model, **kwargs)
         _ = self.notify(
             topic='wagers',
             value={'uuid': str(wager.uuid)},
             key='wager_created'
         )
-        return self.save(instance=wager)
+        return self._save(instance=wager)
 
     def find(self, **kwargs):
-        return Base.find(self, model=self.wager_model, **kwargs)
+        return self._find(self, model=self.wager_model, **kwargs)

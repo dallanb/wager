@@ -12,15 +12,19 @@ class Payout(Base):
         self.payout_model = PayoutModel
 
     def find(self, **kwargs):
-        return Base.find(self, model=self.payout_model, **kwargs)
+        return self._find(self, model=self.payout_model, **kwargs)
+
+    def add(self, **kwargs):
+        payout = self._init(model=self.payout_model, **kwargs)
+        return self._add(instance=payout)
 
     def create(self, **kwargs):
-        payout = self.init(model=self.payout_model, **kwargs)
-        return self.save(instance=payout)
+        payout = self._init(model=self.payout_model, **kwargs)
+        return self._save(instance=payout)
 
     def update(self, uuid, **kwargs):
         parties = self.find(uuid=uuid)
         if not parties.total:
             self.error(code=HTTPStatus.NOT_FOUND)
         payout = self.assign_attr(instance=parties.items[0], attr=kwargs)
-        return self.save(instance=payout)
+        return self._save(instance=payout)

@@ -13,11 +13,18 @@ class Contest(Base):
         self.contest_model = ContestModel
 
     def find(self, **kwargs):
-        return Base.find(self, model=self.contest_model, **kwargs)
+        return self._find(self, model=self.contest_model, **kwargs)
+
+    def add(self, **kwargs):
+        contest = self._init(model=self.contest_model, **kwargs)
+        return self._add(instance=contest)
+
+    def commit(self):
+        return self._commit()
 
     def create(self, **kwargs):
-        contest = self.init(model=self.contest_model, **kwargs)
-        return self.save(instance=contest)
+        contest = self._init(model=self.contest_model, **kwargs)
+        return self._save(instance=contest)
 
     # add caching to this method to avoid chatty api
     def fetch_contest(self, uuid, params=None):
