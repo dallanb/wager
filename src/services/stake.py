@@ -11,7 +11,7 @@ class Stake(Base):
         self.stake_model = StakeModel
 
     def find(self, **kwargs):
-        return self._find(self, model=self.stake_model, **kwargs)
+        return self._find(model=self.stake_model, **kwargs)
 
     def add(self, **kwargs):
         stake = self._init(model=self.stake_model, **kwargs)

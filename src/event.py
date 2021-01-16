@@ -11,5 +11,6 @@ def new_event_listener(event):
     if topic == 'contests':
         try:
             Contest().handle_event(key=key, data=data)
-        except Exception:
-            logging.info('contest event')
+        except Exception as ex:
+            logging.info(ex)
+            logging.info('contest error')

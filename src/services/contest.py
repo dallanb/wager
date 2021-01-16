@@ -13,7 +13,7 @@ class Contest(Base):
         self.contest_model = ContestModel
 
     def find(self, **kwargs):
-        return self._find(self, model=self.contest_model, **kwargs)
+        return self._find(model=self.contest_model, **kwargs)
 
     def add(self, **kwargs):
         contest = self._init(model=self.contest_model, **kwargs)

@@ -23,4 +23,4 @@ class Wager(Base):
         return self._save(instance=wager)
 
     def find(self, **kwargs):
-        return self._find(self, model=self.wager_model, **kwargs)
+        return self._find(model=self.wager_model, **kwargs)

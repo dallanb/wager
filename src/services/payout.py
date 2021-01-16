@@ -12,7 +12,7 @@ class Payout(Base):
         self.payout_model = PayoutModel
 
     def find(self, **kwargs):
-        return self._find(self, model=self.payout_model, **kwargs)
+        return self._find(model=self.payout_model, **kwargs)
 
     def add(self, **kwargs):
         payout = self._init(model=self.payout_model, **kwargs)
