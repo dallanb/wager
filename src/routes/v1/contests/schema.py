@@ -1,6 +1,5 @@
 from marshmallow import fields, Schema
 
-
 class DumpContestSchema(Schema):
     uuid = fields.UUID()
     ctime = fields.Integer()
