@@ -26,4 +26,4 @@ api.add_resource(StakesAPI, '/stakes/<uuid:uuid>', endpoint="stake")
 api.add_resource(StakesListAPI, '/participants/<uuid:uuid>/stakes', '/stakes', endpoint="stakes")
 
 # Contests
-api.add_resource(ContestsCompleteAPI, '/contests/<uuid:uuid>/complete', endpoint="contest_complete")
+api.add_resource(ContestsCompleteAPI, '/contests/<uuid:contest_uuid>/complete', endpoint="contest_complete")
