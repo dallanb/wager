@@ -28,7 +28,7 @@ class ContestsCompleteAPI(Base):
         parties_total = parties.total
         # return the payouts for placers
         total_payout = buy_in * parties_total
-        party_payouts = [{payout.rank: payout.proportion * total_payout} for payout in payouts.items]
+        party_payouts = {payout.rank: payout.proportion * total_payout for payout in payouts.items}
         return DataResponse(
             data={
                 'contest': self.dump(
