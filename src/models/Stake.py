@@ -4,7 +4,7 @@ from .mixins import BaseMixin
 
 
 class Stake(db.Model, BaseMixin):
-    amount = db.Column(db.String)
+    amount = db.Column(db.Float)
 
     # FK
     participant_uuid = db.Column(UUIDType(binary=False), db.ForeignKey('participant.uuid'), nullable=False)

@@ -11,7 +11,7 @@ class Party(Base):
         self.party_model = PartyModel
 
     def find(self, **kwargs):
-        return self._find(self, model=self.party_model, **kwargs)
+        return self._find(model=self.party_model, **kwargs)
 
     def add(self, **kwargs):
         party = self._init(model=self.party_model, **kwargs)

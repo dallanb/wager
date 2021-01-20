@@ -11,7 +11,7 @@ class Participant(Base):
         self.participant_model = ParticipantModel
 
     def find(self, **kwargs):
-        return self._find(self, model=self.participant_model, **kwargs)
+        return self._find(model=self.participant_model, **kwargs)
 
     def add(self, **kwargs):
         participant = self._init(model=self.participant_model, **kwargs)
