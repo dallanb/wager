@@ -1,10 +1,10 @@
-from .. import api
 from .v1 import ContestsCompleteAPI
-from .v1 import PingAPI
-from .v1 import WagersAPI, WagersListAPI
-from .v1 import PartiesAPI, PartiesListAPI
 from .v1 import ParticipantsAPI, ParticipantsListAPI
-from .v1 import StakesAPI, StakesListAPI
+from .v1 import PartiesAPI, PartiesListAPI
+from .v1 import PingAPI
+from .v1 import StakesListAPI
+from .v1 import WagersAPI, WagersListAPI
+from .. import api
 
 # Ping
 api.add_resource(PingAPI, '/ping', methods=['GET'])
@@ -22,7 +22,7 @@ api.add_resource(ParticipantsAPI, '/participants/<uuid:uuid>', endpoint="partici
 api.add_resource(ParticipantsListAPI, '/parties/<uuid:uuid>/participants', '/participants', endpoint="participants")
 
 # Stakes
-api.add_resource(StakesAPI, '/stakes/<uuid:uuid>', endpoint="stake")
+# api.add_resource(StakesAPI, '/stakes/<uuid:uuid>', endpoint="stake")
 api.add_resource(StakesListAPI, '/participants/<uuid:uuid>/stakes', '/stakes', endpoint="stakes")
 
 # Contests

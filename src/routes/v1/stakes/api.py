@@ -8,29 +8,30 @@ from ....common.response import DataResponse, MessageResponse
 from ....services import StakeService, ParticipantService
 
 
-class StakesAPI(Base):
-    def __init__(self):
-        Base.__init__(self)
-        self.stake = StakeService()
+# class StakesAPI(Base):
+#     def __init__(self):
 
-    @marshal_with(DataResponse.marshallable())
-    @check_user
-    def put(self, uuid):
-        data = self.clean(schema=update_schema, instance=request.get_json())
-        stake = self.stake.update(uuid=uuid, **data)
-        return DataResponse(
-            data={
-                'stakes': self.dump(
-                    schema=dump_schema,
-                    instance=stake
-                )
-            }
-        )
-
-    @marshal_with(MessageResponse.marshallable())
-    def delete(self, uuid):
-        _ = self.stake.destroy(uuid=uuid)
-        return MessageResponse()
+#         Base.__init__(self)
+#         self.stake = StakeService()
+#
+#     @marshal_with(DataResponse.marshallable())
+#     @check_user
+#     def put(self, uuid):
+#         data = self.clean(schema=update_schema, instance=request.get_json())
+#         stake = self.stake.update(uuid=uuid, **data)
+#         return DataResponse(
+#             data={
+#                 'stakes': self.dump(
+#                     schema=dump_schema,
+#                     instance=stake
+#                 )
+#             }
+#         )
+#
+#     @marshal_with(MessageResponse.marshallable())
+#     def delete(self, uuid):
+#         _ = self.stake.destroy(uuid=uuid)
+#         return MessageResponse()
 
 
 class StakesListAPI(Base):

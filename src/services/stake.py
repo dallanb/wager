@@ -1,7 +1,9 @@
 import logging
-from .base import Base
-from ..models import Stake as StakeModel
 from http import HTTPStatus
+
+from .base import Base
+from ..decorators import stake_notification
+from ..models import Stake as StakeModel
 
 
 class Stake(Base):
@@ -17,6 +19,7 @@ class Stake(Base):
         stake = self._init(model=self.stake_model, **kwargs)
         return self._add(instance=stake)
 
+    @stake_notification(operation='create')
     def create(self, **kwargs):
         stake = self._init(model=self.stake_model, **kwargs)
         return self._save(instance=stake)

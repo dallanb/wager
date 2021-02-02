@@ -28,13 +28,6 @@ class DumpStakeSchema(Schema):
         return data
 
 
-class UpdateStakeSchema(Schema):
-    amount = fields.Number(required=False, missing=None,
-                           validate=validate.Range(min=0, error="Cannot be a negative value."),
-                           as_string=True)
-
-
 create_schema = CreateStakeSchema()
 dump_schema = DumpStakeSchema()
 dump_many_schema = DumpStakeSchema(many=True)
-update_schema = UpdateStakeSchema()
