@@ -36,4 +36,4 @@ class Contest:
                 party = self.party_service.add(wager=contests.items[0].wager)
                 participant = self.participant_service.add(member_uuid=data['member_uuid'],
                                                            status='active', party=party)
-                _ = self.stake_service.add(amount=contests.items[0].buy_in, participant=participant)
+                _ = self.stake_service.create(amount=contests.items[0].buy_in, participant=participant)
