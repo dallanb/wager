@@ -10,7 +10,7 @@ class Stake(db.Model, BaseMixin):
     participant_uuid = db.Column(UUIDType(binary=False), db.ForeignKey('participant.uuid'), nullable=False)
 
     # Relationship
-    participant = db.relationship("Participant", back_populates="stakes", lazy="noload")
+    participant = db.relationship("Participant", back_populates="stakes")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
