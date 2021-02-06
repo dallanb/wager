@@ -45,7 +45,6 @@ pipeline {
             }
             post {
                 always {
-                    junit 'results.xml'
                     script {
                         summary = junit testResults: 'results.xml'
                     }
