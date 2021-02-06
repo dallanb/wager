@@ -35,6 +35,9 @@ COPY bin ./bin
 # copy build bin
 COPY build/bin/entrypoint.qaw.sh ./build/bin/entrypoint.sh
 
+# copy test
+COPY tests ./tests
+
 # copy migrations
 COPY migrations ./migrations
 
