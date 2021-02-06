@@ -6,7 +6,6 @@ services:
     image: dallanbhatti/wager:qaw
     restart: on-failure
     volumes:
-      - migrations:/home/app/migrations
       - bin:/home/app/bin
       - tests:/home/app/tests
       - seeds:/home/app/seeds
