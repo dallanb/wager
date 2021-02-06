@@ -29,12 +29,11 @@ pipeline {
                 slackSend (color: '#0000FF', message: "STARTED: Testing Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
                 script {
                     if (env.BRANCH_NAME == 'qaw') {
-                        sh "ls"
-                        sh "ls ./proxy/build/"
                         sh "docker build -f proxy/build/Dockerfile -t dallanbhatti/wager_proxy:latest proxy"
                         sh "docker-compose -f docker-compose.test.yaml up"
                         sh "bash bin/test.sh"
                         sh "docker-compose -f docker-compose.test.yaml down -v"
+                        sh "docker image rm dallanbhatti/wager_proxy:latest"
                     }
                 }
             }

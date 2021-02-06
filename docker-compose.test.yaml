@@ -50,9 +50,7 @@ services:
       - wager-net
   wager_proxy:
     container_name: wager_proxy
-    build:
-      context: ./proxy
-      dockerfile: ./proxy/build/Dockerfile
+    image: dallanbhatti/wager_proxy:latest
     restart: on-failure
     volumes:
       - wager_statics/.:/usr/share/nginx/
