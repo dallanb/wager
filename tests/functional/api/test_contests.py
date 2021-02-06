@@ -22,6 +22,6 @@ def test_fetch_contest_complete(get_user_uuid, get_contest_uuid, get_participant
     # Response
     assert response.status_code == 200
     response = json.loads(response.data)
-    assert response['msg'] == "OKAY"
+    assert response['msg'] == "OK"
     assert response['data'] is not None
     assert response['data']['contest'] is not None
