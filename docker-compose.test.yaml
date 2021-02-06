@@ -5,14 +5,6 @@ services:
     container_name: wager
     image: dallanbhatti/wager:qaw
     restart: on-failure
-    volumes:
-      - bin:/home/app/bin
-      - tests:/home/app/tests
-      - seeds:/home/app/seeds
-      - src:/home/app/src
-      - statics:/home/app/statics
-      - manage.py:/home/app/manage.py
-      - setup.py:/home/app/setup.py
     env_file:
       - env/.env.wager
     healthcheck:
