@@ -46,7 +46,9 @@ pipeline {
             post {
                 always {
                     junit 'results.xml'
-                    summary = junit testResults: 'results.xml'
+                    script {
+                        summary = junit testResults: 'results.xml'
+                    }
                     slackSend (
                        color: '#007D00',
                        message: "\n *Test Summary* - ${summary.totalCount}, Failures: ${summary.failCount}, Skipped: ${summary.skipCount}, Passed: ${summary.passCount}"
