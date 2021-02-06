@@ -10,14 +10,14 @@ from tests.functional.helpers import generate_name
 
 
 @pytest.mark.parametrize("party_name", [generate_name()])
-def test_create_party(party_name, get_user_uuid, get_contest_uuid, create_wager):
-    user_uuid = get_user_uuid()
+def test_create_party(party_name, get_member_uuid, get_contest_uuid, create_wager):
+    member_uuid = get_member_uuid()
     contest_uuid = get_contest_uuid()
     wager = create_wager(contest_uuid=contest_uuid)
     uuid = wager.uuid
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': user_uuid}
+    headers = {'X-Consumer-Custom-ID': member_uuid}
 
     # Payload
     payload = {'name': party_name}
@@ -38,8 +38,8 @@ def test_create_party(party_name, get_user_uuid, get_contest_uuid, create_wager)
 # Fetch
 ###########
 @pytest.mark.parametrize("party_name", [generate_name()])
-def test_fetch_party(party_name, get_user_uuid, get_contest_uuid, create_wager, create_party):
-    user_uuid = get_user_uuid()
+def test_fetch_party(party_name, get_member_uuid, get_contest_uuid, create_wager, create_party):
+    member_uuid = get_member_uuid()
     contest_uuid = get_contest_uuid()
 
     wager = create_wager(contest_uuid=contest_uuid)
@@ -49,7 +49,7 @@ def test_fetch_party(party_name, get_user_uuid, get_contest_uuid, create_wager, 
     party_uuid = party.uuid
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': user_uuid}
+    headers = {'X-Consumer-Custom-ID': member_uuid}
 
     # Request
     response = app.test_client().get(f'/parties/{party_uuid}',
@@ -65,11 +65,11 @@ def test_fetch_party(party_name, get_user_uuid, get_contest_uuid, create_wager, 
 ###########
 # Fetch All
 ###########
-def test_fetch_all_party(get_user_uuid):
-    user_uuid = get_user_uuid()
+def test_fetch_all_party(get_member_uuid):
+    member_uuid = get_member_uuid()
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': user_uuid}
+    headers = {'X-Consumer-Custom-ID': member_uuid}
 
     # Request
     response = app.test_client().get('/parties',
@@ -81,11 +81,11 @@ def test_fetch_all_party(get_user_uuid):
     assert response['msg'] == "OK"
 
 
-def test_fetch_all_party_expand_wager(get_user_uuid):
-    user_uuid = get_user_uuid()
+def test_fetch_all_party_expand_wager(get_member_uuid):
+    member_uuid = get_member_uuid()
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': user_uuid}
+    headers = {'X-Consumer-Custom-ID': member_uuid}
 
     # Request
     response = app.test_client().get('/parties?expand=wager',
@@ -100,11 +100,11 @@ def test_fetch_all_party_expand_wager(get_user_uuid):
     assert response['data']['parties'][0]['wager'] is not None
 
 
-def test_fetch_all_party_include_participants(get_user_uuid):
-    user_uuid = get_user_uuid()
+def test_fetch_all_party_include_participants(get_member_uuid):
+    member_uuid = get_member_uuid()
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': user_uuid}
+    headers = {'X-Consumer-Custom-ID': member_uuid}
 
     # Request
     response = app.test_client().get('/parties?include=participants',
@@ -123,8 +123,8 @@ def test_fetch_all_party_include_participants(get_user_uuid):
 # Update
 ###########
 @pytest.mark.parametrize("party_name", [generate_name()])
-def test_update_party(party_name, get_user_uuid, get_contest_uuid, create_wager, create_party):
-    user_uuid = get_user_uuid()
+def test_update_party(party_name, get_member_uuid, get_contest_uuid, create_wager, create_party):
+    member_uuid = get_member_uuid()
     contest_uuid = get_contest_uuid()
 
     wager = create_wager(contest_uuid=contest_uuid)
@@ -134,7 +134,7 @@ def test_update_party(party_name, get_user_uuid, get_contest_uuid, create_wager,
     party_uuid = party.uuid
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': user_uuid}
+    headers = {'X-Consumer-Custom-ID': member_uuid}
 
     # Payload
     payload = {'name': party_name}

@@ -1,7 +1,9 @@
 import logging
-from .base import Base
-from ..models import Stake as StakeModel
 from http import HTTPStatus
+
+from .base import Base
+from ..decorators import stake_notification
+from ..models import Stake as StakeModel
 
 
 class Stake(Base):
@@ -11,21 +13,26 @@ class Stake(Base):
         self.stake_model = StakeModel
 
     def find(self, **kwargs):
-        return Base.find(self, model=self.stake_model, **kwargs)
+        return self._find(model=self.stake_model, **kwargs)
 
+    def add(self, **kwargs):
+        stake = self._init(model=self.stake_model, **kwargs)
+        return self._add(instance=stake)
+
+    @stake_notification(operation='create')
     def create(self, **kwargs):
-        stake = self.init(model=self.stake_model, **kwargs)
-        return self.save(instance=stake)
+        stake = self._init(model=self.stake_model, **kwargs)
+        return self._save(instance=stake)
 
     def update(self, uuid, instance, **kwargs):
         stakes = self.find(uuid=uuid)
         if not stakes.total:
             self.error(code=HTTPStatus.NOT_FOUND)
         stake = self.assign_attr(instance=stakes.items[0], attr=kwargs)
-        return self.save(instance=stake)
+        return self._save(instance=stake)
 
     def destroy(self, uuid):
         stakes = self.find(uuid=uuid)
         if not stakes.total:
             self.error(code=HTTPStatus.NOT_FOUND)
-        return Base.destroy(self, instance=stakes.items[0])
+        return Base._destroy(self, instance=stakes.items[0])

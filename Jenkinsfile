@@ -14,7 +14,11 @@ pipeline {
                     dockerImageName = registry + ":$BRANCH_NAME"
                     dockerImage = ''
                     if (env.BRANCH_NAME == 'qaw') {
-                        docker.image(dockerImageName).pull()
+                        try {
+                            docker.image(dockerImageName).pull()
+                        } catch (Exception e) {
+                            echo 'This image does not exist'
+                        }
                         dockerImage = docker.build(dockerImageName, "-f build/Dockerfile.$BRANCH_NAME --cache-from $dockerImageName .")
                     }
                 }
@@ -47,7 +51,7 @@ pipeline {
                 slackSend (color: '#0000FF', message: "STARTED: Recreating Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
                 script {
                     if (dockerImage) {
-                        httpRequest url: 'http://192.168.0.100:9000/hooks/redeploy', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody: """
+                        httpRequest url: 'http://192.168.0.100:10001/hooks/redeploy', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody: """
                             {
                                 "project": {
                                     "name": "$container",

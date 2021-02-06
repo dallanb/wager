@@ -1,15 +1,12 @@
 from marshmallow import Schema, post_dump
 from marshmallow_enum import EnumField
 from webargs import fields
+
 from ....common import ParticipantStatusEnum
 
 
 class CreateParticipantSchema(Schema):
-    user_uuid = fields.UUID(required=True)
-    uuid = fields.UUID()
-    ctime = fields.Integer()
-    mtime = fields.Integer()
-    party = fields.Nested('DumpPartySchema')
+    member_uuid = fields.UUID(required=True)
 
 
 class DumpParticipantSchema(Schema):
@@ -17,7 +14,7 @@ class DumpParticipantSchema(Schema):
     uuid = fields.UUID()
     ctime = fields.Integer()
     mtime = fields.Integer()
-    user_uuid = fields.UUID()
+    member_uuid = fields.UUID()
     party = fields.Nested('DumpPartySchema',
                           include=('uuid', 'ctime', 'mtime', 'name', 'wager'))
     stakes = fields.List(fields.Nested('DumpStakeSchema', exclude=('participant',)))
@@ -46,7 +43,7 @@ class FetchAllParticipantSchema(Schema):
     per_page = fields.Int(required=False, missing=10)
     expand = fields.DelimitedList(fields.String(), required=False, missing=[])
     include = fields.DelimitedList(fields.String(), required=False, missing=[])
-    user_uuid = fields.UUID(required=False)
+    member_uuid = fields.UUID(required=False)
 
 
 create_schema = CreateParticipantSchema()

@@ -1,4 +1,6 @@
-from .services import Contest
+import logging
+
+from .events import *
 
 
 def new_event_listener(event):
@@ -7,4 +9,8 @@ def new_event_listener(event):
     data = event.value
 
     if topic == 'contests':
-        Contest().handle_event(key=key, data=data)
+        try:
+            Contest().handle_event(key=key, data=data)
+        except Exception as ex:
+            logging.info(ex)
+            logging.info('contest error')

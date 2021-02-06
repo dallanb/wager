@@ -11,19 +11,25 @@ class Base:
         self.logger = logging.getLogger(__name__)
 
     # @cache.memoize(timeout=1000)
-    def count(self, model):
+    def _count(self, model):
         return self.db.count(model=model)
 
-    def find(self, model, **kwargs):
+    def _find(self, model, **kwargs):
         return self.db.find(model=model, **kwargs)
 
-    def init(self, model, **kwargs):
+    def _init(self, model, **kwargs):
         return self.db.init(model=model, **kwargs)
 
-    def save(self, instance):
+    def _add(self, instance):
+        return self.db.add(instance=instance)
+
+    def _commit(self):
+        return self.db.commit()
+
+    def _save(self, instance):
         return self.db.save(instance=instance)
 
-    def destroy(self, instance):
+    def _destroy(self, instance):
         return self.db.destroy(instance=instance)
 
     @classmethod
