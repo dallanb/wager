@@ -30,6 +30,7 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'qaw') {
                         sh "ls"
+                        sh "ls ./proxy/build/"
                         sh "docker-compose -f docker-compose.test.yaml up"
                         sh "bash bin/test.sh"
                         sh "docker-compose -f docker-compose.test.yaml down -v"
