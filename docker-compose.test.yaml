@@ -55,7 +55,7 @@ services:
       dockerfile: proxy/build/Dockerfile
     restart: on-failure
     volumes:
-      - statics/.:/usr/share/nginx/
+      - wager_statics/.:/usr/share/nginx/
     ports:
       - 80:80
     depends_on:
@@ -74,6 +74,7 @@ services:
       - wager-net
 volumes:
   wager_data:
+  wager_statics:
 networks:
   wager-net:
     driver: bridge
