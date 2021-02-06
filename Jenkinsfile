@@ -29,13 +29,18 @@ pipeline {
                 slackSend (color: '#0000FF', message: "STARTED: Testing Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
                 script {
                     if (env.BRANCH_NAME == 'qaw') {
-                        sh "docker build -f build/Dockerfile.$BRANCH_NAME -t dallanbhatti/wager:test ."
-                        sh "docker build -f proxy/build/Dockerfile -t dallanbhatti/wager_proxy:test proxy"
-                        sh "docker-compose -f docker-compose.test.yaml up -d"
-                        sh "bash bin/test.sh"
-                        sh "docker-compose -f docker-compose.test.yaml down -v"
-                        sh "docker image rm dallanbhatti/wager:test"
-                        sh "docker image rm dallanbhatti/wager_proxy:test"
+                        try {
+                            sh "docker build -f build/Dockerfile.$BRANCH_NAME -t dallanbhatti/wager:test ."
+                            sh "docker build -f proxy/build/Dockerfile -t dallanbhatti/wager_proxy:test proxy"
+                            sh "docker-compose -f docker-compose.test.yaml up -d"
+                            sh "bash bin/test.sh"
+                        } catch(Exception e) {
+                            echo 'Test failed for this build'
+                        } finally {
+                            sh "docker-compose -f docker-compose.test.yaml down -v"
+                            sh "docker image rm dallanbhatti/wager:test"
+                            sh "docker image rm dallanbhatti/wager_proxy:test"
+                        }
                     }
                 }
             }
