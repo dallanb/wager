@@ -5,11 +5,11 @@ from src import app
 ###########
 # Fetch
 ###########
-def test_fetch_wager(get_member_uuid, get_contest_uuid, create_wager):
-    member_uuid = get_member_uuid()
+def test_fetch_wager(get_user_uuid, get_contest_uuid, create_wager):
+    member_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
 
-    wager = create_wager(contest_uuid=contest_uuid)
+    wager = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
     wager_uuid = wager.uuid
 
     # Headers
@@ -29,8 +29,8 @@ def test_fetch_wager(get_member_uuid, get_contest_uuid, create_wager):
 ###########
 # Fetch All
 ###########
-def test_fetch_all_wager(get_member_uuid):
-    member_uuid = get_member_uuid()
+def test_fetch_all_wager(get_user_uuid):
+    member_uuid = get_user_uuid()
 
     # Headers
     headers = {'X-Consumer-Custom-ID': member_uuid}
@@ -45,8 +45,8 @@ def test_fetch_all_wager(get_member_uuid):
     assert response['msg'] == "OK"
 
 
-def test_fetch_all_wager_include_parties(get_member_uuid):
-    member_uuid = get_member_uuid()
+def test_fetch_all_wager_include_parties(get_user_uuid):
+    member_uuid = get_user_uuid()
 
     # Headers
     headers = {'X-Consumer-Custom-ID': member_uuid}
@@ -64,8 +64,8 @@ def test_fetch_all_wager_include_parties(get_member_uuid):
     assert response['data']['wagers'][0]['parties'] is not None
 
 
-def test_fetch_all_wager_include_participants(get_member_uuid):
-    member_uuid = get_member_uuid()
+def test_fetch_all_wager_include_participants(get_user_uuid):
+    member_uuid = get_user_uuid()
 
     # Headers
     headers = {'X-Consumer-Custom-ID': member_uuid}

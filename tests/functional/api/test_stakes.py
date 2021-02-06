@@ -9,19 +9,18 @@ from tests.functional.helpers import generate_name, generate_number
 ###########
 # Create
 ###########
-@pytest.mark.parametrize("party_name", [generate_name()])
 @pytest.mark.parametrize("stake_amount", [generate_number()])
-def test_create_stake(party_name, stake_amount, get_member_uuid, get_contest_uuid,
+def test_create_stake(stake_amount, get_user_uuid, get_contest_uuid,
                       get_participant_uuid,
                       create_wager,
                       create_party,
                       create_participant):
-    member_uuid = get_member_uuid()
+    member_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
     participant_uuid = get_participant_uuid()
-    wager = create_wager(contest_uuid=contest_uuid)
+    wager = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
     wager_uuid = wager.uuid
-    wager_party = create_party(wager_uuid=wager_uuid, name=party_name)
+    wager_party = create_party(wager_uuid=wager_uuid)
     party_uuid = wager_party.uuid
     wager_party_participant = create_participant(party_uuid=party_uuid, member_uuid=participant_uuid)
     participant_uuid = wager_party_participant.uuid
@@ -47,19 +46,18 @@ def test_create_stake(party_name, stake_amount, get_member_uuid, get_contest_uui
 ###########
 # Update
 ###########
-@pytest.mark.parametrize("party_name", [generate_name()])
 @pytest.mark.parametrize("stake_amount", [generate_number()])
-def test_update_stake(party_name, stake_amount, get_member_uuid, get_contest_uuid,
+def test_update_stake(stake_amount, get_user_uuid, get_contest_uuid,
                       get_participant_uuid,
                       create_wager,
                       create_party,
                       create_participant,
                       create_stake):
-    member_uuid = get_member_uuid()
+    member_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
-    wager = create_wager(contest_uuid=contest_uuid)
+    wager = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
     wager_uuid = wager.uuid
-    party = create_party(wager_uuid=wager_uuid, name=party_name)
+    party = create_party(wager_uuid=wager_uuid)
     party_uuid = party.uuid
     participant = create_participant(party_uuid=party_uuid, member_uuid=member_uuid)
     participant_uuid = participant.uuid
@@ -87,19 +85,18 @@ def test_update_stake(party_name, stake_amount, get_member_uuid, get_contest_uui
 ###########
 # Destroy
 ###########
-@pytest.mark.parametrize("party_name", [generate_name()])
 @pytest.mark.parametrize("stake_amount", [generate_number()])
-def test_destroy_stake(party_name, stake_amount, get_member_uuid, get_contest_uuid,
+def test_destroy_stake(stake_amount, get_user_uuid, get_contest_uuid,
                        get_participant_uuid,
                        create_wager,
                        create_party,
                        create_participant,
                        create_stake):
-    member_uuid = get_member_uuid()
+    member_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
-    wager = create_wager(contest_uuid=contest_uuid)
+    wager = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
     wager_uuid = wager.uuid
-    party = create_party(wager_uuid=wager_uuid, name=party_name)
+    party = create_party(wager_uuid=wager_uuid)
     party_uuid = party.uuid
     participant = create_participant(party_uuid=party_uuid, member_uuid=member_uuid)
     participant_uuid = participant.uuid

@@ -1,20 +1,21 @@
-import pytest
 import json
-from tests.functional.helpers import generate_name, generate_uuid
+
+import pytest
+
 from src import app
+from tests.functional.helpers import generate_name, generate_uuid
 
 
 ###########
 # Create
 ###########
-@pytest.mark.parametrize("party_name", [generate_name()])
-def test_create_participant(party_name, get_member_uuid, get_contest_uuid, get_participant_uuid, create_wager,
+def test_create_participant(get_user_uuid, get_contest_uuid, get_participant_uuid, create_wager,
                             create_party):
-    member_uuid = get_member_uuid()
+    member_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
-    wager = create_wager(contest_uuid=contest_uuid)
+    wager = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
     wager_uuid = wager.uuid
-    party = create_party(wager_uuid=wager_uuid, name=party_name)
+    party = create_party(wager_uuid=wager_uuid)
     party_uuid = party.uuid
 
     participant_member_uuid = generate_uuid()
@@ -40,14 +41,13 @@ def test_create_participant(party_name, get_member_uuid, get_contest_uuid, get_p
 ###########
 # Fetch
 ###########
-@pytest.mark.parametrize("party_name", [generate_name()])
-def test_fetch_participant(party_name, get_member_uuid, get_contest_uuid, get_participant_uuid, create_wager,
+def test_fetch_participant(get_user_uuid, get_contest_uuid, get_participant_uuid, create_wager,
                            create_party, create_participant):
-    member_uuid = get_member_uuid()
+    member_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
-    wager = create_wager(contest_uuid=contest_uuid)
+    wager = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
     wager_uuid = wager.uuid
-    party = create_party(wager_uuid=wager_uuid, name=party_name)
+    party = create_party(wager_uuid=wager_uuid)
     party_uuid = party.uuid
     participant = create_participant(party_uuid=party_uuid, member_uuid=member_uuid)
     participant_uuid = participant.uuid
@@ -69,8 +69,8 @@ def test_fetch_participant(party_name, get_member_uuid, get_contest_uuid, get_pa
 ###########
 # Fetch All
 ###########
-def test_fetch_all_participant(get_member_uuid):
-    member_uuid = get_member_uuid()
+def test_fetch_all_participant(get_user_uuid):
+    member_uuid = get_user_uuid()
 
     # Headers
     headers = {'X-Consumer-Custom-ID': member_uuid}
@@ -85,8 +85,8 @@ def test_fetch_all_participant(get_member_uuid):
     assert response['msg'] == "OK"
 
 
-def test_fetch_all_participant_expand_party(get_member_uuid):
-    member_uuid = get_member_uuid()
+def test_fetch_all_participant_expand_party(get_user_uuid):
+    member_uuid = get_user_uuid()
 
     # Headers
     headers = {'X-Consumer-Custom-ID': member_uuid}
@@ -104,8 +104,8 @@ def test_fetch_all_participant_expand_party(get_member_uuid):
     assert response['data']['participants'][0]['party'] is not None
 
 
-def test_fetch_all_participant_expand_wager(get_member_uuid):
-    member_uuid = get_member_uuid()
+def test_fetch_all_participant_expand_wager(get_user_uuid):
+    member_uuid = get_user_uuid()
 
     # Headers
     headers = {'X-Consumer-Custom-ID': member_uuid}
@@ -124,8 +124,8 @@ def test_fetch_all_participant_expand_wager(get_member_uuid):
     assert response['data']['participants'][0]['party']['wager'] is not None
 
 
-def test_fetch_all_participant_include_stakes(get_member_uuid):
-    member_uuid = get_member_uuid()
+def test_fetch_all_participant_include_stakes(get_user_uuid):
+    member_uuid = get_user_uuid()
 
     # Headers
     headers = {'X-Consumer-Custom-ID': member_uuid}
