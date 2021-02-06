@@ -24,6 +24,36 @@ pipeline {
                 }
             }
         }
+        stage('Test') {
+            steps {
+                slackSend (color: '#0000FF', message: "STARTED: Testing Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
+                script {
+                    if (env.BRANCH_NAME == 'qaw') {
+                        try {
+                            sh "docker build -f build/Dockerfile.$BRANCH_NAME -t dallanbhatti/wager:test ."
+                            sh "docker build -f proxy/build/Dockerfile -t dallanbhatti/wager_proxy:test proxy"
+                            sh "docker-compose -f docker-compose.test.yaml up -d"
+                            sh "bash bin/test.sh"
+                        } finally {
+                            sh "docker cp wager:/home/app/results.xml ."
+                            sh "docker-compose -f docker-compose.test.yaml down -v"
+                            sh "docker image rm dallanbhatti/wager:test"
+                            sh "docker image rm dallanbhatti/wager_proxy:test"
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    junit 'results.xml'
+                    def summary = junit testResults: 'results.xml'
+                    slackSend (
+                       color: '#007D00',
+                       message: "\n *Test Summary* - ${summary.totalCount}, Failures: ${summary.failCount}, Skipped: ${summary.skipCount}, Passed: ${summary.passCount}"
+                    )
+                }
+            }
+        }
         stage('Deploy') {
             steps {
                 slackSend (color: '#0000FF', message: "STARTED: Deploying Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")

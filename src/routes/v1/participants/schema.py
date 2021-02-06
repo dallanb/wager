@@ -5,10 +5,6 @@ from webargs import fields
 from ....common import ParticipantStatusEnum
 
 
-class CreateParticipantSchema(Schema):
-    member_uuid = fields.UUID(required=True)
-
-
 class DumpParticipantSchema(Schema):
     status = EnumField(ParticipantStatusEnum)
     uuid = fields.UUID()
@@ -46,7 +42,6 @@ class FetchAllParticipantSchema(Schema):
     member_uuid = fields.UUID(required=False)
 
 
-create_schema = CreateParticipantSchema()
 dump_schema = DumpParticipantSchema()
 dump_many_schema = DumpParticipantSchema(many=True)
 fetch_all_schema = FetchAllParticipantSchema()

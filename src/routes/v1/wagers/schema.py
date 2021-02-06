@@ -3,11 +3,6 @@ from webargs import fields
 from marshmallow_enum import EnumField
 from ....common import ParticipantStatusEnum
 
-
-class CreateWagerSchema(Schema):
-    contest_uuid = fields.UUID()
-
-
 class DumpWagerSchema(Schema):
     uuid = fields.UUID()
     ctime = fields.Integer()
@@ -35,7 +30,6 @@ class FetchAllWagerSchema(Schema):
     include = fields.DelimitedList(fields.String(), required=False, missing=[])
 
 
-create_schema = CreateWagerSchema()
 dump_schema = DumpWagerSchema()
 dump_many_schema = DumpWagerSchema(many=True)
 fetch_all_schema = FetchAllWagerSchema()

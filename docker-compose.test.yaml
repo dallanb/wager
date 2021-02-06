@@ -1,82 +1,78 @@
 version: "3.2"
 
 services:
-  adminer:
-    container_name: adminer
-    build:
-      context: ${HUNCHO_DIR}/services/adminer
-      dockerfile: ${HUNCHO_DIR}/services/adminer/build/Dockerfile
-    restart: always
-    ports:
-      - 8090:8080
   wager:
     container_name: wager
-    build:
-      context: ${HUNCHO_DIR}/services/wager
-      dockerfile: ${HUNCHO_DIR}/services/wager/build/Dockerfile.test
+    image: dallanbhatti/wager:test
     restart: on-failure
-    volumes:
-      - ${HUNCHO_DIR}/services/wager/migrations:/home/app/migrations
-      - ${HUNCHO_DIR}/services/wager/bin:/home/app/bin
-      - ${HUNCHO_DIR}/services/wager/tests:/home/app/tests
-      - ${HUNCHO_DIR}/services/wager/seeds:/home/app/seeds
-      - ${HUNCHO_DIR}/services/wager/src:/home/app/src
-      - ${HUNCHO_DIR}/services/wager/statics:/home/app/statics
-      - ${HUNCHO_DIR}/services/wager/manage.py:/home/app/manage.py
-      - ${HUNCHO_DIR}/services/wager/setup.py:/home/app/setup.py
     env_file:
-      - ${HUNCHO_DIR}/env/test/.env.wager
+      - env/.env.wager
     healthcheck:
       test: curl --fail -s wager:5000/ping || exit 1
-      interval: 60s
+      interval: 10s
       timeout: 5s
       retries: 5
     depends_on:
-#      - wager_cache
       - wager_db
-#  wager_cache:
-#    container_name: wager_cache
-#    build:
-#      context: ${HUNCHO_DIR}/services/redis
-#      dockerfile: ${HUNCHO_DIR}/services/redis/build/Dockerfile
-#    restart: unless-stopped
-#    volumes:
-#      - ${HUNCHO_DIR}/data/test/wager_cache/redis_data:/var/lib/redis
-#      - ${HUNCHO_DIR}/data/test/wager_cache/redis.conf:/usr/local/etc/redis/redis.conf
-#    env_file:
-#      - ${HUNCHO_DIR}/env/test/.env.wager_cache
-#    healthcheck:
-#      test: ["CMD", "redis-cli","ping"]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 5
+      - wager_kafka
+      - wager_zookeeper
+    networks:
+      - wager-net
   wager_db:
     container_name: wager_db
-    build:
-      context: ${HUNCHO_DIR}/services/postgresql
-      dockerfile: ${HUNCHO_DIR}/services/postgresql/build/Dockerfile
-      args:
-        POSTGRES_VERSION: 9.6
+    image: postgres:9.6
     ports:
-      - 5432:5432
+      - 5432
     volumes:
-      - ${HUNCHO_DIR}/data/test/wager_db/data:/var/lib/postgresql/data/
+      - wager_data:/var/lib/postgresql/data/
     env_file:
-      - ${HUNCHO_DIR}/env/test/.env.wager_db
+      - env/.env.wager_db
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U wager"]
       interval: 10s
       timeout: 5s
       retries: 20
+    networks:
+      - wager-net
+  wager_kafka:
+    container_name: wager_kafka
+    image: wurstmeister/kafka:latest
+    restart: on-failure
+    ports:
+      - "9092:9092"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - env/.env.wager_kafka
+    depends_on:
+      - wager_zookeeper
+    networks:
+      - wager-net
   wager_proxy:
     container_name: wager_proxy
-    build:
-      context: ${HUNCHO_DIR}/services/wager/proxy
-      dockerfile: ${HUNCHO_DIR}/services/wager/proxy/build/Dockerfile
+    image: dallanbhatti/wager_proxy:test
     restart: on-failure
     volumes:
-      - ${HUNCHO_DIR}/services/wager/statics/.:/usr/share/nginx/
+      - wager_statics/.:/usr/share/nginx/
     ports:
       - 80:80
     depends_on:
       - wager
+    networks:
+      - wager-net
+  wager_zookeeper:
+    container_name: wager_zookeeper
+    image: wurstmeister/zookeeper:latest
+    restart: on-failure
+    ports:
+      - "2181:2181"
+    env_file:
+      - env/.env.wager_zookeeper
+    networks:
+      - wager-net
+volumes:
+  wager_data:
+  wager_statics:
+networks:
+  wager-net:
+    driver: bridge

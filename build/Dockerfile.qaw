@@ -35,14 +35,11 @@ COPY bin ./bin
 # copy build bin
 COPY build/bin/entrypoint.qaw.sh ./build/bin/entrypoint.sh
 
+# copy test
+COPY tests ./tests
+
 # copy migrations
 COPY migrations ./migrations
-
-# copy seeds
-COPY seeds ./seeds
-
-# copy tests
-COPY tests ./tests
 
 # create logs directory
 RUN mkdir logs

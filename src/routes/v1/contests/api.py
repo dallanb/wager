@@ -1,8 +1,9 @@
 from flask_restful import marshal_with
+
+from .schema import *
 from ..base import Base
 from ....common import DataResponse
 from ....services import ContestService, PartyService, PayoutService
-from .schema import *
 
 
 class ContestsCompleteAPI(Base):
@@ -29,6 +30,7 @@ class ContestsCompleteAPI(Base):
         # return the payouts for placers
         total_payout = buy_in * parties_total
         party_payouts = {payout.rank: payout.proportion * total_payout for payout in payouts.items}
+        payout_proportions = {payout.rank: payout.proportion for payout in payouts.items}
         return DataResponse(
             data={
                 'contest': self.dump(
@@ -38,7 +40,8 @@ class ContestsCompleteAPI(Base):
                         'parties': parties_total,
                         'total_payout': total_payout,
                         'buy_in': buy_in,
-                        'party_payouts': party_payouts
+                        'party_payouts': party_payouts,
+                        'payout_proportions': payout_proportions
                     }
                 )
             }

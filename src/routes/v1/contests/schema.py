@@ -15,6 +15,7 @@ class DumpContestCompleteSchema(Schema):
     total_payout = fields.Float()
     buy_in = fields.Float()
     party_payouts = fields.Dict(keys=fields.Integer(), values=fields.Float())
+    payout_proportions = fields.Dict(keys=fields.Integer(), values=fields.Float())
 
 
 dump_schema = DumpContestSchema()

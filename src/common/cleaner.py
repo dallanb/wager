@@ -1,7 +1,8 @@
 from uuid import UUID
+
+from iso4217 import Currency
 from sqlalchemy.orm.base import object_mapper
 from sqlalchemy.orm.exc import UnmappedInstanceError
-from iso4217 import Currency
 
 
 class Cleaner:
@@ -52,14 +53,6 @@ class Cleaner:
         if min_count is not None and v < min_count:
             return None
         if max_count is not None and v > max_count:
-            return None
-        return v
-
-    @classmethod
-    def is_email(cls, v):
-        if v is None:
-            return v
-        if not re.search('[^@]+@[^@]+\.[^@]+', v):
             return None
         return v
 
