@@ -2,11 +2,6 @@ from marshmallow import validate, Schema, post_dump
 from webargs import fields
 
 
-class CreateStakeSchema(Schema):
-    amount = fields.Number(required=True, validate=validate.Range(min=0, error="Cannot be a negative value."),
-                           as_string=True)
-
-
 class DumpStakeSchema(Schema):
     uuid = fields.UUID()
     ctime = fields.Integer()
@@ -28,6 +23,5 @@ class DumpStakeSchema(Schema):
         return data
 
 
-create_schema = CreateStakeSchema()
 dump_schema = DumpStakeSchema()
 dump_many_schema = DumpStakeSchema(many=True)

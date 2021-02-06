@@ -14,7 +14,6 @@ if [ "$DATABASE" = "wager" ]; then
   echo "PostgreSQL started"
 fi
 
-
 while ! nc -z wager_zookeeper 2181; do
   sleep 0.1
 done
@@ -23,4 +22,4 @@ echo "Kafka started"
 manage init
 manage load
 
-manage run -h 0.0.0.0
+gunicorn --bind 0.0.0.0:5000 manage:app

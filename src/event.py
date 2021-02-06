@@ -2,7 +2,6 @@ import logging
 
 from .events import *
 
-
 def new_event_listener(event):
     topic = event.topic
     key = event.key

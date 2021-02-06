@@ -1,2 +1,1 @@
-from .api import StakesListAPI
-from .schema import create_schema, dump_schema, dump_many_schema
+from .schema import dump_schema, dump_many_schema

@@ -1,9 +1,5 @@
-from marshmallow import validate, Schema, post_load, post_dump
+from marshmallow import Schema, post_dump
 from webargs import fields
-
-
-class CreatePartySchema(Schema):
-    name = fields.String(required=True)
 
 
 class DumpPartySchema(Schema):
@@ -41,12 +37,6 @@ class FetchAllPartySchema(Schema):
     name = fields.String(required=False)
 
 
-class UpdatePartySchema(Schema):
-    name = fields.String(required=True)
-
-
-create_schema = CreatePartySchema()
 dump_schema = DumpPartySchema()
 dump_many_schema = DumpPartySchema(many=True)
 fetch_all_schema = FetchAllPartySchema()
-update_schema = UpdatePartySchema()

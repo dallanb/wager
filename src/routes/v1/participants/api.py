@@ -3,7 +3,6 @@ from flask_restful import marshal_with
 from .schema import *
 from ..base import Base
 from ....common.response import DataResponse
-from ....common.auth import check_user
 from ....services import ParticipantService, PartyService
 
 
@@ -56,20 +55,3 @@ class ParticipantsListAPI(Base):
             }
         )
 
-    @marshal_with(DataResponse.marshallable())
-    @check_user
-    def post(self, uuid):
-        data = self.clean(schema=create_schema, instance=request.get_json())
-        parties = self.party.find(uuid=uuid)
-        if not parties.total:
-            self.throw_error(http_code=self.code.NOT_FOUND)
-        participant = self.participant.create(member_uuid=data['member_uuid'], party=parties.items[0],
-                                              status="pending")
-        return DataResponse(
-            data={
-                'participants': self.dump(
-                    schema=dump_schema,
-                    instance=participant
-                )
-            }
-        )

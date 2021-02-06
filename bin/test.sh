@@ -1,7 +1,7 @@
 #!/bin/sh
 
 . ~/.bashrc
-manage delete_db
-manage flush_cache
-manage init
+python manage.py delete
+python manage.py create
+python manage.py load
 python -m py.test --disable-pytest-warnings -s
