@@ -3,7 +3,7 @@ version: "3.2"
 services:
   wager:
     container_name: wager
-    image: dallanbhatti/wager:qaw
+    image: dallanbhatti/wager:test
     restart: on-failure
     env_file:
       - env/.env.wager
@@ -50,7 +50,7 @@ services:
       - wager-net
   wager_proxy:
     container_name: wager_proxy
-    image: dallanbhatti/wager_proxy:latest
+    image: dallanbhatti/wager_proxy:test
     restart: on-failure
     volumes:
       - wager_statics/.:/usr/share/nginx/
