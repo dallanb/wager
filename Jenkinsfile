@@ -34,8 +34,6 @@ pipeline {
                             sh "docker build -f proxy/build/Dockerfile -t dallanbhatti/wager_proxy:test proxy"
                             sh "docker-compose -f docker-compose.test.yaml up -d"
                             sh "bash bin/test.sh"
-                        } catch(Exception e) {
-                            echo 'Test failed for this build'
                         } finally {
                             sh "docker-compose -f docker-compose.test.yaml down -v"
                             sh "docker image rm dallanbhatti/wager:test"
