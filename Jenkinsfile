@@ -30,7 +30,7 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'qaw') {
                         sh "docker build -f proxy/build/Dockerfile -t dallanbhatti/wager_proxy:latest proxy"
-                        sh "docker-compose -f docker-compose.test.yaml up"
+                        sh "docker-compose -f docker-compose.test.yaml up -d"
                         sh "bash bin/test.sh"
                         sh "docker-compose -f docker-compose.test.yaml down -v"
                         sh "docker image rm dallanbhatti/wager_proxy:latest"
