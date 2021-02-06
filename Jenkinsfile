@@ -29,7 +29,6 @@ pipeline {
                 slackSend (color: '#0000FF', message: "STARTED: Testing Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
                 script {
                     if (env.BRANCH_NAME == 'qaw') {
-                        sh "echo $(ls)"
                         sh "docker-compose -f docker-compose.test.yaml up"
                         sh "bash bin/test.sh"
                         sh "docker-compose -f docker-compose.test.yaml down"
