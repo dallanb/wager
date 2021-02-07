@@ -7,7 +7,7 @@ from src import app
 # Fetch
 ###########
 def test_fetch_party(get_user_uuid, get_contest_uuid, create_wager, create_party):
-    member_uuid = get_user_uuid()
+    user_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
 
     wager = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
@@ -17,7 +17,7 @@ def test_fetch_party(get_user_uuid, get_contest_uuid, create_wager, create_party
     party_uuid = party.uuid
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': member_uuid}
+    headers = {'X-Consumer-Custom-ID': user_uuid}
 
     # Request
     response = app.test_client().get(f'/parties/{party_uuid}',
@@ -34,10 +34,10 @@ def test_fetch_party(get_user_uuid, get_contest_uuid, create_wager, create_party
 # Fetch All
 ###########
 def test_fetch_all_party(get_user_uuid):
-    member_uuid = get_user_uuid()
+    user_uuid = get_user_uuid()
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': member_uuid}
+    headers = {'X-Consumer-Custom-ID': user_uuid}
 
     # Request
     response = app.test_client().get('/parties',
@@ -50,10 +50,10 @@ def test_fetch_all_party(get_user_uuid):
 
 
 def test_fetch_all_party_expand_wager(get_user_uuid):
-    member_uuid = get_user_uuid()
+    user_uuid = get_user_uuid()
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': member_uuid}
+    headers = {'X-Consumer-Custom-ID': user_uuid}
 
     # Request
     response = app.test_client().get('/parties?expand=wager',
@@ -69,10 +69,10 @@ def test_fetch_all_party_expand_wager(get_user_uuid):
 
 
 def test_fetch_all_party_include_participants(get_user_uuid):
-    member_uuid = get_user_uuid()
+    user_uuid = get_user_uuid()
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': member_uuid}
+    headers = {'X-Consumer-Custom-ID': user_uuid}
 
     # Request
     response = app.test_client().get('/parties?include=participants',

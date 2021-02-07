@@ -8,12 +8,12 @@ from src import app
 ###########
 def test_fetch_contest_complete(get_user_uuid, get_contest_uuid, get_participant_uuid, create_wager,
                                 create_party, create_participant):
-    member_uuid = get_user_uuid()
+    user_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
     _ = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
 
     # Headers
-    headers = {'X-Consumer-Custom-ID': member_uuid}
+    headers = {'X-Consumer-Custom-ID': user_uuid}
 
     # Request
     response = app.test_client().get(f'/contests/{contest_uuid}/complete',
@@ -25,3 +25,10 @@ def test_fetch_contest_complete(get_user_uuid, get_contest_uuid, get_participant
     assert response['msg'] == "OK"
     assert response['data'] is not None
     assert response['data']['contest'] is not None
+    # contest = response['data']['contest']
+    # assert contest['uuid'] is not None
+    # assert contest['parties'] is not None
+    # assert contest['total_payout'] is not None
+    # assert contest['buy_in'] is not None
+    # assert contest['party_payouts'] is not None
+    # assert contest['payout_proportions'] is not None
