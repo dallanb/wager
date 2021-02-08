@@ -1,4 +1,6 @@
 import logging
+from http import HTTPStatus
+
 from ..common import Cache, DB, Event
 from ..common.error import ManualException
 
@@ -15,7 +17,10 @@ class Base:
         return self.db.count(model=model)
 
     def _find(self, model, **kwargs):
-        return self.db.find(model=model, **kwargs)
+        try:
+            return self.db.find(model=model, **kwargs)
+        except AttributeError:
+            self.error(code=HTTPStatus.BAD_REQUEST)
 
     def _init(self, model, **kwargs):
         return self.db.init(model=model, **kwargs)
@@ -56,7 +61,7 @@ class Base:
     def error(code, **kwargs):
         if code is None:
             raise ManualException()
-        code = code.value
+        error_code = code.value
         msg = kwargs.get('msg', code.phrase)
         err = kwargs.get('err', None)
-        raise ManualException(code=code, msg=msg, err=err)
+        raise ManualException(code=error_code, msg=msg, err=err)

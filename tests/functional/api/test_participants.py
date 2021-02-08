@@ -60,25 +60,15 @@ def test_fetch_all_participant(reset_db, seed_participant):
     assert metadata['total_count'] == 1
 
 
-def test_fetch_all_participant_w_member_uuid(reset_db, get_member_uuid, get_contest_uuid,
-                                             get_participant_uuid,
-                                             create_wager,
-                                             create_party, create_participant):
+def test_fetch_all_participant_w_pagination(reset_db, seed_participant):
     """
     GIVEN a Flask application configured for testing
-    WHEN the GET endpoint 'participants' is requested with no participants
+    WHEN the GET endpoint 'participants' is requested with pagination
     THEN check that the response is valid
     """
-    member_uuid = get_member_uuid()
-    contest_uuid = get_contest_uuid()
-    wager = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
-    wager_uuid = wager.uuid
-    party = create_party(wager_uuid=wager_uuid)
-    party_uuid = party.uuid
-    _ = create_participant(party_uuid=party_uuid, member_uuid=member_uuid)
 
     # Request
-    response = app.test_client().get(f'/participants?member_uuid={member_uuid}')
+    response = app.test_client().get(f'/participants?page=1&per_page=1')
 
     # Response
     assert response.status_code == 200
@@ -88,7 +78,10 @@ def test_fetch_all_participant_w_member_uuid(reset_db, get_member_uuid, get_cont
     assert len(participants) == 1
     metadata = response['data']['_metadata']
     assert metadata['total_count'] == 1
-
+    assert metadata['page_count'] == 1
+    assert metadata['page'] == 1
+    assert metadata['per_page'] == 1
+    assert response['data']['participants'][0]['uuid'] is not None
 
 
 def test_fetch_all_participant_empty(reset_db):
@@ -170,3 +163,76 @@ def test_fetch_participant_bad_participant_uuid(reset_db, get_member_uuid, seed_
 
     # Response
     assert response.status_code == 404
+
+
+###########
+# Fetch All
+###########
+def test_fetch_all_participant_w_bad_member_uuid(reset_db, get_member_uuid, seed_participant):
+    """
+    GIVEN a Flask application configured for testing
+    WHEN the GET endpoint 'participants' is requested with invalid query param 'member_uuid'
+    THEN check that the response is valid
+    """
+    member_uuid = get_member_uuid()
+
+    # Request
+    response = app.test_client().get(f'/participants?member_uuid={member_uuid}')
+
+    # Response
+    assert response.status_code == 200
+    response = json.loads(response.data)
+    assert response['msg'] == "OK"
+    participants = response['data']['participants']
+    assert len(participants) == 0
+    metadata = response['data']['_metadata']
+    assert metadata['total_count'] == 0
+
+
+def test_fetch_all_participant_w_bad_expand(reset_db, seed_participant):
+    """
+    GIVEN a Flask application configured for testing
+    WHEN the GET endpoint 'participants' is requested with invalid query param 'expand'
+    THEN check that the response is valid
+    """
+    # Request
+    response = app.test_client().get(f'/participants?expand=contest')
+
+    # Response
+    assert response.status_code == 400
+
+
+def test_fetch_all_participant_w_bad_include(reset_db, seed_participant):
+    """
+    GIVEN a Flask application configured for testing
+    WHEN the GET endpoint 'participants' is requested with invalid query param 'include'
+    THEN check that the response is valid
+    """
+    # Request
+    response = app.test_client().get(f'/participants?include=contest')
+
+    # Response
+    assert response.status_code == 400
+
+
+def test_fetch_all_participant_w_bad_pagination(reset_db, seed_participant):
+    """
+    GIVEN a Flask application configured for testing
+    WHEN the GET endpoint 'participants' is requested with pagination
+    THEN check that the response is valid
+    """
+
+    # Request
+    response = app.test_client().get(f'/participants?page=2&per_page=1')
+
+    # Response
+    assert response.status_code == 200
+    response = json.loads(response.data)
+    assert response['msg'] == "OK"
+    participants = response['data']['participants']
+    assert len(participants) == 0
+    metadata = response['data']['_metadata']
+    assert metadata['total_count'] == 1
+    assert metadata['page_count'] == 0
+    assert metadata['page'] == 2
+    assert metadata['per_page'] == 1

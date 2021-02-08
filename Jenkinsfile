@@ -56,7 +56,7 @@ pipeline {
                     )
                     slackSend (
                        color: '#FFA500',
-                       message: "COVERAGE SUMMARY - Report generated at ${env.BUILD_URL}/cobertura"
+                       message: "COVERAGE SUMMARY - Report generated at ${env.BUILD_URL}cobertura"
                     )
                 }
             }
