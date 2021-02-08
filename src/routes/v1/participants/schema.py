@@ -2,6 +2,7 @@ from marshmallow import Schema, post_dump
 from marshmallow_enum import EnumField
 from webargs import fields
 
+from ..stakes.schema import DumpStakeSchema
 from ....common import ParticipantStatusEnum
 
 
@@ -12,8 +13,8 @@ class DumpParticipantSchema(Schema):
     mtime = fields.Integer()
     member_uuid = fields.UUID()
     party = fields.Nested('DumpPartySchema',
-                          include=('uuid', 'ctime', 'mtime', 'name', 'wager'))
-    stakes = fields.List(fields.Nested('DumpStakeSchema', exclude=('participant',)))
+                          include=('uuid', 'ctime', 'mtime', 'name'))
+    stakes = fields.List(fields.Nested(DumpStakeSchema, exclude=('participant',)))
 
     def get_attribute(self, obj, attr, default):
         if attr == 'party':

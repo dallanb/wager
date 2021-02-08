@@ -6,8 +6,13 @@ from src import app
 ###########
 # Fetch
 ###########
-def test_fetch_contest_complete(get_user_uuid, get_contest_uuid, get_participant_uuid, create_wager,
+def test_fetch_contest_complete(reset_db, get_user_uuid, get_contest_uuid, get_participant_uuid, create_wager,
                                 create_party, create_participant):
+    """
+    GIVEN a Flask application configured for testing
+    WHEN the GET endpoint 'contest_complete' is requested
+    THEN check that the response is valid
+    """
     user_uuid = get_user_uuid()
     contest_uuid = get_contest_uuid()
     _ = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
@@ -25,10 +30,10 @@ def test_fetch_contest_complete(get_user_uuid, get_contest_uuid, get_participant
     assert response['msg'] == "OK"
     assert response['data'] is not None
     assert response['data']['contest'] is not None
-    # contest = response['data']['contest']
-    # assert contest['uuid'] is not None
-    # assert contest['parties'] is not None
-    # assert contest['total_payout'] is not None
-    # assert contest['buy_in'] is not None
-    # assert contest['party_payouts'] is not None
-    # assert contest['payout_proportions'] is not None
+    contest = response['data']['contest']
+    assert contest['uuid'] is not None
+    assert contest['parties'] == 0
+    assert contest['total_payout'] == 0.0
+    assert contest['buy_in'] == 5.0
+    assert contest['party_payouts'] == {}
+    assert contest['payout_proportions'] == {}

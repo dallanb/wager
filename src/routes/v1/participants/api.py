@@ -1,5 +1,6 @@
 from flask import request
 from flask_restful import marshal_with
+
 from .schema import *
 from ..base import Base
 from ....common.response import DataResponse
@@ -54,4 +55,3 @@ class ParticipantsListAPI(Base):
                 )
             }
         )
-
