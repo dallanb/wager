@@ -8,4 +8,4 @@ echo "Server ready"
 
 docker exec wager python manage.py init
 docker exec wager python manage.py load
-docker exec wager py.test --disable-pytest-warnings -s --junitxml results.xml
+docker exec wager py.test --disable-pytest-warnings -s --junitxml tests.xml --cov-report xml --cov-report term --cov-branch --cov=src
