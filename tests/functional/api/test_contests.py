@@ -20,8 +20,6 @@ def test_fetch_contest_complete(reset_db, get_contest_uuid, get_participant_uuid
     contest_uuid = get_contest_uuid()
     _ = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
 
-
-
     # Request
     response = app.test_client().get(f'/contests/{contest_uuid}/complete')
 
@@ -54,8 +52,6 @@ def test_fetch_contest_complete_fail(reset_db, get_contest_uuid, seed_wager):
     THEN check that the response is valid
     """
     contest_uuid = get_contest_uuid()
-
-
 
     # Request
     response = app.test_client().get(f'/contests/{contest_uuid}/complete')
