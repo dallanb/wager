@@ -36,6 +36,7 @@ pipeline {
                             sh "bash bin/test.sh"
                         } finally {
                             sh "docker cp wager:/home/app/tests.xml ."
+                            sh "docker cp wager:/home/app/coverage.xml ."
                             sh "docker-compose -f docker-compose.test.yaml down -v"
                             sh "docker image rm dallanbhatti/wager:test"
                             sh "docker image rm dallanbhatti/wager_proxy:test"
@@ -47,7 +48,9 @@ pipeline {
                 always {
                     script {
                         summary = junit testResults: 'tests.xml'
+
                     }
+                    step([$class: 'CoberturaPublisher', autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'coverage.xml', failUnhealthy: false, failUnstable: false, maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
                     slackSend (
                        color: '#FFFF00',
                        message: "TEST SUMMARY - Passed: ${summary.passCount}, Failures: ${summary.failCount}, Skipped: ${summary.skipCount}"
