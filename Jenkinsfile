@@ -50,7 +50,7 @@ pipeline {
                         summary = junit testResults: 'tests.xml'
 
                     }
-                    step([$class: 'CoberturaPublisher', autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: 'coverage.xml', failUnhealthy: false, failUnstable: false, maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
+                    cobertura coberturaReportFile: 'coverage.xml', enableNewApi: true
                     slackSend (
                        color: '#FFFF00',
                        message: "TEST SUMMARY - Passed: ${summary.passCount}, Failures: ${summary.failCount}, Skipped: ${summary.skipCount}"
