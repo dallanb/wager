@@ -47,13 +47,17 @@ pipeline {
             post {
                 always {
                     script {
-                        summary = junit testResults: 'tests.xml'
+                        testSummary = junit testResults: 'tests.xml'
+                        coverageSummary = cobertura coberturaReportFile: 'coverage.xml', enableNewApi: true
 
                     }
-                    cobertura coberturaReportFile: 'coverage.xml', enableNewApi: true
                     slackSend (
                        color: '#FFFF00',
-                       message: "TEST SUMMARY - Passed: ${summary.passCount}, Failures: ${summary.failCount}, Skipped: ${summary.skipCount}"
+                       message: "TEST SUMMARY - Passed: ${testSummary.passCount}, Failures: ${testSummary.failCount}, Skipped: ${testSummary.skipCount}"
+                    )
+                    slackSend (
+                       color: '#FFA500',
+                       message: "COVERAGE SUMMARY - ${coverageSummary}"
                     )
                 }
             }
