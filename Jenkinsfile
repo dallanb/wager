@@ -48,8 +48,7 @@ pipeline {
                 always {
                     script {
                         testSummary = junit testResults: 'tests.xml'
-                        coverageSummary = cobertura coberturaReportFile: 'coverage.xml', enableNewApi: true
-
+                        cobertura coberturaReportFile: 'coverage.xml', enableNewApi: true
                     }
                     slackSend (
                        color: '#FFFF00',
@@ -57,7 +56,7 @@ pipeline {
                     )
                     slackSend (
                        color: '#FFA500',
-                       message: "COVERAGE SUMMARY - ${coverageSummary}"
+                       message: "COVERAGE SUMMARY - Report generated at ${env.BUILD_URL}"
                     )
                 }
             }
