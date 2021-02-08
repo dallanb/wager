@@ -57,7 +57,7 @@ def test_fetch_all_party(reset_db, seed_party):
     assert metadata['total_count'] == 1
 
 
-def test_fetch_all_party_w_pagination(reset_db, seed_participant):
+def test_fetch_all_party_w_pagination(reset_db, seed_party):
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'parties' is requested with pagination
@@ -84,7 +84,7 @@ def test_fetch_all_party_w_pagination(reset_db, seed_participant):
 def test_fetch_all_party_empty(reset_db):
     """
     GIVEN a Flask application configured for testing
-    WHEN the GET endpoint 'participants' is requested with no participants
+    WHEN the GET endpoint 'parties' is requested with no parties
     THEN check that the response is valid
     """
 
@@ -179,13 +179,13 @@ def test_fetch_all_party_w_bad_name(reset_db, seed_party):
     assert response.status_code == 200
     response = json.loads(response.data)
     assert response['msg'] == "OK"
-    participants = response['data']['parties']
-    assert len(participants) == 0
+    parties = response['data']['parties']
+    assert len(parties) == 0
     metadata = response['data']['_metadata']
     assert metadata['total_count'] == 0
 
 
-def test_fetch_all_party_w_bad_expand(reset_db, seed_participant):
+def test_fetch_all_party_w_bad_expand(reset_db, seed_party):
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'parties' is requested with invalid query param 'expand'
@@ -198,7 +198,7 @@ def test_fetch_all_party_w_bad_expand(reset_db, seed_participant):
     assert response.status_code == 400
 
 
-def test_fetch_all_party_w_bad_include(reset_db, seed_participant):
+def test_fetch_all_party_w_bad_include(reset_db, seed_party):
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'parties' is requested with invalid query param 'include'
@@ -211,7 +211,7 @@ def test_fetch_all_party_w_bad_include(reset_db, seed_participant):
     assert response.status_code == 400
 
 
-def test_fetch_all_party_w_bad_pagination(reset_db, seed_participant):
+def test_fetch_all_party_w_bad_pagination(reset_db, seed_party):
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'parties' is requested with pagination
