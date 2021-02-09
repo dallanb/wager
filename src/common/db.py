@@ -1,5 +1,4 @@
 import collections
-import logging
 import re
 
 import inflect
@@ -69,7 +68,6 @@ class DB:
             query = query.limit(limit)
         if offset is not None:
             query = query.offset(offset)
-        logging.info(query)
         return query
 
     @classmethod
