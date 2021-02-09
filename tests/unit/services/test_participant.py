@@ -252,3 +252,187 @@ def test_participant_find_by_non_existent_expand(kafka_conn):
         _ = participant_service.find(expand=['junk'])
     except ManualException as ex:
         assert ex.code == 400
+
+
+###########
+# Create
+###########
+def test_participant_create(kafka_conn, reset_db, get_member_uuid, create_wager, create_party):
+    """
+    GIVEN 0 participant instance in the database
+    WHEN the create method is called
+    THEN it should return 1 participant and add 1 participant instance into the database
+    """
+    global global_wager
+    global global_party
+
+    member_uuid = get_member_uuid()
+    global_wager = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
+    global_party = create_party(wager_uuid=global_wager.uuid)
+
+    participant = participant_service.create(party=global_party, member_uuid=member_uuid, status='active')
+    assert participant.uuid is not None
+    assert participant.member_uuid == member_uuid
+    assert participant.party is not None
+
+
+def test_participant_create_dup_member_uuid_dup_party(kafka_conn, get_member_uuid):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the create method is called with duplicate member_uuid and duplicate party
+    THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global global_party
+
+    member_uuid = get_member_uuid()
+
+    try:
+        _ = participant_service.create(party=global_party, member_uuid=member_uuid, status='active')
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_participant_create_dup_member_uuid(kafka_conn, get_member_uuid, create_wager, create_party):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the create method is called with duplicate member_uuid
+    THEN it should return 1 participant and add 1 participant instance into the database
+    """
+    global global_wager
+    global global_party
+
+    member_uuid = get_member_uuid()
+    wager = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
+    party = create_party(wager_uuid=wager.uuid)
+    participant = participant_service.create(party=party, member_uuid=member_uuid, status='active')
+    assert participant.member_uuid == member_uuid
+
+    participants = participant_service.find(member_uuid=member_uuid)
+    assert participants.total == 2
+    assert len(participants.items) == 2
+
+
+def test_participant_create_dup_party(kafka_conn):
+    """
+    GIVEN 2 participant instance in the database
+    WHEN the create method is called with duplicate party
+    THEN it should return 1 participant and add 1 participant instance into the database
+    """
+    global global_wager
+    global global_party
+
+    participant = participant_service.create(party=global_party, member_uuid=generate_uuid(), status='active')
+    assert participant.uuid is not None
+    assert participant.party == global_party
+
+
+def test_participant_create_w_party_uuid(kafka_conn):
+    """
+    GIVEN 3 participant instance in the database
+    WHEN the create method is called with party_uuid
+    THEN it should return 1 participant and add 1 participant instance into the database
+    """
+    global global_wager
+    global global_party
+
+    participant = participant_service.create(party_uuid=global_party.uuid, member_uuid=generate_uuid(), status='active')
+    assert participant.uuid is not None
+    assert participant.party == global_party
+
+
+def test_participant_create_wo_party(kafka_conn):
+    """
+    GIVEN 3 participant instance in the database
+    WHEN the create method is called without party
+    THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
+    """
+    global global_wager
+
+    try:
+        _ = participant_service.create(member_uuid=generate_uuid(), status='active')
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_participant_create_wo_member_uuid(kafka_conn):
+    """
+    GIVEN 3 participant instance in the database
+    WHEN the create method is called without member_uuid
+    THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global global_party
+    try:
+        _ = participant_service.create(party=global_party, status='active')
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_participant_create_wo_status(kafka_conn):
+    """
+    GIVEN 3 participant instance in the database
+    WHEN the create method is called without status
+    THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
+    """
+    global global_wager
+    try:
+        _ = participant_service.create(party=global_party, member_uuid=generate_uuid())
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_participant_create_w_non_existent_party_uuid(kafka_conn):
+    """
+    GIVEN 3 participant instance in the database
+    WHEN the create method is called with non existent party uuid
+    THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
+    """
+    global global_wager
+    try:
+        _ = participant_service.create(party_uuid=generate_uuid(), member_uuid=generate_uuid(), status='active')
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_participant_create_w_non_existent_status(kafka_conn):
+    """
+    GIVEN 3 participant instance in the database
+    WHEN the create method is called with non existent status
+    THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global global_party
+    try:
+        _ = participant_service.create(party=global_party, member_uuid=generate_uuid(), status='radioactive')
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_participant_create_w_bad_stakes(kafka_conn):
+    """
+    GIVEN 3 participant instance in the database
+    WHEN the create method is called with stakes array
+    THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global global_party
+    try:
+        _ = participant_service.create(party=global_party, member_uuid=generate_uuid(), status='active',
+                                       stakes=[global_party])
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_participant_create_w_bad_field(kafka_conn):
+    """
+    GIVEN 3 participant instance in the database
+    WHEN the create method is called with a non existent field
+    THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global global_party
+    try:
+        _ = participant_service.create(party=global_party, member_uuid=generate_uuid(), status='active', junk='junk')
+    except ManualException as ex:
+        assert ex.code == 500

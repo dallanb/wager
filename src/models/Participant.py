@@ -1,10 +1,14 @@
-from sqlalchemy_utils import UUIDType, generic_repr
+from sqlalchemy_utils import UUIDType
+
+from .mixins import BaseMixin
 from .. import db
 from ..common import ParticipantStatusEnum
-from .mixins import BaseMixin
 
 
 class Participant(db.Model, BaseMixin):
+    # Constraints
+    __table_args__ = (db.UniqueConstraint('member_uuid', 'party_uuid', name='member_party'),)
+
     member_uuid = db.Column(UUIDType(binary=False), nullable=False)
 
     # FK

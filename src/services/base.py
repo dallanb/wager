@@ -29,11 +29,15 @@ class Base:
             return self.db.init(model=model, **kwargs)
         except TypeError:
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except KeyError:
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _add(self, instance):
         try:
             return self.db.add(instance=instance)
         except TypeError:
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except KeyError:
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _commit(self):
@@ -52,10 +56,10 @@ class Base:
     def _save(self, instance):
         try:
             return self.db.save(instance=instance)
-        except IntegrityError:
+        except DataError:
             self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
-        except DataError:
+        except IntegrityError:
             self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
         except StatementError:
