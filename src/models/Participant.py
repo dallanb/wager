@@ -1,3 +1,4 @@
+from sqlalchemy.orm import validates
 from sqlalchemy_utils import UUIDType
 
 from .mixins import BaseMixin
@@ -22,6 +23,20 @@ class Participant(db.Model, BaseMixin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    @validates('member_uuid')
+    def validates_member_uuid(self, key, value):
+        if self.member_uuid:  # Field already exists
+            raise ValueError('member_uuid cannot be modified.')
+
+        return value
+
+    @validates('party_uuid')
+    def validates_party_uuid(self, key, value):
+        if self.party_uuid:  # Field already exists
+            raise ValueError('party_uuid cannot be modified.')
+
+        return value
 
 
 Participant.register()

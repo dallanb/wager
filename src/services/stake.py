@@ -28,7 +28,7 @@ class Stake(Base):
         stakes = self.find(uuid=uuid)
         if not stakes.total:
             self.error(code=HTTPStatus.NOT_FOUND)
-        stake = self.assign_attr(instance=stakes.items[0], attr=kwargs)
+        stake = self._assign_attr(instance=stakes.items[0], attr=kwargs)
         return self._save(instance=stake)
 
     def destroy(self, uuid):

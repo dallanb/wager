@@ -87,6 +87,24 @@ class Base:
     def _rollback(self):
         return self.db.rollback()
 
+    def _assign_attr(self, instance, attr):
+        try:
+            for k, v in attr.items():
+                if not (hasattr(instance, k)):
+                    raise KeyError(f'invalid key {k}')
+                instance.__setattr__(k, v)
+            return instance
+        except ValueError as ex:
+            self.logger.error(f'assign_attr error - ValueError')
+            self.logger.error(ex)
+            self.db.rollback()
+            self.error(code=HTTPStatus.BAD_REQUEST)
+        except KeyError as ex:
+            self.logger.error(f'assign_attr error - KeyError')
+            self.logger.error(ex)
+            self.db.rollback()
+            self.error(code=HTTPStatus.BAD_REQUEST)
+
     @classmethod
     def dump(cls, schema, instance, params=None):
         if params:
@@ -97,12 +115,6 @@ class Base:
     @classmethod
     def clean(cls, schema, instance, **kwargs):
         return schema.load(instance, **kwargs)
-
-    @staticmethod
-    def assign_attr(instance, attr):
-        for k, v in attr.items():
-            instance.__setattr__(k, v)
-        return instance
 
     def notify(self, topic, value, key):
         self.event.send(topic=topic, value=value, key=key)

@@ -26,5 +26,5 @@ class Payout(Base):
         parties = self.find(uuid=uuid)
         if not parties.total:
             self.error(code=HTTPStatus.NOT_FOUND)
-        payout = self.assign_attr(instance=parties.items[0], attr=kwargs)
+        payout = self._assign_attr(instance=parties.items[0], attr=kwargs)
         return self._save(instance=payout)

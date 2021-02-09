@@ -637,3 +637,77 @@ def test_participant_commit_wo_party(kafka_conn):
         _ = participant_service.commit()
     except ManualException as ex:
         assert ex.code == 500
+
+
+###########
+# Update
+###########
+def test_participant_update(kafka_conn, reset_db, seed_participant):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the update method is called
+    THEN it should return 1 participant and update 1 participant instance in the database
+    """
+    global global_participant
+    participants = participant_service.find()
+    global_participant = participants.items[0]
+    assert global_participant.status.name == 'pending'
+
+    participant_service.update(uuid=global_participant.uuid, status='active')
+    assert global_participant.status.name == 'active'
+
+
+def test_participant_update_member_uuid(kafka_conn):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the update method is called with member_uuid
+    THEN it should return 0 participant and update 0 participant instance in the database and ManualException with code 400
+    """
+    global global_participant
+
+    try:
+        _ = participant_service.update(uuid=global_participant.uuid, member_uuid=generate_uuid())
+    except ManualException as ex:
+        assert ex.code == 400
+
+
+def test_participant_update_party_uuid(kafka_conn):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the update method is called with party_uuid
+    THEN it should return 0 participant and update 0 participant instance in the database and ManualException with code 400
+    """
+    global global_participant
+
+    try:
+        _ = participant_service.update(uuid=global_participant.uuid, party_uuid=generate_uuid())
+    except ManualException as ex:
+        assert ex.code == 400
+
+
+def test_participant_update_w_bad_uuid(kafka_conn):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the update method is called with random uuid
+    THEN it should return 0 participant and update 0 participant instance in the database and ManualException with code 404
+    """
+    global global_participant
+
+    try:
+        _ = participant_service.update(uuid=generate_uuid(), status='inactive')
+    except ManualException as ex:
+        assert ex.code == 404
+
+
+def test_participant_update_w_bad_field(kafka_conn):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the update method is called with random uuid
+    THEN it should return 1 participant and update 0 participant instance in the database
+    """
+    global global_participant
+
+    try:
+        _ = participant_service.update(uuid=global_participant.uuid, junk='junk')
+    except ManualException as ex:
+        assert ex.code == 400
