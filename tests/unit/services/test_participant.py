@@ -1,3 +1,5 @@
+import logging
+
 from src import services, ManualException
 from tests.helpers import generate_uuid
 
@@ -434,5 +436,126 @@ def test_participant_create_w_bad_field(kafka_conn):
     global global_party
     try:
         _ = participant_service.create(party=global_party, member_uuid=generate_uuid(), status='active', junk='junk')
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+###########
+# Add
+###########
+def test_participant_add(kafka_conn, reset_db, get_member_uuid, create_wager, create_party):
+    """
+    GIVEN 0 participant instance in the database
+    WHEN the add method is called
+    THEN it should return 1 participant and add 0 participant instance into the database
+    """
+    global global_wager
+    global global_party
+    member_uuid = get_member_uuid()
+    global_wager = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
+    global_party = create_party(wager_uuid=global_wager.uuid)
+    logging.info(global_party)
+    participant = participant_service.add(party=global_party, member_uuid=member_uuid, status='active')
+    assert participant.uuid is not None
+    assert participant.member_uuid == member_uuid
+    assert participant.party == global_party
+
+    participants = participant_service.find(uuid=participant.uuid)
+    assert participants.total == 1
+    assert len(participants.items) == 1
+
+
+def test_participant_add_dup_member_uuid_dup_party(kafka_conn, get_member_uuid):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the add method is called with duplicate member_uuid and duplicate party
+    THEN it should return 1 participant and add 0 participant instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global global_party
+
+    member_uuid = get_member_uuid()
+
+    participants = participant_service.find(member_uuid=member_uuid)
+    assert participants.total == 1
+    assert len(participants.items) == 1
+
+    participant = participant_service.add(party=global_party, member_uuid=member_uuid, status='active')
+    assert participant.party == participants.items[0].party
+    assert participant.member_uuid == participants.items[0].member_uuid
+
+    participant_service.rollback()
+
+
+def test_participant_add_w_party_uuid(kafka_conn):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the add method is called with party_uuid
+    THEN it should return 1 participant and add 0 participant instance into the database
+    """
+    global global_wager
+    global global_party
+
+    participant = participant_service.add(party_uuid=global_party.uuid, member_uuid=generate_uuid(), status='active')
+    assert participant.uuid is not None
+    assert participant.party is None
+    assert participant.party_uuid == global_party.uuid
+    participant_service.rollback()
+
+
+def test_participant_add_wo_party(kafka_conn):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the add method is called without party
+    THEN it should return 1 participant and add 0 participant instance into the database
+    """
+    global global_wager
+
+    participant = participant_service.add(member_uuid=generate_uuid(), status='active')
+    assert participant.uuid is not None
+    assert participant.party is None
+    assert participant.party_uuid is None
+    participant_service.rollback()
+
+
+def test_participant_add_w_non_existent_party_uuid(kafka_conn):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the add method is called with non existent party uuid
+    THEN it should return 1 participant and add 0 participant instance into the database
+    """
+    global global_wager
+
+    party_uuid = generate_uuid()
+    participant = participant_service.add(party_uuid=party_uuid, member_uuid=generate_uuid(), status='active')
+    assert participant.party_uuid == party_uuid
+    participant_service.rollback()
+
+
+def test_participant_add_w_bad_stakes(kafka_conn):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the add method is called with stakes array
+    THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global global_party
+    try:
+        _ = participant_service.add(party=global_party, member_uuid=generate_uuid(), status='active',
+                                    stakes=[global_party])
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_participant_add_w_bad_field(kafka_conn):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the add method is called with a non existent field
+    THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global global_party
+    try:
+        _ = participant_service.add(party=global_party, member_uuid=generate_uuid(), status='active', junk='junk')
     except ManualException as ex:
         assert ex.code == 500

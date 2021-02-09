@@ -22,34 +22,46 @@ class Base:
         try:
             return self.db.find(model=model, **kwargs)
         except AttributeError:
+            self.logger.error(f'find error - AttributeError, model - {model.__tablename__}')
             self.error(code=HTTPStatus.BAD_REQUEST)
 
     def _init(self, model, **kwargs):
         try:
             return self.db.init(model=model, **kwargs)
         except TypeError:
+            self.logger.error(f'init error - TypeError, model - {model.__tablename__}')
+            self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
         except KeyError:
+            self.logger.error(f'init error - KeyError, model - {model.__tablename__}')
+            self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _add(self, instance):
         try:
             return self.db.add(instance=instance)
         except TypeError:
+            self.logger.error(f'add error - TypeError')
+            self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
         except KeyError:
+            self.logger.error(f'add error - KeyError')
+            self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _commit(self):
         try:
             return self.db.commit()
-        except IntegrityError:
+        except DataError:
+            self.logger.error(f'commit error - DataError')
             self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
-        except DataError:
+        except IntegrityError:
+            self.logger.error(f'commit error - IntegrityError')
             self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
         except StatementError:
+            self.logger.error(f'commit error - StatementError')
             self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
@@ -57,17 +69,23 @@ class Base:
         try:
             return self.db.save(instance=instance)
         except DataError:
+            self.logger.error(f'save error - DataError')
             self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
         except IntegrityError:
+            self.logger.error(f'save error - IntegrityError')
             self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
         except StatementError:
+            self.logger.error(f'save error - StatementError')
             self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _destroy(self, instance):
         return self.db.destroy(instance=instance)
+
+    def _rollback(self):
+        return self.db.rollback()
 
     @classmethod
     def dump(cls, schema, instance, params=None):

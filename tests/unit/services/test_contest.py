@@ -475,7 +475,7 @@ def test_contest_add_wo_contest_uuid(kafka_conn, reset_db):
     contest = contest_service.add(buy_in=5.0, wager_uuid=global_wager.uuid)
     assert contest.uuid is not None
     assert contest.contest_uuid is None
-    contest_service.db.rollback()
+    contest_service.rollback()
 
 
 def test_contest_add_wo_buy_in(kafka_conn, reset_db, get_contest_uuid):
@@ -509,7 +509,7 @@ def test_contest_add_wo_wager(kafka_conn, reset_db, get_contest_uuid):
     contest = contest_service.add(contest_uuid=contest_uuid)
     assert contest.uuid is not None
     assert contest.wager is None
-    contest_service.db.rollback()
+    contest_service.rollback()
 
 
 def test_contest_add_w_bad_field(kafka_conn, get_contest_uuid):
@@ -541,7 +541,7 @@ def test_contest_add_w_bad_buy_in(kafka_conn, get_contest_uuid):
     contest = contest_service.add(contest_uuid=contest_uuid, buy_in='five', wager=global_wager)
     assert contest.uuid is not None
     assert contest.buy_in == 'five'
-    contest_service.db.rollback()
+    contest_service.rollback()
 
 
 def test_contest_add_w_bad_contest_uuid(kafka_conn):
@@ -556,7 +556,7 @@ def test_contest_add_w_bad_contest_uuid(kafka_conn):
     contest = contest_service.add(contest_uuid=1, buy_in=5.0, wager=global_wager)
     assert contest.uuid is not None
     assert contest.contest_uuid == 1
-    contest_service.db.rollback()
+    contest_service.rollback()
 
 
 def test_contest_add_w_non_existent_wager(kafka_conn, reset_db):
@@ -569,7 +569,7 @@ def test_contest_add_w_non_existent_wager(kafka_conn, reset_db):
     contest = contest_service.add(contest_uuid=generate_uuid(), buy_in=5.0, wager_uuid=wager_uuid)
     assert contest.uuid is not None
     assert contest.wager_uuid == wager_uuid
-    contest_service.db.rollback()
+    contest_service.rollback()
 
 
 ###########

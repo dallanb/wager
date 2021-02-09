@@ -25,3 +25,6 @@ class Contest(Base):
     def create(self, **kwargs):
         contest = self._init(model=self.contest_model, **kwargs)
         return self._save(instance=contest)
+
+    def rollback(self):
+        return self._rollback()
