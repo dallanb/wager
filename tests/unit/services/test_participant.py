@@ -685,6 +685,20 @@ def test_participant_update_party_uuid(kafka_conn):
         assert ex.code == 400
 
 
+def test_participant_update_party(kafka_conn):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the update method is called with party
+    THEN it should return 0 participant and update 0 participant instance in the database and ManualException with code 400
+    """
+    global global_participant
+
+    try:
+        _ = participant_service.update(uuid=global_participant.uuid, party=generate_uuid())
+    except ManualException as ex:
+        assert ex.code == 400
+
+
 def test_participant_update_w_bad_uuid(kafka_conn):
     """
     GIVEN 1 participant instance in the database

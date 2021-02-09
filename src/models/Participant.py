@@ -38,5 +38,12 @@ class Participant(db.Model, BaseMixin):
 
         return value
 
+    @validates('party')
+    def validates_party(self, key, value):
+        if self.party:  # Field already exists
+            raise ValueError('party cannot be modified.')
+
+        return value
+
 
 Participant.register()
