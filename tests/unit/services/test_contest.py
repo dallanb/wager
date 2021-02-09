@@ -290,3 +290,91 @@ def test_contest_create_wo_contest_uuid(reset_db):
         _ = contest_service.create(buy_in=5.0, wager_uuid=global_wager.uuid)
     except ManualException as ex:
         assert ex.code == 500
+
+
+def test_contest_create_wo_buy_in(get_contest_uuid):
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the create method is called without buy in
+    THEN it should return 1 contest and add 1 contest instance into the database
+    """
+    global global_wager
+    contest_uuid = get_contest_uuid()
+
+    contest = contest_service.create(contest_uuid=contest_uuid, wager_uuid=global_wager.uuid)
+    assert contest.buy_in == 0.0
+    assert type(contest.buy_in) == float
+
+
+def test_contest_create_wo_wager(reset_db, get_contest_uuid):
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the create method is called without wager
+    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
+    """
+    global global_wager
+    contest_uuid = get_contest_uuid()
+
+    try:
+        _ = contest_service.create(contest_uuid=contest_uuid)
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_contest_create_w_bad_field(get_contest_uuid):
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the create method is called with a non existent field
+    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global_wager = services.WagerService().create(status='active')
+    contest_uuid = get_contest_uuid()
+
+    try:
+        _ = contest_service.create(contest_uuid=contest_uuid, buy_in=5.0, wager=global_wager, junk='junk')
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_contest_create_w_bad_buy_in(get_contest_uuid):
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the create method is called with a string buy_in
+    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global_wager = services.WagerService().create(status='active')
+    contest_uuid = get_contest_uuid()
+
+    try:
+        _ = contest_service.create(contest_uuid=contest_uuid, buy_in='five', wager=global_wager)
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_contest_create_w_bad_contest_uuid():
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the create method is called with an int contest_uuid
+    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global_wager = services.WagerService().create(status='active')
+
+    try:
+        _ = contest_service.create(contest_uuid=1, buy_in=5.0, wager=global_wager)
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_contest_create_w_non_existent_wager(reset_db):
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the create method is called with a non existent wager
+    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
+    """
+    try:
+        _ = contest_service.create(contest_uuid=generate_uuid(), buy_in=5.0, wager_uuid=generate_uuid())
+    except ManualException as ex:
+        assert ex.code == 500

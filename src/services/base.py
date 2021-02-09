@@ -1,7 +1,7 @@
 import logging
 from http import HTTPStatus
 
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import DataError, IntegrityError, StatementError
 
 from ..common import DB, Event
 from ..common.error import ManualException
@@ -25,7 +25,10 @@ class Base:
             self.error(code=HTTPStatus.BAD_REQUEST)
 
     def _init(self, model, **kwargs):
-        return self.db.init(model=model, **kwargs)
+        try:
+            return self.db.init(model=model, **kwargs)
+        except TypeError:
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _add(self, instance):
         return self.db.add(instance=instance)
@@ -37,6 +40,13 @@ class Base:
         try:
             return self.db.save(instance=instance)
         except IntegrityError:
+            self.db.rollback()
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except DataError:
+            self.db.rollback()
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except StatementError:
+            self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _destroy(self, instance):

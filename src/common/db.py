@@ -239,3 +239,7 @@ class DB:
         db.session.delete(instance)
         db.session.commit()
         return True
+
+    @classmethod
+    def rollback(cls):
+        db.session.rollback()
