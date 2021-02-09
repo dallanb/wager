@@ -31,7 +31,10 @@ class Base:
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _add(self, instance):
-        return self.db.add(instance=instance)
+        try:
+            return self.db.add(instance=instance)
+        except TypeError:
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _commit(self):
         return self.db.commit()
