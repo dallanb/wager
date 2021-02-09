@@ -501,7 +501,7 @@ def test_contest_add_wo_wager(reset_db, get_contest_uuid):
     """
     GIVEN 0 contest instance in the database
     WHEN the add method is called without wager
-    THEN it should return 1 contest and add 0 contest instance into the database and ManualException with code 500
+    THEN it should return 1 contest and add 0 contest instance into the database
     """
     global global_wager
     contest_uuid = get_contest_uuid()
@@ -563,10 +563,184 @@ def test_contest_add_w_non_existent_wager(reset_db):
     """
     GIVEN 0 contest instance in the database
     WHEN the add method is called with a non existent wager
-    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
+    THEN it should return 0 contest and add 0 contest instance into the database
     """
     wager_uuid = generate_uuid()
     contest = contest_service.add(contest_uuid=generate_uuid(), buy_in=5.0, wager_uuid=wager_uuid)
     assert contest.uuid is not None
     assert contest.wager_uuid == wager_uuid
     contest_service.db.rollback()
+
+
+###########
+# Commit
+###########
+def test_contest_commit(reset_db, get_contest_uuid):
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the commit method is called
+    THEN it should return 0 contest and add 1 contest instance into the database
+    """
+    global global_wager
+    global_wager = services.WagerService().create(status='active')
+    contest_uuid = get_contest_uuid()
+    _ = contest_service.add(contest_uuid=contest_uuid, buy_in=5.0, wager=global_wager)
+    _ = contest_service.commit()
+
+    contests = contest_service.find(contest_uuid=contest_uuid)
+    assert contests.total == 1
+    assert len(contests.items) == 1
+
+
+def test_contest_commit_dup_contest_uuid(reset_db, get_contest_uuid):
+    """
+    GIVEN 1 contest instance in the database
+    WHEN the commit method is called with contest_uuid of contest already in the database
+    THEN it should return 0 contest and add 1 contest instance into the database
+    """
+    wager = services.WagerService().create(status='active')
+    contest_uuid = get_contest_uuid()
+    contest = contest_service.create(contest_uuid=contest_uuid, buy_in=5.0, wager=wager)
+    assert contest.uuid is not None
+
+    _ = contest_service.add(contest_uuid=contest_uuid, buy_in=5.0, wager=wager)
+    _ = contest_service.commit()
+
+    contests = contest_service.find(contest_uuid=contest_uuid)
+    assert contests.total == 2
+    assert len(contests.items) == 2
+
+
+def test_contest_commit_int_buy_in(reset_db, get_contest_uuid):
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the commit method is called with integer buy in
+    THEN it should return 0 contest and add 1 contest instance into the database
+    """
+    global global_wager
+    global_wager = services.WagerService().create(status='active')
+    contest_uuid = get_contest_uuid()
+    _ = contest_service.add(contest_uuid=contest_uuid, buy_in=5, wager=global_wager)
+    _ = contest_service.commit()
+
+    contests = contest_service.find(contest_uuid=contest_uuid)
+    assert contests.total == 1
+    assert len(contests.items) == 1
+
+
+def test_contest_commit_w_wager_uuid(reset_db):
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the commit method is called with wager_uuid
+    THEN it should return 0 contest and add 1 contest instance into the database
+    """
+    global global_wager
+    global_wager = services.WagerService().create(status='active')
+    contest_uuid = generate_uuid()
+    _ = contest_service.add(contest_uuid=contest_uuid, buy_in=5.0, wager_uuid=global_wager.uuid)
+    _ = contest_service.commit()
+
+    contests = contest_service.find(contest_uuid=contest_uuid)
+    assert contests.total == 1
+    assert len(contests.items) == 1
+
+
+def test_contest_commit_wo_contest_uuid(reset_db):
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the commit method is called without contest_uuid
+    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global_wager = services.WagerService().create(status='active')
+    _ = contest_service.add(buy_in=5.0, wager_uuid=global_wager.uuid)
+
+    try:
+        _ = contest_service.commit()
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_contest_commit_wo_buy_in(reset_db, get_contest_uuid):
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the commit method is called without buy in
+    THEN it should return 0 contest and add 1 contest instance into the database
+    """
+    global global_wager
+    global_wager = services.WagerService().create(status='active')
+    contest_uuid = get_contest_uuid()
+
+    _ = contest_service.add(contest_uuid=contest_uuid, wager_uuid=global_wager.uuid)
+    _ = contest_service.commit()
+
+    contests = contest_service.find(contest_uuid=contest_uuid)
+    assert contests.total == 1
+    assert len(contests.items) == 1
+
+
+def test_contest_commit_wo_wager(reset_db, get_contest_uuid):
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the commit method is called without wager
+    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
+    """
+    global global_wager
+    contest_uuid = get_contest_uuid()
+
+    _ = contest_service.add(contest_uuid=contest_uuid)
+
+    try:
+        _ = contest_service.commit()
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_contest_commit_w_bad_buy_in(get_contest_uuid):
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the commit method is called with a string buy_in
+    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global_wager = services.WagerService().create(status='active')
+    contest_uuid = get_contest_uuid()
+
+    _ = contest_service.add(contest_uuid=contest_uuid, buy_in='five', wager=global_wager)
+
+    try:
+        _ = contest_service.commit()
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_contest_commit_w_bad_contest_uuid():
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the commit method is called with an int contest_uuid
+    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global_wager = services.WagerService().create(status='active')
+
+    _ = contest_service.add(contest_uuid=1, buy_in=5.0, wager=global_wager)
+
+    try:
+        _ = contest_service.commit()
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_contest_commit_w_non_existent_wager(reset_db):
+    """
+    GIVEN 0 contest instance in the database
+    WHEN the commit method is called with a non existent wager
+    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
+    """
+    wager_uuid = generate_uuid()
+    _ = contest_service.add(contest_uuid=generate_uuid(), buy_in=5.0, wager_uuid=wager_uuid)
+
+    try:
+        _ = contest_service.commit()
+    except ManualException as ex:
+        assert ex.code == 500

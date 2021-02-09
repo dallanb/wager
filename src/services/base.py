@@ -37,7 +37,17 @@ class Base:
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _commit(self):
-        return self.db.commit()
+        try:
+            return self.db.commit()
+        except IntegrityError:
+            self.db.rollback()
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except DataError:
+            self.db.rollback()
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except StatementError:
+            self.db.rollback()
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _save(self, instance):
         try:
