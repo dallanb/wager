@@ -10,4 +10,5 @@ from .reset_db import reset_db
 from .seed_participant import seed_participant
 from .seed_party import seed_party
 from .seed_stake import seed_stake
+from .kafka_conn import kafka_conn
 from .seed_wager import seed_wager

@@ -27,7 +27,7 @@ services:
     ports:
       - 20002:5000
     env_file:
-      - ${HUNCHO_DIR}/env/dev/.env.wager
+      - env/.env.wager
     healthcheck:
       test: curl --fail -s wager:5000/ping || exit 1
       interval: 60s
@@ -43,12 +43,36 @@ services:
     volumes:
       - ${HUNCHO_DIR}/data/dev/wager_db/data:/var/lib/postgresql/data/
     env_file:
-      - ${HUNCHO_DIR}/env/dev/.env.wager_db
+      - env/.env.wager_db
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U wager"]
+      test: [ "CMD-SHELL", "pg_isready -U wager" ]
       interval: 10s
       timeout: 5s
       retries: 20
+    networks:
+      - app-net
+  wager_kafka:
+    container_name: wager_kafka
+    image: wurstmeister/kafka:latest
+    restart: on-failure
+    ports:
+      - "9092:9092"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - env/.env.wager_kafka
+    depends_on:
+      - wager_zookeeper
+    networks:
+      - app-net
+  wager_zookeeper:
+    container_name: wager_zookeeper
+    image: wurstmeister/zookeeper:latest
+    restart: on-failure
+    ports:
+      - "2181:2181"
+    env_file:
+      - env/.env.wager_zookeeper
     networks:
       - app-net
 networks:
