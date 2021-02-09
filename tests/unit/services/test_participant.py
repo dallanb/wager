@@ -469,7 +469,7 @@ def test_participant_add_dup_member_uuid_dup_party(kafka_conn, get_member_uuid):
     """
     GIVEN 1 participant instance in the database
     WHEN the add method is called with duplicate member_uuid and duplicate party
-    THEN it should return 1 participant and add 0 participant instance into the database and ManualException with code 500
+    THEN it should return 1 participant and add 0 participant instance into the database
     """
     global global_wager
     global global_party
@@ -557,5 +557,83 @@ def test_participant_add_w_bad_field(kafka_conn):
     global global_party
     try:
         _ = participant_service.add(party=global_party, member_uuid=generate_uuid(), status='active', junk='junk')
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+###########
+# Commit
+###########
+def test_participant_commit(kafka_conn, reset_db, get_member_uuid, create_wager, create_party):
+    """
+    GIVEN 0 participant instance in the database
+    WHEN the commit method is called
+    THEN it should return 0 participant and add 1 participant instance into the database
+    """
+    global global_wager
+    global global_party
+    member_uuid = get_member_uuid()
+    global_wager = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
+    global_party = create_party(wager_uuid=global_wager.uuid)
+    _ = participant_service.add(party=global_party, member_uuid=member_uuid, status='active')
+    _ = participant_service.commit()
+
+    participants = participant_service.find()
+    assert participants.total == 1
+    assert len(participants.items) == 1
+
+
+def test_participant_commit_dup_member_uuid_dup_party(kafka_conn, get_member_uuid):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the commit method is called with duplicate member_uuid and duplicate party
+    THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
+    """
+    global global_wager
+    global global_party
+
+    member_uuid = get_member_uuid()
+
+    _ = participant_service.find(member_uuid=member_uuid)
+
+    _ = participant_service.add(party=global_party, member_uuid=member_uuid, status='active')
+
+    try:
+        _ = participant_service.commit()
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_participant_commit_w_party_uuid(kafka_conn):
+    """
+    GIVEN 1 participant instance in the database
+    WHEN the commit method is called with party_uuid
+    THEN it should return 0 participant and add 1 participant instance into the database
+    """
+    global global_wager
+    global global_party
+
+    member_uuid = generate_uuid()
+    _ = participant_service.add(party_uuid=global_party.uuid, member_uuid=member_uuid, status='active')
+
+    _ = participant_service.commit()
+
+    participants = participant_service.find(member_uuid=member_uuid)
+    assert participants.total == 1
+    assert len(participants.items) == 1
+
+
+def test_participant_commit_wo_party(kafka_conn):
+    """
+    GIVEN 2 participant instance in the database
+    WHEN the commit method is called without party
+    THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
+    """
+    global global_wager
+
+    _ = participant_service.add(member_uuid=generate_uuid(), status='active')
+
+    try:
+        _ = participant_service.commit()
     except ManualException as ex:
         assert ex.code == 500

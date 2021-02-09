@@ -22,18 +22,18 @@ class Base:
         try:
             return self.db.find(model=model, **kwargs)
         except AttributeError:
-            self.logger.error(f'find error - AttributeError, model - {model.__tablename__}')
+            self.logger.error(f'find error - AttributeError')
             self.error(code=HTTPStatus.BAD_REQUEST)
 
     def _init(self, model, **kwargs):
         try:
             return self.db.init(model=model, **kwargs)
         except TypeError:
-            self.logger.error(f'init error - TypeError, model - {model.__tablename__}')
+            self.logger.error(f'init error - TypeError')
             self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
         except KeyError:
-            self.logger.error(f'init error - KeyError, model - {model.__tablename__}')
+            self.logger.error(f'init error - KeyError')
             self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
