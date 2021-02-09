@@ -48,20 +48,10 @@ class DB:
             if logic_operator == 'and':
                 query = query.filter(and_(*criterion))
         for i, k in enumerate(expand):
-            tables = k.split('.')
-            options = db.lazyload(getattr(model, tables[0]))
-            for j, table in enumerate(tables):
-                if j > 0:
-                    nested_class = cls._get_class_by_tablename(tables[j - 1])
-                    options = options.lazyload(getattr(nested_class, table))
+            options = db.lazyload(getattr(model, k))
             query = query.options(options)
         for i, k in enumerate(include):
-            tables = k.split('.')
-            options = db.joinedload(getattr(model, tables[0]))
-            for j, table in enumerate(tables):
-                if j > 0:
-                    nested_class = cls._get_class_by_tablename(cls._singularize(tables[j - 1]))
-                    options = options.joinedload(getattr(nested_class, table))
+            options = db.joinedload(getattr(model, k))
             query = query.options(options)
         if sort_by is not None:
             direction = re.search('[.](a|de)sc', sort_by)
@@ -249,3 +239,7 @@ class DB:
         db.session.delete(instance)
         db.session.commit()
         return True
+
+    @classmethod
+    def rollback(cls):
+        db.session.rollback()

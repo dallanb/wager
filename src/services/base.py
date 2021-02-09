@@ -1,5 +1,9 @@
 import logging
-from ..common import Cache, DB, Event
+from http import HTTPStatus
+
+from sqlalchemy.exc import DataError, IntegrityError, StatementError
+
+from ..common import DB, Event
 from ..common.error import ManualException
 
 
@@ -15,19 +19,48 @@ class Base:
         return self.db.count(model=model)
 
     def _find(self, model, **kwargs):
-        return self.db.find(model=model, **kwargs)
+        try:
+            return self.db.find(model=model, **kwargs)
+        except AttributeError:
+            self.error(code=HTTPStatus.BAD_REQUEST)
 
     def _init(self, model, **kwargs):
-        return self.db.init(model=model, **kwargs)
+        try:
+            return self.db.init(model=model, **kwargs)
+        except TypeError:
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _add(self, instance):
-        return self.db.add(instance=instance)
+        try:
+            return self.db.add(instance=instance)
+        except TypeError:
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _commit(self):
-        return self.db.commit()
+        try:
+            return self.db.commit()
+        except IntegrityError:
+            self.db.rollback()
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except DataError:
+            self.db.rollback()
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except StatementError:
+            self.db.rollback()
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _save(self, instance):
-        return self.db.save(instance=instance)
+        try:
+            return self.db.save(instance=instance)
+        except IntegrityError:
+            self.db.rollback()
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except DataError:
+            self.db.rollback()
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except StatementError:
+            self.db.rollback()
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _destroy(self, instance):
         return self.db.destroy(instance=instance)
@@ -56,7 +89,7 @@ class Base:
     def error(code, **kwargs):
         if code is None:
             raise ManualException()
-        code = code.value
+        error_code = code.value
         msg = kwargs.get('msg', code.phrase)
         err = kwargs.get('err', None)
-        raise ManualException(code=code, msg=msg, err=err)
+        raise ManualException(code=error_code, msg=msg, err=err)

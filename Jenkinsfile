@@ -9,7 +9,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                slackSend (color: '#0000FF', message: "STARTED: Building Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
+                slackSend (color: '#0000FF', message: "Building Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
                 script {
                     dockerImageName = registry + ":$BRANCH_NAME"
                     dockerImage = ''
@@ -26,7 +26,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                slackSend (color: '#0000FF', message: "STARTED: Testing Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
+                slackSend (color: '#0000FF', message: "Testing Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
                 script {
                     if (env.BRANCH_NAME == 'qaw') {
                         try {
@@ -35,7 +35,8 @@ pipeline {
                             sh "docker-compose -f docker-compose.test.yaml up -d"
                             sh "bash bin/test.sh"
                         } finally {
-                            sh "docker cp wager:/home/app/results.xml ."
+                            sh "docker cp wager:/home/app/tests.xml ."
+                            sh "docker cp wager:/home/app/coverage.xml ."
                             sh "docker-compose -f docker-compose.test.yaml down -v"
                             sh "docker image rm dallanbhatti/wager:test"
                             sh "docker image rm dallanbhatti/wager_proxy:test"
@@ -46,18 +47,23 @@ pipeline {
             post {
                 always {
                     script {
-                        summary = junit testResults: 'results.xml'
+                        testSummary = junit testResults: 'tests.xml'
+                        cobertura coberturaReportFile: 'coverage.xml', enableNewApi: true
                     }
                     slackSend (
                        color: '#FFFF00',
-                       message: "TEST SUMMARY - Passed: ${summary.passCount}, Failures: ${summary.failCount}, Skipped: ${summary.skipCount}"
+                       message: "TEST SUMMARY - Passed: ${testSummary.passCount}, Failures: ${testSummary.failCount}, Skipped: ${testSummary.skipCount}"
+                    )
+                    slackSend (
+                       color: '#FFA500',
+                       message: "COVERAGE SUMMARY - Report generated at ${env.BUILD_URL}cobertura"
                     )
                 }
             }
         }
         stage('Deploy') {
             steps {
-                slackSend (color: '#0000FF', message: "STARTED: Deploying Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
+                slackSend (color: '#0000FF', message: "Deploying Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
                 script {
                     if (dockerImage) {
                         docker.withRegistry( '', registryCredential ) {
@@ -69,7 +75,7 @@ pipeline {
         }
         stage('Clean') {
             steps {
-                slackSend (color: '#0000FF', message: "STARTED: Cleaning Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
+                slackSend (color: '#0000FF', message: "Cleaning Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
                 script {
                     if (dockerImage) {
                         sh "docker image prune -f"
@@ -79,7 +85,7 @@ pipeline {
         }
         stage('Recreate') {
             steps {
-                slackSend (color: '#0000FF', message: "STARTED: Recreating Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
+                slackSend (color: '#0000FF', message: "Recreating Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' ")
                 script {
                     if (dockerImage) {
                         httpRequest url: 'http://192.168.0.100:10001/hooks/redeploy', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody: """

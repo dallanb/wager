@@ -10,7 +10,7 @@ cli = FlaskGroup(app)
 
 def full_load():
     initialize_statuses()
-    os.system('flask seed run')
+    # os.system('flask seed run')
 
 
 def init_db():
