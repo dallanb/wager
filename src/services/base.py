@@ -1,7 +1,9 @@
 import logging
 from http import HTTPStatus
 
-from ..common import Cache, DB, Event
+from sqlalchemy.exc import IntegrityError
+
+from ..common import DB, Event
 from ..common.error import ManualException
 
 
@@ -32,7 +34,10 @@ class Base:
         return self.db.commit()
 
     def _save(self, instance):
-        return self.db.save(instance=instance)
+        try:
+            return self.db.save(instance=instance)
+        except IntegrityError:
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _destroy(self, instance):
         return self.db.destroy(instance=instance)
