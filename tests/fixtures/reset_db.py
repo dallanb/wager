@@ -17,3 +17,4 @@ def reset_db():
     # load
     init_wager_status(status_enums=common.WagerStatusEnum)
     init_participant_status(status_enums=common.ParticipantStatusEnum)
+
