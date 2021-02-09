@@ -15,4 +15,4 @@ if [ "$DATABASE" = "wager" ]; then
 fi
 
 
-gunicorn --bind 0.0.0.0:5000 manage:app
+manage run -h 0.0.0.0

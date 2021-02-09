@@ -1,4 +1,5 @@
 import collections
+import logging
 import re
 
 import inflect
@@ -48,7 +49,7 @@ class DB:
             if logic_operator == 'and':
                 query = query.filter(and_(*criterion))
         for i, k in enumerate(expand):
-            options = db.lazyload(getattr(model, k))
+            options = db.joinedload(getattr(model, k))
             query = query.options(options)
         for i, k in enumerate(include):
             options = db.joinedload(getattr(model, k))
@@ -68,6 +69,7 @@ class DB:
             query = query.limit(limit)
         if offset is not None:
             query = query.offset(offset)
+        logging.info(query)
         return query
 
     @classmethod

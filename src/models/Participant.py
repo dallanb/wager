@@ -12,9 +12,9 @@ class Participant(db.Model, BaseMixin):
     status = db.Column(db.Enum(ParticipantStatusEnum), db.ForeignKey('participant_status.name'), nullable=False)
 
     # Relationship
-    party = db.relationship("Party", back_populates="participants", lazy="noload")
+    party = db.relationship("Party", back_populates="participants")
     participant_status = db.relationship("ParticipantStatus")
-    stakes = db.relationship("Stake", back_populates="participant", lazy="noload")
+    stakes = db.relationship("Stake", back_populates="participant")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

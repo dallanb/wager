@@ -9,8 +9,8 @@ class Wager(db.Model, BaseMixin):
 
     # Relationship
     wager_status = db.relationship("WagerStatus")
-    parties = db.relationship("Party", back_populates='wager', lazy="noload")
-    payouts = db.relationship("Payout", back_populates='wager', lazy="noload")
+    parties = db.relationship("Party", back_populates='wager')
+    payouts = db.relationship("Payout", back_populates='wager')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
