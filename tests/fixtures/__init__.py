@@ -10,6 +10,6 @@ from .kafka_conn import kafka_conn
 from .reset_db import reset_db
 from .seed_participant import seed_participant
 from .seed_party import seed_party
-from .seed_payout import seed_payout
+from .seed_payouts import seed_payouts
 from .seed_stake import seed_stake
 from .seed_wager import seed_wager

@@ -74,31 +74,16 @@ def test_contest_find_by_wager_uuid(kafka_conn):
     assert contest.wager.uuid == global_wager.uuid
 
 
-def test_contest_find_by_contest_uuid_multiple(kafka_conn, get_contest_uuid, create_wager):
-    """
-    GIVEN 2 contest instance in the database
-    WHEN the find method is called with contest_uuid
-    THEN it should return 2 contest
-    """
-    contest_uuid = get_contest_uuid()
-    _ = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
-
-    global global_contest
-    contests = contest_service.find(contest_uuid=contest_uuid)
-    assert contests.total == 2
-    assert len(contests.items) == 2
-
-
-def test_contest_find_by_contest_uuid_multiple_match_single(kafka_conn, reset_db, get_contest_uuid, create_wager):
+def test_contest_find_by_contest_uuid_multiple_match_single(kafka_conn, get_contest_uuid, create_wager):
     """
     GIVEN 2 contest instance in the database
     WHEN the find method is called with contest_uuid
     THEN it should return 1 contest
     """
     contest_uuid = get_contest_uuid()
-    _ = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
     _ = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
 
+    global global_contest
     contests = contest_service.find(contest_uuid=contest_uuid)
     assert contests.total == 1
     assert len(contests.items) == 1
@@ -211,23 +196,19 @@ def test_contest_create_dup_contest_uuid(kafka_conn, get_contest_uuid):
     """
     GIVEN 1 contest instance in the database
     WHEN the create method is called with contest_uuid of contest already in the database
-    THEN it should return 1 contest and add 1 contest instance into the database
+    THEN it should return 0 contest and add 1 contest instance into the database and ManualException with code 500
     """
     wager = services.WagerService().create(status='active')
     contest_uuid = get_contest_uuid()
-    contest = contest_service.create(contest_uuid=contest_uuid, buy_in=1.0, wager=wager)
-    assert contest.uuid is not None
-    assert contest.contest_uuid == contest_uuid
-    assert contest.buy_in == 1.0
-
-    contests = contest_service.find(contest_uuid=contest_uuid)
-    assert contests.total == 2
-    assert len(contests.items) == 2
+    try:
+        _ = contest_service.create(contest_uuid=contest_uuid, buy_in=1.0, wager=wager)
+    except ManualException as ex:
+        assert ex.code == 500
 
 
 def test_contest_create_dup_wager(kafka_conn, get_contest_uuid):
     """
-    GIVEN 2 contest instance in the database
+    GIVEN 1 contest instance in the database
     WHEN the create method is called with wager of contest already in the database
     THEN it should return 1 contest and add 1 contest instance into the database
     """
@@ -247,7 +228,7 @@ def test_contest_create_dup_wager(kafka_conn, get_contest_uuid):
     assert len(contests.items) == 2
 
 
-def test_contest_create_int_buy_in(kafka_conn, reset_db, get_contest_uuid):
+def test_contest_create_int_buy_in(kafka_conn, reset_db):
     """
     GIVEN 0 contest instance in the database
     WHEN the create method is called with integer buy in
@@ -255,7 +236,7 @@ def test_contest_create_int_buy_in(kafka_conn, reset_db, get_contest_uuid):
     """
     global global_wager
     global_wager = services.WagerService().create(status='active')
-    contest_uuid = get_contest_uuid()
+    contest_uuid = generate_uuid()
     contest = contest_service.create(contest_uuid=contest_uuid, buy_in=5, wager=global_wager)
     assert contest.uuid is not None
     assert contest.contest_uuid == contest_uuid
@@ -410,18 +391,12 @@ def test_contest_add_dup_contest_uuid(kafka_conn, reset_db, get_contest_uuid):
     """
     wager = services.WagerService().create(status='active')
     contest_uuid = get_contest_uuid()
-    contest = contest_service.create(contest_uuid=contest_uuid, buy_in=5.0, wager=wager)
+    _ = contest_service.create(contest_uuid=contest_uuid, buy_in=5.0, wager=wager)
+
+    contest = contest_service.add(contest_uuid=contest_uuid, buy_in=5.0, wager=wager)
     assert contest.uuid is not None
 
-    contest_add = contest_service.add(contest_uuid=contest_uuid, buy_in=5.0, wager=wager)
-    assert contest_add.uuid is not None
-
-    assert contest.uuid != contest_add.uuid
-    assert contest.contest_uuid == contest_add.contest_uuid
-
-    contests = contest_service.find(contest_uuid=contest_uuid)
-    assert contests.total == 2
-    assert len(contests.items) == 2
+    contest_service.rollback()
 
 
 def test_contest_add_int_buy_in(kafka_conn, reset_db, get_contest_uuid):
@@ -596,7 +571,7 @@ def test_contest_commit_dup_contest_uuid(kafka_conn, reset_db, get_contest_uuid)
     """
     GIVEN 1 contest instance in the database
     WHEN the commit method is called with contest_uuid of contest already in the database
-    THEN it should return 0 contest and add 1 contest instance into the database
+    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
     """
     wager = services.WagerService().create(status='active')
     contest_uuid = get_contest_uuid()
@@ -604,11 +579,11 @@ def test_contest_commit_dup_contest_uuid(kafka_conn, reset_db, get_contest_uuid)
     assert contest.uuid is not None
 
     _ = contest_service.add(contest_uuid=contest_uuid, buy_in=5.0, wager=wager)
-    _ = contest_service.commit()
 
-    contests = contest_service.find(contest_uuid=contest_uuid)
-    assert contests.total == 2
-    assert len(contests.items) == 2
+    try:
+        _ = contest_service.commit()
+    except ManualException as ex:
+        assert ex.code == 500
 
 
 def test_contest_commit_int_buy_in(kafka_conn, reset_db, get_contest_uuid):

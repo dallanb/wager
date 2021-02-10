@@ -19,11 +19,10 @@ class Contest:
     def handle_event(self, key, data):
         if key == 'owner_active':
             self.logger.info('owner active')
-            wager = self.wager_service.create(status='pending')
+            wager = self.wager_service.create(status='active')
             _ = self.contest_service.create(contest_uuid=data['contest_uuid'], buy_in=data['buy_in'],
                                             wager=wager)
-            for i, payout in enumerate(data['payout']):
-                _ = self.payout_service.create(rank=i + 1, proportion=payout, wager=wager)
+            self.wager_service.validate_and_create_payout(instance=wager, payout_list=data['payout'])
             party = self.party_service.add(wager=wager)
             participant = self.participant_service.add(member_uuid=data['member_uuid'],
                                                        status='active', party=party)
