@@ -18,6 +18,9 @@ class Payout(Base):
         payout = self._init(model=self.payout_model, **kwargs)
         return self._add(instance=payout)
 
+    def commit(self):
+        return self._commit()
+
     def create(self, **kwargs):
         payout = self._init(model=self.payout_model, **kwargs)
         return self._save(instance=payout)
@@ -28,3 +31,6 @@ class Payout(Base):
             self.error(code=HTTPStatus.NOT_FOUND)
         payout = self._assign_attr(instance=parties.items[0], attr=kwargs)
         return self._save(instance=payout)
+
+    def rollback(self):
+        return self._rollback()

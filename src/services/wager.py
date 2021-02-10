@@ -1,5 +1,8 @@
 import logging
+from http import HTTPStatus
+
 from .base import Base
+from ..common import WagerStatusEnum
 from ..models import Wager as WagerModel
 
 
@@ -24,3 +27,10 @@ class Wager(Base):
 
     def find(self, **kwargs):
         return self._find(model=self.wager_model, **kwargs)
+
+    def _status_machine(self, prev_status, new_status):
+        # cannot go from active to pending
+        if WagerStatusEnum[prev_status] == WagerStatusEnum['active'] and WagerStatusEnum[
+            new_status] == WagerStatusEnum['pending']:
+            self.error(code=HTTPStatus.BAD_REQUEST)
+        return True

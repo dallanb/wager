@@ -19,7 +19,7 @@ class Contest:
     def handle_event(self, key, data):
         if key == 'owner_active':
             self.logger.info('owner active')
-            wager = self.wager_service.create(status='active')
+            wager = self.wager_service.create(status='pending')
             _ = self.contest_service.create(contest_uuid=data['contest_uuid'], buy_in=data['buy_in'],
                                             wager=wager)
             for i, payout in enumerate(data['payout']):
