@@ -57,7 +57,7 @@ def test_stake_find_by_participant_uuid(kafka_conn):
     assert stake.participant.uuid == global_participant.uuid
 
 
-def test_stake_find_include_participants(kafka_conn):
+def test_stake_find_expand_participant(kafka_conn):
     """
     GIVEN 1 stake instance in the database
     WHEN the find method is called with include argument to return participants
@@ -67,7 +67,7 @@ def test_stake_find_include_participants(kafka_conn):
     global global_stake
     global global_participant
 
-    stakes = stake_service.find(include=['participants'])
+    stakes = stake_service.find(expand=['participant'])
     assert stakes.total == 1
     assert len(stakes.items) == 1
     stake = stakes.items[0]
