@@ -1,3 +1,5 @@
+import logging
+
 from src import services, ManualException
 from tests.helpers import generate_uuid
 
@@ -50,10 +52,10 @@ def test_participant_find_by_uuid(kafka_conn):
     assert participant.uuid == global_participant.uuid
 
 
-def test_participant_find_include_stakes(kafka_conn, create_stake):
+def test_participant_find_include_stake(kafka_conn, create_stake):
     """
     GIVEN 1 participant instance in the database
-    WHEN the find method is called with uuid and with include argument to also return stakes
+    WHEN the find method is called with uuid and with include argument to also return stake
     THEN it should return 1 participant
     """
     global global_participant
@@ -61,14 +63,13 @@ def test_participant_find_include_stakes(kafka_conn, create_stake):
 
     global_stake = create_stake(participant_uuid=global_participant.uuid)
 
-    participants = participant_service.find(uuid=global_participant.uuid, include=['stakes'])
+    participants = participant_service.find(uuid=global_participant.uuid, include=['stake'])
 
     assert participants.total == 1
     assert len(participants.items) == 1
     participant = participants.items[0]
-    assert participant.stakes is not None
-    assert len(participant.stakes) == 1
-    assert participant.stakes[0].uuid == global_stake.uuid
+    assert participant.stake is not None
+    assert participant.stake.uuid == global_stake.uuid
 
 
 def test_participant_find_expand_party(kafka_conn):
@@ -89,24 +90,23 @@ def test_participant_find_expand_party(kafka_conn):
     assert participant.party.uuid == global_party.uuid
 
 
-def test_participant_find_include_stakes_expand_party(kafka_conn):
+def test_participant_find_include_stake_expand_party(kafka_conn):
     """
     GIVEN 1 participant instance in the database
-    WHEN the find method is called with uuid and with include argument to also return stakes and with expand argument to also return party
+    WHEN the find method is called with uuid and with include argument to also return stake and with expand argument to also return party
     THEN it should return 1 participant
     """
     global global_participant
     global global_stake
     global global_party
 
-    participants = participant_service.find(uuid=global_participant.uuid, include=['stakes'], expand=['party'])
+    participants = participant_service.find(uuid=global_participant.uuid, include=['stake'], expand=['party'])
 
     assert participants.total == 1
     assert len(participants.items) == 1
     participant = participants.items[0]
-    assert participant.stakes is not None
-    assert len(participant.stakes) == 1
-    assert participant.stakes[0].uuid == global_stake.uuid
+    assert participant.stake is not None
+    assert participant.stake.uuid == global_stake.uuid
     assert participant.party is not None
     assert participant.party.uuid == global_party.uuid
 
@@ -409,17 +409,17 @@ def test_participant_create_w_non_existent_status(kafka_conn):
         assert ex.code == 500
 
 
-def test_participant_create_w_bad_stakes(kafka_conn):
+def test_participant_create_w_bad_stake(kafka_conn):
     """
     GIVEN 3 participant instance in the database
-    WHEN the create method is called with stakes array
+    WHEN the create method is called with stake array
     THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
     """
     global global_wager
     global global_party
     try:
         _ = participant_service.create(party=global_party, member_uuid=generate_uuid(), status='active',
-                                       stakes=[global_party])
+                                       stake=global_party)
     except ManualException as ex:
         assert ex.code == 500
 
@@ -529,17 +529,17 @@ def test_participant_add_w_non_existent_party_uuid(kafka_conn):
     participant_service.rollback()
 
 
-def test_participant_add_w_bad_stakes(kafka_conn):
+def test_participant_add_w_bad_stake(kafka_conn):
     """
     GIVEN 1 participant instance in the database
-    WHEN the add method is called with stakes array
+    WHEN the add method is called with stake array
     THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
     """
     global global_wager
     global global_party
     try:
         _ = participant_service.add(party=global_party, member_uuid=generate_uuid(), status='active',
-                                    stakes=[global_party])
+                                    stake=global_party)
     except ManualException as ex:
         assert ex.code == 500
 
@@ -672,14 +672,15 @@ def test_participant_update_party_uuid(kafka_conn):
     """
     GIVEN 1 participant instance in the database
     WHEN the update method is called with party_uuid
-    THEN it should return 0 participant and update 0 participant instance in the database and ManualException with code 400
+    THEN it should return 0 participant and update 0 participant instance in the database and ManualException with code 500
     """
     global global_participant
 
     try:
         _ = participant_service.update(uuid=global_participant.uuid, party_uuid=generate_uuid())
     except ManualException as ex:
-        assert ex.code == 400
+        logging.info(ex)
+        assert ex.code == 500
 
 
 def test_participant_update_party(kafka_conn):

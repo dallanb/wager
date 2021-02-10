@@ -152,3 +152,125 @@ def test_stake_find_by_non_existent_expand(kafka_conn):
         _ = stake_service.find(expand=['junk'])
     except ManualException as ex:
         assert ex.code == 400
+
+
+###########
+# Create
+###########
+def test_stake_create(kafka_conn, reset_db, seed_participant):
+    """
+    GIVEN 0 stake instance in the database
+    WHEN the create method is called
+    THEN it should return 1 stake and add 1 stake instance into the database
+    """
+    global global_participant
+    global global_stake
+
+    participants = services.ParticipantService().find()
+    global_participant = participants.items[0]
+
+    stake = stake_service.create(participant=global_participant, amount=5.0)
+    assert stake.uuid is not None
+    assert stake.participant is not None
+
+
+def test_stake_create_dup_participant(kafka_conn, get_member_uuid):
+    """
+    GIVEN 1 stake instance in the database
+    WHEN the create method is called with duplicate participant
+    THEN it should return 0 stake and add 0 stake instance into the database and ManualException with code 500
+    """
+    global global_participant
+
+    try:
+        _ = stake_service.create(participant=global_participant, amount=5.0)
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_stake_create_w_participant_uuid(kafka_conn, reset_db, seed_participant):
+    """
+    GIVEN 0 stake instance in the database
+    WHEN the create method is called with participant_uuid
+    THEN it should return 1 stake and add 1 stake instance into the database
+    """
+    global global_participant
+    global global_stake
+
+    participants = services.ParticipantService().find()
+    global_participant = participants.items[0]
+
+    stake = stake_service.create(participant_uuid=global_participant.uuid, amount=5.0)
+    assert stake.uuid is not None
+
+
+def test_stake_create_wo_participant(kafka_conn):
+    """
+    GIVEN 1 stake instance in the database
+    WHEN the create method is called without participant
+    THEN it should return 0 stake and add 0 stake instance into the database and ManualException with code 500
+    """
+    global global_participant
+
+    try:
+        _ = stake_service.create(amount=5.0)
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_stake_create_w_non_existent_participant_uuid(kafka_conn):
+    """
+    GIVEN 1 stake instance in the database
+    WHEN the create method is called with non existent participant uuid
+    THEN it should return 0 stake and add 0 stake instance into the database and ManualException with code 500
+    """
+    global global_participant
+    try:
+        _ = stake_service.create(participant_uuid=generate_uuid(), amount=5.0)
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_stake_create_w_bad_amount(kafka_conn, reset_db, seed_participant):
+    """
+    GIVEN 1 stake instance in the database
+    WHEN the create method is called with invalid amount
+    THEN it should return 0 stake and add 0 stake instance into the database and ManualException with code 500
+    """
+    global global_participant
+
+    participants = services.ParticipantService().find()
+    global_participant = participants.items[0]
+
+    try:
+        _ = stake_service.create(participant=global_participant, amount='five')
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_stake_create_wo_amount(kafka_conn):
+    """
+    GIVEN 0 stake instance in the database
+    WHEN the create method is called without amount
+    THEN it should return 1 stake and add 1 stake instance into the database
+    """
+    global global_participant
+
+    stake = stake_service.create(participant=global_participant)
+    assert stake.amount == 0.0
+
+
+def test_stake_create_w_bad_field(kafka_conn, reset_db, seed_participant):
+    """
+    GIVEN 0 stake instance in the database
+    WHEN the create method is called with a non existent field
+    THEN it should return 0 stake and add 0 stake instance into the database and ManualException with code 500
+    """
+    global global_participant
+
+    participants = services.ParticipantService().find()
+    global_participant = participants.items[0]
+    try:
+        _ = stake_service.create(participant=global_participant, amount=5.0, junk='junk')
+    except ManualException as ex:
+        assert ex.code == 500

@@ -2,7 +2,6 @@ import logging
 from http import HTTPStatus
 
 from .base import Base
-from ..common import WagerStatusEnum
 from ..models import Wager as WagerModel
 from ..services import PayoutService
 
@@ -37,7 +36,6 @@ class Wager(Base):
         return self.apply(instance=wagers.items[0], **kwargs)
 
     def apply(self, instance, **kwargs):
-        _ = self._status_machine(instance.status.name, kwargs['status'])
         wager = self._assign_attr(instance=instance, attr=kwargs)
         return self._save(instance=wager)
 
@@ -53,15 +51,3 @@ class Wager(Base):
             new_payout = self.payout_service.create(rank=i + 1, proportion=payout, wager=instance)
             payouts.append(new_payout)
         return payouts
-
-    def _status_machine(self, prev_status, new_status=None):
-        if new_status:
-            # cannot go from active to pending
-            if WagerStatusEnum[prev_status] == WagerStatusEnum['active'] and \
-                    WagerStatusEnum[new_status] == WagerStatusEnum['pending']:
-                self.error(code=HTTPStatus.BAD_REQUEST)
-            # cannot go from inactive to pending
-            elif WagerStatusEnum[prev_status] == WagerStatusEnum['inactive'] and \
-                    WagerStatusEnum[new_status] == WagerStatusEnum['pending']:
-                self.error(code=HTTPStatus.BAD_REQUEST)
-        return True

@@ -14,13 +14,13 @@ class DumpParticipantSchema(Schema):
     member_uuid = fields.UUID()
     party = fields.Nested('DumpPartySchema',
                           include=('uuid', 'ctime', 'mtime'))
-    stakes = fields.List(fields.Nested(DumpStakeSchema, exclude=('participant',)))
+    stake = fields.Nested(DumpStakeSchema, exclude=('participant',))
 
     def get_attribute(self, obj, attr, default):
         if attr == 'party':
             return getattr(obj, attr, default) if any(
                 attr in expand for expand in self.context.get('expand', [])) else None
-        if attr == 'stakes':
+        if attr == 'stake':
             return getattr(obj, attr, default) if any(
                 attr in include for include in self.context.get('include', [])) else None
         else:
@@ -30,8 +30,8 @@ class DumpParticipantSchema(Schema):
     def make_obj(self, data, **kwargs):
         if data.get('party', False) is None:
             del data['party']
-        if data.get('stakes', False) is None:
-            del data['stakes']
+        if data.get('stake', False) is None:
+            del data['stake']
         return data
 
 

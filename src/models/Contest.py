@@ -1,3 +1,4 @@
+from sqlalchemy.orm import validates
 from sqlalchemy_utils import UUIDType
 
 from .mixins import BaseMixin
@@ -15,6 +16,13 @@ class Contest(db.Model, BaseMixin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    @validates('buy_in')
+    def validates_buy_in(self, key, value):
+        if self.buy_in:  # Field already exists
+            raise ValueError('buy_in cannot be modified.')
+
+        return value
 
 
 Contest.register()

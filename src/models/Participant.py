@@ -19,7 +19,7 @@ class Participant(db.Model, BaseMixin):
     # Relationship
     party = db.relationship("Party", back_populates="participants")
     participant_status = db.relationship("ParticipantStatus")
-    stakes = db.relationship("Stake", back_populates="participant")
+    stake = db.relationship("Stake", back_populates="participant", uselist=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -28,20 +28,6 @@ class Participant(db.Model, BaseMixin):
     def validates_member_uuid(self, key, value):
         if self.member_uuid:  # Field already exists
             raise ValueError('member_uuid cannot be modified.')
-
-        return value
-
-    @validates('party_uuid')
-    def validates_party_uuid(self, key, value):
-        if self.party_uuid:  # Field already exists
-            raise ValueError('party_uuid cannot be modified.')
-
-        return value
-
-    @validates('party')
-    def validates_party(self, key, value):
-        if self.party:  # Field already exists
-            raise ValueError('party cannot be modified.')
 
         return value
 

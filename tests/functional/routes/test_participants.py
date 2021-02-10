@@ -123,24 +123,23 @@ def test_fetch_all_participant_expand_party(reset_db, seed_participant):
     assert participants[0]['party']['uuid'] is not None
 
 
-def test_fetch_all_participant_include_stakes(reset_db, seed_stake):
+def test_fetch_all_participant_include_stake(reset_db, seed_stake):
     """
     GIVEN a Flask application configured for testing
-    WHEN the GET endpoint 'participants' with include query param 'stakes' is requested
+    WHEN the GET endpoint 'participants' with include query param 'stake' is requested
     THEN check that the response is valid
     """
 
     # Request
-    response = app.test_client().get('/participants?include=stakes')
+    response = app.test_client().get('/participants?include=stake')
 
     # Response
     assert response.status_code == 200
     response = json.loads(response.data)
     assert response['msg'] == "OK"
     participants = response['data']['participants']
-    assert 'stakes' in participants[0]
-    assert len(participants[0]['stakes']) == 1
-    assert participants[0]['stakes'][0]['uuid'] is not None
+    assert 'stake' in participants[0]
+    assert participants[0]['stake']['uuid'] is not None
 
 
 #############

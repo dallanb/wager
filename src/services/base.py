@@ -104,6 +104,11 @@ class Base:
             self.logger.error(ex)
             self.db.rollback()
             self.error(code=HTTPStatus.BAD_REQUEST)
+        except AttributeError as ex:
+            self.logger.error(f'assign_attr error - AttributeError')
+            self.logger.error(ex)
+            self.db.rollback()
+            self.error(code=HTTPStatus.BAD_REQUEST)
 
     @classmethod
     def dump(cls, schema, instance, params=None):
