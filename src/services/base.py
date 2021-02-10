@@ -36,6 +36,10 @@ class Base:
             self.logger.error(f'init error - KeyError')
             self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except AttributeError:
+            self.logger.error('init error - AttributeError')
+            self.db.rollback()
+            self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
     def _add(self, instance):
         try:
