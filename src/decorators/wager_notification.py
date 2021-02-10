@@ -48,17 +48,6 @@ class wager_notification:
                 'uuid': str(new_instance.uuid),
                 'owner_uuid': str(new_instance.owner_uuid),
                 'league_uuid': str(new_instance.league_uuid) if new_instance.league_uuid else None,
-                'message': self.generate_message(key=key, wager=new_instance)
+                'message': ""
             }
             self.service.notify(topic=self.topic, value=value, key=key)
-
-    @staticmethod
-    def generate_message(key, **kwargs):
-        if key == 'wager_ready':
-            wager = kwargs.get('wager')
-            return f"{wager.name} is ready"
-        elif key == 'wager_active':
-            wager = kwargs.get('wager')
-            return f"{wager.name} is active"
-        else:
-            return ''

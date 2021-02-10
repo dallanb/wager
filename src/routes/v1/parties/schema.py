@@ -6,7 +6,6 @@ class DumpPartySchema(Schema):
     uuid = fields.UUID()
     ctime = fields.Integer()
     mtime = fields.Integer()
-    name = fields.String()
     wager = fields.Nested('DumpWagerSchema', only=("uuid", "ctime", "mtime", "status"))
     participants = fields.List(fields.Nested('DumpParticipantSchema', exclude=('party',)))
 
@@ -34,7 +33,6 @@ class FetchAllPartySchema(Schema):
     per_page = fields.Int(required=False, missing=10)
     expand = fields.DelimitedList(fields.String(), required=False, missing=[])
     include = fields.DelimitedList(fields.String(), required=False, missing=[])
-    name = fields.String(required=False)
 
 
 dump_schema = DumpPartySchema()

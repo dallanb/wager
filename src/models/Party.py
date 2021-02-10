@@ -1,11 +1,11 @@
+from sqlalchemy.orm import validates
 from sqlalchemy_utils import UUIDType
-from .. import db
+
 from .mixins import BaseMixin
+from .. import db
 
 
 class Party(db.Model, BaseMixin):
-    name = db.Column(db.String, nullable=True)
-
     # FK
     wager_uuid = db.Column(UUIDType(binary=False), db.ForeignKey('wager.uuid'), nullable=False)
 
@@ -15,6 +15,20 @@ class Party(db.Model, BaseMixin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    @validates('wager_uuid')
+    def validates_wager_uuid(self, key, value):
+        if self.wager_uuid:  # Field already exists
+            raise ValueError('wager_uuid cannot be modified.')
+
+        return value
+
+    @validates('wager')
+    def validates_party(self, key, value):
+        if self.wager:  # Field already exists
+            raise ValueError('wager cannot be modified.')
+
+        return value
 
 
 Party.register()

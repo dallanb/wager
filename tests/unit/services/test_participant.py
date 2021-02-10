@@ -1,5 +1,3 @@
-import logging
-
 from src import services, ManualException
 from tests.helpers import generate_uuid
 
@@ -454,7 +452,6 @@ def test_participant_add(kafka_conn, reset_db, get_member_uuid, create_wager, cr
     member_uuid = get_member_uuid()
     global_wager = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
     global_party = create_party(wager_uuid=global_wager.uuid)
-    logging.info(global_party)
     participant = participant_service.add(party=global_party, member_uuid=member_uuid, status='active')
     assert participant.uuid is not None
     assert participant.member_uuid == member_uuid

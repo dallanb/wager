@@ -13,7 +13,7 @@ class DumpParticipantSchema(Schema):
     mtime = fields.Integer()
     member_uuid = fields.UUID()
     party = fields.Nested('DumpPartySchema',
-                          include=('uuid', 'ctime', 'mtime', 'name'))
+                          include=('uuid', 'ctime', 'mtime'))
     stakes = fields.List(fields.Nested(DumpStakeSchema, exclude=('participant',)))
 
     def get_attribute(self, obj, attr, default):

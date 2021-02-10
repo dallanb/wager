@@ -165,26 +165,6 @@ def test_fetch_party_bad_party_uuid(reset_db, get_member_uuid, seed_party):
 ###########
 # Fetch All
 ###########
-def test_fetch_all_party_w_bad_name(reset_db, seed_party):
-    """
-    GIVEN a Flask application configured for testing
-    WHEN the GET endpoint 'parties' is requested with invalid query param 'name'
-    THEN check that the response is valid
-    """
-
-    # Request
-    response = app.test_client().get('/parties?name=Name')
-
-    # Response
-    assert response.status_code == 200
-    response = json.loads(response.data)
-    assert response['msg'] == "OK"
-    parties = response['data']['parties']
-    assert len(parties) == 0
-    metadata = response['data']['_metadata']
-    assert metadata['total_count'] == 0
-
-
 def test_fetch_all_party_w_bad_expand(reset_db, seed_party):
     """
     GIVEN a Flask application configured for testing
