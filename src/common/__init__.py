@@ -1,5 +1,4 @@
 from .auth import check_user
-from .cache import Cache
 from .cleaner import Cleaner
 from .db import DB
 from .enums import ParticipantStatusEnum, WagerStatusEnum
