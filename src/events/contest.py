@@ -1,8 +1,6 @@
 import logging
 
-from ..external import Contest as ContestExternal
-from ..services import ContestService, StakeService \
-    , WagerService, PayoutService, ParticipantService, PartyService
+from ..services import ContestService, StakeService, WagerService, ParticipantService, PartyService
 
 
 class Contest:
@@ -10,11 +8,9 @@ class Contest:
         self.logger = logging.getLogger(__name__)
         self.contest_service = ContestService()
         self.wager_service = WagerService()
-        self.payout_service = PayoutService()
         self.participant_service = ParticipantService()
         self.party_service = PartyService()
         self.stake_service = StakeService()
-        self.contest_external = ContestExternal()
 
     def handle_event(self, key, data):
         if key == 'owner_active':
