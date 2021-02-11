@@ -14,9 +14,9 @@ def kafka_conn():
 
 
 @pytest.fixture
-def kafka_conn_last_mg():
+def kafka_conn_last_msg():
     def _method(topic):
-        consumer = KafkaConsumer(bootstrap_servers='wager_kafka:9092', group_id='testing',
+        consumer = KafkaConsumer(bootstrap_servers=app.config['KAFKA_URL'], group_id='testing',
                                  key_deserializer=bytes.decode,
                                  value_deserializer=lambda v: json.loads(v.decode('utf-8')), auto_offset_reset='latest',
                                  enable_auto_commit=False)
