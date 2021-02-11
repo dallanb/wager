@@ -41,7 +41,7 @@ services:
     container_name: wager_db
     image: postgres:9.6
     volumes:
-      - ${HUNCHO_DIR}/data/dev/wager_db/data:/var/lib/postgresql/data/
+      - wager_data:/var/lib/postgresql/data/
     env_file:
       - env/.env.wager_db
     healthcheck:
@@ -75,6 +75,8 @@ services:
       - env/.env.wager_zookeeper
     networks:
       - app-net
+volumes:
+  wager_data:
 networks:
   app-net:
     driver: bridge

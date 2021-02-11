@@ -3,7 +3,7 @@ from src import services
 stake_service = services.StakeService()
 
 
-def test_stake_notification_operation_create(reset_db, kafka_conn_custom, seed_participant):
+def test_stake_notification_operation_create(reset_db, kafka_conn_last_msg, seed_participant):
     """
     GIVEN 0 contest instance in the database
     WHEN the stake service create method is called
@@ -12,8 +12,10 @@ def test_stake_notification_operation_create(reset_db, kafka_conn_custom, seed_p
     participants = services.ParticipantService().find()
     participant = participants.items[0]
     stake = stake_service.create(participant=participant, amount=5.0)
-    msg = kafka_conn_custom('wagers')
+    msg = kafka_conn_last_msg('wagers')
+    assert msg.key is not None
     assert msg.key == 'stake_created'
+    assert msg.value is not None
     assert msg.value['uuid'] == str(stake.uuid)
     assert msg.value['member_uuid'] == str(stake.participant.member_uuid)
     assert msg.value['amount'] == stake.amount

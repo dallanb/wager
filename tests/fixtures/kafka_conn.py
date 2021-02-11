@@ -1,9 +1,10 @@
-import pytest
 import json
 
+import pytest
 from kafka import KafkaConsumer, TopicPartition, OffsetAndMetadata
 
 from src import app, Consumer, new_event_listener
+from tests.helpers import new_event_listener as test_event_listener
 
 
 @pytest.fixture(scope='session')
@@ -13,9 +14,9 @@ def kafka_conn():
 
 
 @pytest.fixture
-def kafka_conn_custom():
+def kafka_conn_last_msg():
     def _method(topic):
-        consumer = KafkaConsumer(bootstrap_servers='wager_kafka:9092', group_id='testing',
+        consumer = KafkaConsumer(bootstrap_servers=app.config['KAFKA_URL'], group_id='testing',
                                  key_deserializer=bytes.decode,
                                  value_deserializer=lambda v: json.loads(v.decode('utf-8')), auto_offset_reset='latest',
                                  enable_auto_commit=False)
@@ -29,5 +30,14 @@ def kafka_conn_custom():
         msg = next(consumer)
         consumer.close()
         return msg
+
+    return _method
+
+
+@pytest.fixture(scope='module')
+def kafka_conn_custom_topics():
+    def _method(topics):
+        consumer = Consumer(topics=topics, event_listener=test_event_listener)
+        consumer.start()
 
     return _method

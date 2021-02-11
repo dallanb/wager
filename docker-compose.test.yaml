@@ -1,41 +1,41 @@
 version: "3.2"
 
 services:
-  wager:
-    container_name: wager
+  app:
+    container_name: app
     image: dallanbhatti/wager:test
     restart: on-failure
     env_file:
-      - env/.env.wager
+      - env/test/.env.app
     healthcheck:
-      test: curl --fail -s wager:5000/ping || exit 1
+      test: curl --fail -s app:5000/ping || exit 1
       interval: 10s
       timeout: 5s
       retries: 5
     depends_on:
-      - wager_db
-      - wager_kafka
-      - wager_zookeeper
+      - db
+      - kafka
+      - zookeeper
     networks:
-      - wager-net
-  wager_db:
-    container_name: wager_db
+      - test-net
+  db:
+    container_name: db
     image: postgres:9.6
     ports:
       - 5432
     volumes:
-      - wager_data:/var/lib/postgresql/data/
+      - db_data:/var/lib/postgresql/data/
     env_file:
-      - env/.env.wager_db
+      - env/test/.env.db
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U wager"]
       interval: 10s
       timeout: 5s
       retries: 20
     networks:
-      - wager-net
-  wager_kafka:
-    container_name: wager_kafka
+      - test-net
+  kafka:
+    container_name: kafka
     image: wurstmeister/kafka:latest
     restart: on-failure
     ports:
@@ -43,36 +43,36 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     env_file:
-      - env/.env.wager_kafka
+      - env/test/.env.kafka
     depends_on:
-      - wager_zookeeper
+      - zookeeper
     networks:
-      - wager-net
-  wager_proxy:
-    container_name: wager_proxy
+      - test-net
+  web:
+    container_name: web
     image: dallanbhatti/wager_proxy:test
     restart: on-failure
     volumes:
-      - wager_statics/.:/usr/share/nginx/
+      - statics/.:/usr/share/nginx/
     ports:
       - 80:80
     depends_on:
-      - wager
+      - app
     networks:
-      - wager-net
-  wager_zookeeper:
-    container_name: wager_zookeeper
+      - test-net
+  zookeeper:
+    container_name: zookeeper
     image: wurstmeister/zookeeper:latest
     restart: on-failure
     ports:
       - "2181:2181"
     env_file:
-      - env/.env.wager_zookeeper
+      - env/test/.env.zookeeper
     networks:
-      - wager-net
+      - test-net
 volumes:
-  wager_data:
-  wager_statics:
+  db_data:
+  statics:
 networks:
-  wager-net:
+  test-net:
     driver: bridge
