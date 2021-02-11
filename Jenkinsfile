@@ -34,9 +34,9 @@ pipeline {
                             sh "docker build -f proxy/build/Dockerfile.test -t dallanbhatti/wager_proxy:test proxy"
                             sh "docker-compose -f docker-compose.test.yaml up -d"
                             sh "bash bin/test.sh"
-                        } finally {
                             sh "docker cp app:/home/app/tests.xml ."
                             sh "docker cp app:/home/app/coverage.xml ."
+                        } finally {
                             sh "docker-compose -f docker-compose.test.yaml down -v"
                             sh "docker image rm dallanbhatti/wager:test"
                             sh "docker image rm dallanbhatti/wager_proxy:test"

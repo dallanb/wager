@@ -55,8 +55,6 @@ services:
     container_name: wager_kafka
     image: wurstmeister/kafka:latest
     restart: on-failure
-    ports:
-      - "9092:9092"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     env_file:
@@ -69,8 +67,6 @@ services:
     container_name: wager_zookeeper
     image: wurstmeister/zookeeper:latest
     restart: on-failure
-    ports:
-      - "2181:2181"
     env_file:
       - env/.env.wager_zookeeper
     networks:
