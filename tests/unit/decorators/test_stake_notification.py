@@ -13,9 +13,7 @@ def test_stake_notification_operation_create(reset_db, kafka_conn_custom, seed_p
     participant = participants.items[0]
     stake = stake_service.create(participant=participant, amount=5.0)
     msg = kafka_conn_custom('wagers')
-    assert msg.key is not None
     assert msg.key == 'stake_created'
-    assert msg.value is not None
     assert msg.value['uuid'] == str(stake.uuid)
     assert msg.value['member_uuid'] == str(stake.participant.member_uuid)
     assert msg.value['amount'] == stake.amount

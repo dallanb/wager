@@ -679,7 +679,6 @@ def test_participant_update_party_uuid(kafka_conn):
     try:
         _ = participant_service.update(uuid=global_participant.uuid, party_uuid=generate_uuid())
     except ManualException as ex:
-        logging.info(ex)
         assert ex.code == 500
 
 

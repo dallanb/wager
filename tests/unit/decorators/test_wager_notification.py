@@ -11,7 +11,5 @@ def test_wager_notification_operation_create(reset_db, kafka_conn_custom):
     """
     wager = wager_service.create(status='active')
     msg = kafka_conn_custom('wagers')
-    assert msg.key is not None
     assert msg.key == 'wager_created'
-    assert msg.value is not None
     assert msg.value['uuid'] == str(wager.uuid)
