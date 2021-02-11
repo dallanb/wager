@@ -30,13 +30,13 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'qaw') {
                         try {
-                            sh "docker build -f build/Dockerfile.test -t dallanbhatti/wager:test ."
+                            sh "docker build -f build/Dockerfile.test --cache-from $dockerImageName -t dallanbhatti/wager:test ."
                             sh "docker build -f proxy/build/Dockerfile.test -t dallanbhatti/wager_proxy:test proxy"
                             sh "docker-compose -f docker-compose.test.yaml up -d"
                             sh "bash bin/test.sh"
                         } finally {
-                            sh "docker cp wager:/home/app/tests.xml ."
-                            sh "docker cp wager:/home/app/coverage.xml ."
+                            sh "docker cp app:/home/app/tests.xml ."
+                            sh "docker cp app:/home/app/coverage.xml ."
                             sh "docker-compose -f docker-compose.test.yaml down -v"
                             sh "docker image rm dallanbhatti/wager:test"
                             sh "docker image rm dallanbhatti/wager_proxy:test"
