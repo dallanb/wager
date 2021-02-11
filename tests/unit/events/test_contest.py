@@ -90,13 +90,15 @@ def test_contest_participant_active_sync(get_contest_uuid):
     assert stakes.items[0].amount == stakes.items[1].amount
 
 
-def test_contest_owner_active_async(reset_db, get_contest_uuid, get_member_uuid):
+def test_contest_owner_active_async(reset_db, kafka_conn_custom_topics, get_contest_uuid, get_member_uuid):
     """
     GIVEN 0 instance in the database
     WHEN the CONTEST service notifies Kafka that an owner has been created
     THEN event contest handle_event owner_active adds 1 wager instance, 1 contest instance, 2 payout instance, 1 party
     service, 1 participant service and 1 stake service
     """
+    kafka_conn_custom_topics(['contests_test'])
+    time.sleep(1)
     contest_uuid = get_contest_uuid()
     member_uuid = get_member_uuid()
     buy_in = 5.0
@@ -113,8 +115,8 @@ def test_contest_owner_active_async(reset_db, get_contest_uuid, get_member_uuid)
         'message': ''
     }
 
-    base_service.notify(topic='contests', value=value, key='owner_active')
-    time.sleep(0.5)
+    base_service.notify(topic='contests_test', value=value, key='owner_active')
+    time.sleep(1)
 
     wagers = services.WagerService().find()
     contests = services.ContestService().find()
@@ -137,7 +139,7 @@ def test_contest_owner_active_async(reset_db, get_contest_uuid, get_member_uuid)
     assert stakes.items[0].amount == buy_in
 
 
-def test_contest_participant_active_async(get_contest_uuid):
+def test_contest_participant_active_async(kafka_conn_custom_topics, get_contest_uuid):
     """
     GIVEN 1 wager instance, 1 contest instance, 2 payout instance, 1 party service, 1 participant service and 1 stake
     service instance in the database
@@ -145,6 +147,7 @@ def test_contest_participant_active_async(get_contest_uuid):
     THEN event contest handle_event participant_active adds 1 wager instance, 1 contest instance, 2 payout instance, 1 party
     service, 1 participant service and 1 stake service
     """
+    kafka_conn_custom_topics(['contests_test'])
     contest_uuid = get_contest_uuid()
     member_uuid = generate_uuid()
     value = {
@@ -157,8 +160,8 @@ def test_contest_participant_active_async(get_contest_uuid):
         'message': ''
     }
 
-    base_service.notify(topic='contests', value=value, key='participant_active')
-    time.sleep(0.5)
+    base_service.notify(topic='contests_test', value=value, key='participant_active')
+    time.sleep(1)
 
     wagers = services.WagerService().find()
     contests = services.ContestService().find()
