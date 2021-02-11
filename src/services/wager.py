@@ -16,6 +16,7 @@ class Wager(Base):
 
     @wager_notification(operation='create')
     def create(self, **kwargs):
+        self.logger.info('creating')
         wager = self._init(model=self.wager_model, **kwargs)
         return self._save(instance=wager)
 

@@ -6,7 +6,7 @@ from .get_contest_uuid import get_contest_uuid
 from .get_member_uuid import get_member_uuid
 from .get_participant_uuid import get_participant_uuid
 from .get_user_uuid import get_user_uuid
-from .kafka_conn import kafka_conn
+from .kafka_conn import kafka_conn, kafka_conn_custom
 from .reset_db import reset_db
 from .seed_participant import seed_participant
 from .seed_party import seed_party
