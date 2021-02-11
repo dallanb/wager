@@ -30,7 +30,7 @@ pipeline {
                 script {
                     if (env.BRANCH_NAME == 'qaw') {
                         try {
-                            sh "docker build -f build/Dockerfile.$BRANCH_NAME -t dallanbhatti/wager:test ."
+                            sh "docker build -f build/Dockerfile.test -t dallanbhatti/wager:test ."
                             sh "docker build -f proxy/build/Dockerfile -t dallanbhatti/wager_proxy:test proxy"
                             sh "docker-compose -f docker-compose.test.yaml up -d"
                             sh "bash bin/test.sh"
