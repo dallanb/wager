@@ -1,7 +1,7 @@
 import logging
+
 from .base import Base
 from ..models import Party as PartyModel
-from http import HTTPStatus
 
 
 class Party(Base):
@@ -17,13 +17,12 @@ class Party(Base):
         party = self._init(model=self.party_model, **kwargs)
         return self._add(instance=party)
 
+    def commit(self):
+        return self._commit()
+
     def create(self, **kwargs):
         party = self._init(model=self.party_model, **kwargs)
         return self._save(instance=party)
 
-    def update(self, uuid, **kwargs):
-        parties = self.find(uuid=uuid)
-        if not parties.total:
-            self.error(code=HTTPStatus.NOT_FOUND)
-        party = self.assign_attr(instance=parties.items[0], attr=kwargs)
-        return self._save(instance=party)
+    def rollback(self):
+        return self._rollback()

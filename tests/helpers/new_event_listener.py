@@ -1,15 +1,15 @@
 import logging
 
-from .events import *
+from src.events import Contest
 
 
 def new_event_listener(event):
     topic = event.topic
     key = event.key
     data = event.value
-    if topic == 'contests':
+    if topic == 'contests_test':
         try:
             Contest().handle_event(key=key, data=data)
         except Exception as ex:
-            logging.error(ex)
-            logging.error('contest error')
+            logging.info(ex)
+            logging.info('contest error')

@@ -14,7 +14,7 @@ if [ "$DATABASE" = "wager" ]; then
   echo "PostgreSQL started"
 fi
 
-while ! nc -z wager_zookeeper 2181; do
+while ! nc -z zookeeper 2181; do
   sleep 0.1
 done
 echo "Kafka started"

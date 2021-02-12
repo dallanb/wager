@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from flask import request
 from flask_restful import marshal_with
 
@@ -22,6 +24,20 @@ class ParticipantsAPI(Base):
                 'participants': self.dump(
                     schema=dump_schema,
                     instance=participants.items[0]
+                )
+            }
+        )
+
+    @marshal_with(DataResponse.marshallable())
+    def put(self, uuid):
+        participant = self.participant.update(uuid=uuid, member_uuid=uuid4())
+        # if not participants.total:
+        #     self.throw_error(http_code=self.code.NOT_FOUND)
+        return DataResponse(
+            data={
+                'participants': self.dump(
+                    schema=dump_schema,
+                    instance=participant
                 )
             }
         )

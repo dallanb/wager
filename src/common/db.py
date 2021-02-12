@@ -48,7 +48,7 @@ class DB:
             if logic_operator == 'and':
                 query = query.filter(and_(*criterion))
         for i, k in enumerate(expand):
-            options = db.lazyload(getattr(model, k))
+            options = db.joinedload(getattr(model, k))
             query = query.options(options)
         for i, k in enumerate(include):
             options = db.joinedload(getattr(model, k))

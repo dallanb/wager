@@ -1,7 +1,8 @@
 import logging
+from http import HTTPStatus
+
 from .base import Base
 from ..models import Participant as ParticipantModel
-from http import HTTPStatus
 
 
 class Participant(Base):
@@ -17,6 +18,9 @@ class Participant(Base):
         participant = self._init(model=self.participant_model, **kwargs)
         return self._add(instance=participant)
 
+    def commit(self):
+        return self._commit()
+
     def create(self, **kwargs):
         participant = self._init(model=self.participant_model, **kwargs)
         return self._save(instance=participant)
@@ -25,5 +29,8 @@ class Participant(Base):
         participants = self.find(uuid=uuid)
         if not participants.total:
             self.error(code=HTTPStatus.NOT_FOUND)
-        participant = self.assign_attr(instance=participants.items[0], attr=kwargs)
+        participant = self._assign_attr(instance=participants.items[0], attr=kwargs)
         return self._save(instance=participant)
+
+    def rollback(self):
+        return self._rollback()
