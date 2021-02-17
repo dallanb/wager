@@ -1,5 +1,5 @@
 from src import services, ManualException
-from tests.helpers import generate_uuid
+from tests.helpers import generate_uuid, generate_number
 
 global_party = None
 global_wager = None
@@ -291,3 +291,24 @@ def test_party_validate_and_create_payout_invalid_params(kafka_conn, reset_db, s
         _ = wager_service.validate_and_create_payout(instance=wager, payout_list=payout_list)
     except ManualException as ex:
         assert ex.code == 400
+
+
+def test_party_check_payout(kafka_conn, reset_db, get_contest_uuid):
+    """
+    GIVEN 1 wager instance in the database and 1 payout instance in the database
+    WHEN the check_payout method is called with valid parameters
+    THEN it should return nothing
+    """
+    buy_in = 5.0
+    payout = [0.70, 0.20, 0.10]
+    contest_uuid = get_contest_uuid()
+    wager = wager_service.create(status='active')
+    _ = services.ContestService().create(contest_uuid=contest_uuid, buy_in=buy_in, wager=wager)
+    wager_service.validate_and_create_payout(instance=wager, payout_list=payout)
+    for index in range(2):
+        party = services.PartyService().add(wager=wager)
+        participant = services.ParticipantService().add(member_uuid=generate_uuid(),
+                                                        status='active', party=party)
+        _ = services.StakeService().create(amount=buy_in, participant=participant)
+
+    wager_service.check_payout(instance=wager)

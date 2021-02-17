@@ -85,6 +85,9 @@ class Base:
             self.db.rollback()
             self.error(code=HTTPStatus.INTERNAL_SERVER_ERROR)
 
+    def _delete(self, instance):
+        return self.db.delete(instance=instance)
+
     def _destroy(self, instance):
         return self.db.destroy(instance=instance)
 

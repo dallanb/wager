@@ -713,8 +713,8 @@ def test_participant_update_w_bad_uuid(kafka_conn):
 def test_participant_update_w_bad_field(kafka_conn):
     """
     GIVEN 1 participant instance in the database
-    WHEN the update method is called with random uuid
-    THEN it should return 1 participant and update 0 participant instance in the database
+    WHEN the update method is called with random field
+    THEN it should return 0 participant and update 0 participant instance in the database and ManualException with code 400
     """
     global global_participant
 

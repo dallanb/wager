@@ -235,8 +235,13 @@ class DB:
         return cls.run_query(query=query, page=page, per_page=per_page)
 
     @classmethod
-    def destroy(cls, instance):
+    def delete(cls, instance):
         db.session.delete(instance)
+        return True
+
+    @classmethod
+    def destroy(cls, instance):
+        cls.delete(instance=instance)
         db.session.commit()
         return True
 
