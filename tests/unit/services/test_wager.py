@@ -1,8 +1,8 @@
-from src import services, ManualException
-from tests.helpers import generate_uuid, generate_number
+import pytest
 
-global_party = None
-global_wager = None
+from src import services, ManualException
+from tests.helpers import generate_uuid
+
 wager_service = services.WagerService()
 
 
@@ -15,13 +15,11 @@ def test_wager_find(kafka_conn, reset_db, seed_wager):
     WHEN the find method is called
     THEN it should return 1 wager
     """
-    global global_wager
 
     wagers = wager_service.find()
 
     assert wagers.total == 1
     assert len(wagers.items) == 1
-    global_wager = wagers.items[0]
 
 
 def test_wager_find_by_uuid(kafka_conn):
@@ -30,13 +28,12 @@ def test_wager_find_by_uuid(kafka_conn):
     WHEN the find method is called with uuid
     THEN it should return 1 wager
     """
-    global global_wager
 
-    wagers = wager_service.find(uuid=global_wager.uuid)
+    wagers = wager_service.find(uuid=pytest.wager.uuid)
 
     assert wagers.total == 1
     assert len(wagers.items) == 1
-    assert wagers.items[0].uuid == global_wager.uuid
+    assert wagers.items[0].uuid == pytest.wager.uuid
 
 
 def test_wager_find_include_parties(kafka_conn, create_party):
@@ -45,9 +42,8 @@ def test_wager_find_include_parties(kafka_conn, create_party):
     WHEN the find method is called with include argument to return parties
     THEN it should return 1 wager
     """
-    global global_wager
 
-    party = create_party(wager_uuid=global_wager.uuid)
+    party = create_party(wager_uuid=pytest.wager.uuid)
     wagers = wager_service.find(include=['parties'])
 
     wager = wagers.items[0]
@@ -62,10 +58,9 @@ def test_wager_find_include_payouts(kafka_conn):
     WHEN the find method is called with include argument to return payouts
     THEN it should return 1 wager
     """
-    global global_wager
 
     # creating 2 payouts here
-    payouts = wager_service.validate_and_create_payout(instance=global_wager, payout_list=[0.75, 0.25])
+    payouts = wager_service.validate_and_create_payout(instance=pytest.wager, payout_list=[0.75, 0.25])
     wagers = wager_service.find(include=['payouts'])
 
     wager = wagers.items[0]
@@ -79,7 +74,6 @@ def test_wager_find_include_parties_and_payouts(kafka_conn):
     WHEN the find method is called with include argument to return parties and payouts
     THEN it should return 1 wager
     """
-    global global_wager
 
     wagers = wager_service.find(include=['parties', 'payouts'])
 
@@ -90,12 +84,14 @@ def test_wager_find_include_parties_and_payouts(kafka_conn):
     assert len(wager.payouts) == 2
 
 
-def test_wager_find_w_pagination(kafka_conn, seed_wager):
+def test_wager_find_w_pagination(kafka_conn, create_wager):
     """
     GIVEN 2 wager instance in the database
     WHEN the find method is called with valid pagination
     THEN it should return the number of wagers defined in the pagination argument
     """
+    _ = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
+
     wagers_0 = wager_service.find(page=1, per_page=1)
     assert wagers_0.total == 2
     assert len(wagers_0.items) == 1
@@ -166,12 +162,11 @@ def test_wager_create(kafka_conn, reset_db):
     WHEN the create method is called
     THEN it should return 1 wager and add 1 wager instance into the database
     """
-    global global_wager
 
-    global_wager = wager_service.create(status='active')
+    wager = wager_service.create(status='active')
 
-    assert global_wager.uuid is not None
-    assert global_wager.status.name == 'active'
+    assert wager.uuid is not None
+    assert wager.status.name == 'active'
 
 
 def test_wager_create_wo_status(kafka_conn, reset_db):
@@ -228,7 +223,7 @@ def test_wager_create_w_bad_field(kafka_conn):
     WHEN the create method is called with a non existent field
     THEN it should return 0 wager and add 0 wager instance into the database and ManualException with code 500
     """
-    global global_wager
+
     try:
         _ = wager_service.create(status='active', junk='junk')
     except ManualException as ex:
@@ -244,12 +239,9 @@ def test_party_validate_and_create_payout(kafka_conn, reset_db, seed_wager):
     WHEN the validate_and_create_payout method is called with valid parameters
     THEN it should return an array of payout instances
     """
-    global global_wager
-    wagers = wager_service.find()
-    global_wager = wagers.items[0]
 
     payout_list = [0.75, 0.25]
-    payouts = wager_service.validate_and_create_payout(instance=global_wager, payout_list=payout_list)
+    payouts = wager_service.validate_and_create_payout(instance=pytest.wager, payout_list=payout_list)
 
     assert len(payouts) == 2
     for payout in payouts:
@@ -266,11 +258,11 @@ def test_party_validate_and_create_payout_w_existing_payout(kafka_conn):
     WHEN the validate_and_create_payout method is called with valid parameters
     THEN it should return ManualException with code 400 and msg 'payout can only be added once for a wager'
     """
-    global global_wager
+
     payout_list = [1.0]
 
     try:
-        _ = wager_service.validate_and_create_payout(instance=global_wager, payout_list=payout_list)
+        _ = wager_service.validate_and_create_payout(instance=pytest.wager, payout_list=payout_list)
     except ManualException as ex:
         assert ex.code == 400
         assert ex.msg == 'payout can only be added once for a wager'
@@ -293,7 +285,7 @@ def test_party_validate_and_create_payout_invalid_params(kafka_conn, reset_db, s
         assert ex.code == 400
 
 
-def test_party_check_payout(kafka_conn, reset_db, get_contest_uuid):
+def test_party_check_payout(kafka_conn, reset_db):
     """
     GIVEN 1 wager instance in the database and 1 payout instance in the database
     WHEN the check_payout method is called with valid parameters
@@ -301,7 +293,7 @@ def test_party_check_payout(kafka_conn, reset_db, get_contest_uuid):
     """
     buy_in = 5.0
     payout = [0.70, 0.20, 0.10]
-    contest_uuid = get_contest_uuid()
+    contest_uuid = pytest.contest_uuid
     wager = wager_service.create(status='active')
     _ = services.ContestService().create(contest_uuid=contest_uuid, buy_in=buy_in, wager=wager)
     wager_service.validate_and_create_payout(instance=wager, payout_list=payout)
