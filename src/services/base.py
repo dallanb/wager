@@ -117,15 +117,15 @@ class Base:
             self.db.rollback()
             self.error(code=HTTPStatus.BAD_REQUEST)
 
-    @classmethod
-    def dump(cls, schema, instance, params=None):
+    @staticmethod
+    def dump(schema, instance, params=None):
         if params:
             for k, v in params.items():
                 schema.context[k] = v
         return schema.dump(instance)
 
-    @classmethod
-    def clean(cls, schema, instance, **kwargs):
+    @staticmethod
+    def clean(schema, instance, **kwargs):
         return schema.load(instance, **kwargs)
 
     def notify(self, topic, value, key):
