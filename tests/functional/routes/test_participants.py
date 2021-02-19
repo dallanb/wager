@@ -1,32 +1,26 @@
 import json
 
+import pytest
+
 from src import app
+###########
+# Fetch
+###########
+from tests.helpers import generate_uuid
 
 
 #############
 # SUCCESS
 #############
 
-###########
-# Fetch
-###########
-def test_fetch_participant(reset_db, get_member_uuid, get_contest_uuid, get_participant_uuid,
-                           create_wager,
-                           create_party, create_participant):
+
+def test_fetch_participant(reset_db, seed_wager, seed_party, seed_participant):
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'participant' is requested
     THEN check that the response is valid
     """
-    member_uuid = get_member_uuid()
-    contest_uuid = get_contest_uuid()
-    wager = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
-    wager_uuid = wager.uuid
-    party = create_party(wager_uuid=wager_uuid)
-    party_uuid = party.uuid
-    participant = create_participant(party_uuid=party_uuid, member_uuid=member_uuid)
-    participant_uuid = participant.uuid
-
+    participant_uuid = pytest.participant.uuid
     # Request
     response = app.test_client().get(f'/participants/{participant_uuid}')
 
@@ -40,7 +34,7 @@ def test_fetch_participant(reset_db, get_member_uuid, get_contest_uuid, get_part
 ###########
 # Fetch All
 ###########
-def test_fetch_all_participant(reset_db, seed_participant):
+def test_fetch_all_participant():
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'participants' is requested
@@ -60,7 +54,7 @@ def test_fetch_all_participant(reset_db, seed_participant):
     assert metadata['total_count'] == 1
 
 
-def test_fetch_all_participant_w_pagination(reset_db, seed_participant):
+def test_fetch_all_participant_w_pagination():
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'participants' is requested with pagination
@@ -104,7 +98,7 @@ def test_fetch_all_participant_empty(reset_db):
     assert metadata['total_count'] == 0
 
 
-def test_fetch_all_participant_expand_party(reset_db, seed_participant):
+def test_fetch_all_participant_expand_party(reset_db, seed_wager, seed_party, seed_participant):
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'participants' with expand query param 'party' is requested
@@ -123,13 +117,12 @@ def test_fetch_all_participant_expand_party(reset_db, seed_participant):
     assert participants[0]['party']['uuid'] is not None
 
 
-def test_fetch_all_participant_include_stake(reset_db, seed_stake):
+def test_fetch_all_participant_include_stake(seed_stake):
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'participants' with include query param 'stake' is requested
     THEN check that the response is valid
     """
-
     # Request
     response = app.test_client().get('/participants?include=stake')
 
@@ -149,13 +142,13 @@ def test_fetch_all_participant_include_stake(reset_db, seed_stake):
 ###########
 # Fetch
 ###########
-def test_fetch_participant_bad_participant_uuid(reset_db, get_member_uuid, seed_participant):
+def test_fetch_participant_bad_participant_uuid(reset_db, seed_wager, seed_party, seed_participant):
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'participant' is requested with incorrect 'uuid'
     THEN check that the response is valid
     """
-    member_uuid = get_member_uuid()
+    member_uuid = pytest.member_uuid
 
     # Request
     response = app.test_client().get(f'/participants/{member_uuid}')
@@ -167,13 +160,13 @@ def test_fetch_participant_bad_participant_uuid(reset_db, get_member_uuid, seed_
 ###########
 # Fetch All
 ###########
-def test_fetch_all_participant_w_bad_member_uuid(reset_db, get_member_uuid, seed_participant):
+def test_fetch_all_participant_w_bad_member_uuid():
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'participants' is requested with invalid query param 'member_uuid'
     THEN check that the response is valid
     """
-    member_uuid = get_member_uuid()
+    member_uuid = generate_uuid()
 
     # Request
     response = app.test_client().get(f'/participants?member_uuid={member_uuid}')
@@ -188,7 +181,7 @@ def test_fetch_all_participant_w_bad_member_uuid(reset_db, get_member_uuid, seed
     assert metadata['total_count'] == 0
 
 
-def test_fetch_all_participant_w_bad_expand(reset_db, seed_participant):
+def test_fetch_all_participant_w_bad_expand():
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'participants' is requested with invalid query param 'expand'
@@ -201,7 +194,7 @@ def test_fetch_all_participant_w_bad_expand(reset_db, seed_participant):
     assert response.status_code == 400
 
 
-def test_fetch_all_participant_w_bad_include(reset_db, seed_participant):
+def test_fetch_all_participant_w_bad_include():
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'participants' is requested with invalid query param 'include'
@@ -214,7 +207,7 @@ def test_fetch_all_participant_w_bad_include(reset_db, seed_participant):
     assert response.status_code == 400
 
 
-def test_fetch_all_participant_w_bad_pagination(reset_db, seed_participant):
+def test_fetch_all_participant_w_bad_pagination():
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'participants' is requested with pagination
