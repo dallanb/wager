@@ -9,7 +9,7 @@ stake_service = services.StakeService()
 ###########
 # Find
 ###########
-def test_stake_find(kafka_conn, reset_db, seed_stake):
+def test_stake_find(kafka_conn, reset_db, seed_wager, seed_party, seed_participant, seed_stake):
     """
     GIVEN 1 stake instance in the database
     WHEN the find method is called
@@ -63,12 +63,17 @@ def test_stake_find_expand_participant(kafka_conn):
     assert stake.participant.uuid == pytest.participant.uuid
 
 
-def test_stake_find_w_pagination(kafka_conn, seed_stake):
+def test_stake_find_w_pagination(kafka_conn, create_wager, create_party, create_participant, create_stake):
     """
     GIVEN 2 stake instance in the database
     WHEN the find method is called with valid pagination
     THEN it should return 1 stake
     """
+    wager = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
+    party = create_party(wager_uuid=wager.uuid)
+    participant = create_participant(party_uuid=party.uuid, member_uuid=generate_uuid())
+    _ = create_stake(participant_uuid=participant.uuid, amount=5.0)
+
     stakes_0 = stake_service.find(page=1, per_page=1)
     assert stakes_0.total == 2
     assert len(stakes_0.items) == 1
@@ -146,7 +151,7 @@ def test_stake_find_by_non_existent_expand(kafka_conn):
 ###########
 # Create
 ###########
-def test_stake_create(kafka_conn, reset_db, seed_participant):
+def test_stake_create(kafka_conn, reset_db, seed_wager, seed_party, seed_participant):
     """
     GIVEN 0 stake instance in the database
     WHEN the create method is called
@@ -230,7 +235,7 @@ def test_stake_create_wo_amount(kafka_conn):
     assert stake.amount == 0.0
 
 
-def test_stake_create_w_bad_field(kafka_conn, reset_db, seed_participant):
+def test_stake_create_w_bad_field(kafka_conn, reset_db, seed_wager, seed_party, seed_participant):
     """
     GIVEN 0 stake instance in the database
     WHEN the create method is called with a non existent field
