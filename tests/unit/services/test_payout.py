@@ -1,31 +1,24 @@
-import logging
+import pytest
 
 from src import services, ManualException
 from tests.helpers import generate_uuid
 
-global_payout = None
-global_wager = None
 payout_service = services.PayoutService()
 
 
 ###########
 # Find
 ###########
-def test_payout_find(kafka_conn, reset_db, seed_payouts):
+def test_payout_find(kafka_conn, reset_db, seed_wager, seed_payouts):
     """
     GIVEN 2 payout instance in the database
     WHEN the find method is called
     THEN it should return 2 payout
     """
 
-    global global_payout
-    global global_wager
-
     payouts = payout_service.find()
     assert payouts.total == 2
     assert len(payouts.items) == 2
-    global_payout = payouts.items[0]
-    global_wager = payouts.items[0].wager
 
 
 def test_payout_find_by_uuid(kafka_conn):
@@ -34,12 +27,12 @@ def test_payout_find_by_uuid(kafka_conn):
     WHEN the find method is called with uuid
     THEN it should return 1 payout
     """
-    global global_payout
-    payouts = payout_service.find(uuid=global_payout.uuid)
+
+    payouts = payout_service.find(uuid=pytest.payouts[0].uuid)
     assert payouts.total == 1
     assert len(payouts.items) == 1
     payout = payouts.items[0]
-    assert payout.uuid == global_payout.uuid
+    assert payout.uuid == pytest.payouts[0].uuid
 
 
 def test_payout_find_by_wager_uuid(kafka_conn):
@@ -49,14 +42,11 @@ def test_payout_find_by_wager_uuid(kafka_conn):
     THEN it should return 1 payout
     """
 
-    global global_payout
-    global global_wager
-
-    payouts = payout_service.find(wager_uuid=global_wager.uuid)
+    payouts = payout_service.find(wager_uuid=pytest.wager.uuid)
     assert payouts.total == 2
     assert len(payouts.items) == 2
     payout = payouts.items[0]
-    assert payout.wager.uuid == global_wager.uuid
+    assert payout.wager.uuid == pytest.wager.uuid
 
 
 def test_payout_find_w_pagination(kafka_conn):
