@@ -1,39 +1,26 @@
-import logging
+import pytest
 
 from src import services, ManualException
 from tests.helpers import generate_uuid
 
-global_participant = None
-global_stake = None
-global_party = None
-global_wager = None
 participant_service = services.ParticipantService()
 
 
 ###########
 # Find
 ###########
-def test_participant_find_by_member_uuid(kafka_conn, reset_db, get_member_uuid, create_wager, create_party,
-                                         create_participant):
+def test_participant_find_by_member_uuid(kafka_conn, reset_db, seed_wager, seed_party, seed_participant):
     """
     GIVEN 1 participant instance in the database
     WHEN the find method is called with member_uuid
     THEN it should return 1 participant
     """
-    global global_wager
-    global global_party
-    global global_participant
-    member_uuid = get_member_uuid()
-    global_wager = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
-    global_party = create_party(wager_uuid=global_wager.uuid)
-    _ = create_participant(party_uuid=global_party.uuid, member_uuid=member_uuid)
-
+    member_uuid = pytest.member_uuid
     participants = participant_service.find(member_uuid=member_uuid)
 
     assert participants.total == 1
     assert len(participants.items) == 1
-    global_participant = participants.items[0]
-    assert global_participant.member_uuid == member_uuid
+    assert participants.items[0].member_uuid == member_uuid
 
 
 def test_participant_find_by_uuid(kafka_conn):
@@ -42,34 +29,29 @@ def test_participant_find_by_uuid(kafka_conn):
     WHEN the find method is called with uuid
     THEN it should return 1 participant
     """
-    global global_participant
 
-    participants = participant_service.find(uuid=global_participant.uuid)
+    participants = participant_service.find(uuid=pytest.participant.uuid)
 
     assert participants.total == 1
     assert len(participants.items) == 1
     participant = participants.items[0]
-    assert participant.uuid == global_participant.uuid
+    assert participant.uuid == pytest.participant.uuid
 
 
-def test_participant_find_include_stake(kafka_conn, create_stake):
+def test_participant_find_include_stake(kafka_conn, seed_stake):
     """
     GIVEN 1 participant instance in the database
     WHEN the find method is called with uuid and with include argument to also return stake
     THEN it should return 1 participant
     """
-    global global_participant
-    global global_stake
 
-    global_stake = create_stake(participant_uuid=global_participant.uuid)
-
-    participants = participant_service.find(uuid=global_participant.uuid, include=['stake'])
+    participants = participant_service.find(uuid=pytest.participant.uuid, include=['stake'])
 
     assert participants.total == 1
     assert len(participants.items) == 1
     participant = participants.items[0]
     assert participant.stake is not None
-    assert participant.stake.uuid == global_stake.uuid
+    assert participant.stake.uuid == pytest.stake.uuid
 
 
 def test_participant_find_expand_party(kafka_conn):
@@ -78,16 +60,14 @@ def test_participant_find_expand_party(kafka_conn):
     WHEN the find method is called with uuid and with expand argument to also return party
     THEN it should return 1 participant
     """
-    global global_participant
-    global global_party
 
-    participants = participant_service.find(uuid=global_participant.uuid, expand=['party'])
+    participants = participant_service.find(uuid=pytest.participant.uuid, expand=['party'])
 
     assert participants.total == 1
     assert len(participants.items) == 1
     participant = participants.items[0]
     assert participant.party is not None
-    assert participant.party.uuid == global_party.uuid
+    assert participant.party.uuid == pytest.party.uuid
 
 
 def test_participant_find_include_stake_expand_party(kafka_conn):
@@ -96,19 +76,16 @@ def test_participant_find_include_stake_expand_party(kafka_conn):
     WHEN the find method is called with uuid and with include argument to also return stake and with expand argument to also return party
     THEN it should return 1 participant
     """
-    global global_participant
-    global global_stake
-    global global_party
 
-    participants = participant_service.find(uuid=global_participant.uuid, include=['stake'], expand=['party'])
+    participants = participant_service.find(uuid=pytest.participant.uuid, include=['stake'], expand=['party'])
 
     assert participants.total == 1
     assert len(participants.items) == 1
     participant = participants.items[0]
     assert participant.stake is not None
-    assert participant.stake.uuid == global_stake.uuid
+    assert participant.stake.uuid == pytest.stake.uuid
     assert participant.party is not None
-    assert participant.party.uuid == global_party.uuid
+    assert participant.party.uuid == pytest.party.uuid
 
 
 def test_participant_find_by_party_uuid(kafka_conn):
@@ -117,24 +94,22 @@ def test_participant_find_by_party_uuid(kafka_conn):
     WHEN the find method is called with party_uuid
     THEN it should return 1 participant
     """
-    global global_participant
-    global global_party
 
-    participants = participant_service.find(party_uuid=global_party.uuid)
+    participants = participant_service.find(party_uuid=pytest.party.uuid)
 
     assert participants.total == 1
     assert len(participants.items) == 1
 
 
-def test_participant_find_multiple(kafka_conn, get_member_uuid, create_wager, create_party,
+def test_participant_find_multiple(kafka_conn, create_wager, create_party,
                                    create_participant):
     """
     GIVEN 2 participant instance in the database
     WHEN the find method is called
     THEN it should return 2 participant
     """
-    global global_participant
-    member_uuid = get_member_uuid()
+
+    member_uuid = pytest.member_uuid
     wager = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
     party = create_party(wager_uuid=wager.uuid)
     _ = create_participant(party_uuid=party.uuid, member_uuid=member_uuid)
@@ -145,14 +120,14 @@ def test_participant_find_multiple(kafka_conn, get_member_uuid, create_wager, cr
     assert len(participants.items) == 2
 
 
-def test_participant_find_by_member_uuid_multiple(kafka_conn, get_member_uuid):
+def test_participant_find_by_member_uuid_multiple(kafka_conn):
     """
     GIVEN 2 participant instance in the database
     WHEN the find method is called with member_uuid
     THEN it should return 2 participant
     """
-    global global_participant
-    member_uuid = get_member_uuid()
+
+    member_uuid = pytest.member_uuid
 
     participants = participant_service.find(member_uuid=member_uuid)
 
@@ -166,14 +141,12 @@ def test_participant_find_by_party_uuid_multiple_match_single(kafka_conn):
     WHEN the find method is called with party_uuid
     THEN it should return 1 participant
     """
-    global global_participant
-    global global_party
 
-    participants = participant_service.find(party_uuid=global_party.uuid)
+    participants = participant_service.find(party_uuid=pytest.party.uuid)
 
     assert participants.total == 1
     assert len(participants.items) == 1
-    assert participants.items[0].party.uuid == global_party.uuid
+    assert participants.items[0].party.uuid == pytest.party.uuid
 
 
 def test_participant_find_w_pagination(kafka_conn):
@@ -257,52 +230,44 @@ def test_participant_find_by_non_existent_expand(kafka_conn):
 ###########
 # Create
 ###########
-def test_participant_create(kafka_conn, reset_db, get_member_uuid, create_wager, create_party):
+def test_participant_create(kafka_conn, reset_db, seed_wager, seed_party):
     """
     GIVEN 0 participant instance in the database
     WHEN the create method is called
     THEN it should return 1 participant and add 1 participant instance into the database
     """
-    global global_wager
-    global global_party
 
-    member_uuid = get_member_uuid()
-    global_wager = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
-    global_party = create_party(wager_uuid=global_wager.uuid)
+    member_uuid = pytest.member_uuid
 
-    participant = participant_service.create(party=global_party, member_uuid=member_uuid, status='active')
+    participant = participant_service.create(party=pytest.party, member_uuid=member_uuid, status='active')
     assert participant.uuid is not None
     assert participant.member_uuid == member_uuid
     assert participant.party is not None
 
 
-def test_participant_create_dup_member_uuid_dup_party(kafka_conn, get_member_uuid):
+def test_participant_create_dup_member_uuid_dup_party(kafka_conn):
     """
     GIVEN 1 participant instance in the database
     WHEN the create method is called with duplicate member_uuid and duplicate party
     THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
     """
-    global global_wager
-    global global_party
 
-    member_uuid = get_member_uuid()
+    member_uuid = pytest.member_uuid
 
     try:
-        _ = participant_service.create(party=global_party, member_uuid=member_uuid, status='active')
+        _ = participant_service.create(party=pytest.party, member_uuid=member_uuid, status='active')
     except ManualException as ex:
         assert ex.code == 500
 
 
-def test_participant_create_dup_member_uuid(kafka_conn, get_member_uuid, create_wager, create_party):
+def test_participant_create_dup_member_uuid(kafka_conn, create_wager, create_party):
     """
     GIVEN 1 participant instance in the database
     WHEN the create method is called with duplicate member_uuid
     THEN it should return 1 participant and add 1 participant instance into the database
     """
-    global global_wager
-    global global_party
 
-    member_uuid = get_member_uuid()
+    member_uuid = pytest.member_uuid
     wager = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
     party = create_party(wager_uuid=wager.uuid)
     participant = participant_service.create(party=party, member_uuid=member_uuid, status='active')
@@ -319,12 +284,10 @@ def test_participant_create_dup_party(kafka_conn):
     WHEN the create method is called with duplicate party
     THEN it should return 1 participant and add 1 participant instance into the database
     """
-    global global_wager
-    global global_party
 
-    participant = participant_service.create(party=global_party, member_uuid=generate_uuid(), status='active')
+    participant = participant_service.create(party=pytest.party, member_uuid=generate_uuid(), status='active')
     assert participant.uuid is not None
-    assert participant.party == global_party
+    assert participant.party == pytest.party
 
 
 def test_participant_create_w_party_uuid(kafka_conn):
@@ -333,12 +296,10 @@ def test_participant_create_w_party_uuid(kafka_conn):
     WHEN the create method is called with party_uuid
     THEN it should return 1 participant and add 1 participant instance into the database
     """
-    global global_wager
-    global global_party
 
-    participant = participant_service.create(party_uuid=global_party.uuid, member_uuid=generate_uuid(), status='active')
+    participant = participant_service.create(party_uuid=pytest.party.uuid, member_uuid=generate_uuid(), status='active')
     assert participant.uuid is not None
-    assert participant.party == global_party
+    assert participant.party == pytest.party
 
 
 def test_participant_create_wo_party(kafka_conn):
@@ -347,7 +308,6 @@ def test_participant_create_wo_party(kafka_conn):
     WHEN the create method is called without party
     THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
     """
-    global global_wager
 
     try:
         _ = participant_service.create(member_uuid=generate_uuid(), status='active')
@@ -361,10 +321,9 @@ def test_participant_create_wo_member_uuid(kafka_conn):
     WHEN the create method is called without member_uuid
     THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
     """
-    global global_wager
-    global global_party
+
     try:
-        _ = participant_service.create(party=global_party, status='active')
+        _ = participant_service.create(party=pytest.party, status='active')
     except ManualException as ex:
         assert ex.code == 500
 
@@ -375,9 +334,9 @@ def test_participant_create_wo_status(kafka_conn):
     WHEN the create method is called without status
     THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
     """
-    global global_wager
+
     try:
-        _ = participant_service.create(party=global_party, member_uuid=generate_uuid())
+        _ = participant_service.create(party=pytest.party, member_uuid=generate_uuid())
     except ManualException as ex:
         assert ex.code == 500
 
@@ -388,7 +347,7 @@ def test_participant_create_w_non_existent_party_uuid(kafka_conn):
     WHEN the create method is called with non existent party uuid
     THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
     """
-    global global_wager
+
     try:
         _ = participant_service.create(party_uuid=generate_uuid(), member_uuid=generate_uuid(), status='active')
     except ManualException as ex:
@@ -401,10 +360,9 @@ def test_participant_create_w_non_existent_status(kafka_conn):
     WHEN the create method is called with non existent status
     THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
     """
-    global global_wager
-    global global_party
+
     try:
-        _ = participant_service.create(party=global_party, member_uuid=generate_uuid(), status='radioactive')
+        _ = participant_service.create(party=pytest.party, member_uuid=generate_uuid(), status='radioactive')
     except ManualException as ex:
         assert ex.code == 500
 
@@ -415,11 +373,10 @@ def test_participant_create_w_bad_stake(kafka_conn):
     WHEN the create method is called with stake array
     THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
     """
-    global global_wager
-    global global_party
+
     try:
-        _ = participant_service.create(party=global_party, member_uuid=generate_uuid(), status='active',
-                                       stake=global_party)
+        _ = participant_service.create(party=pytest.party, member_uuid=generate_uuid(), status='active',
+                                       stake=pytest.party)
     except ManualException as ex:
         assert ex.code == 500
 
@@ -430,10 +387,9 @@ def test_participant_create_w_bad_field(kafka_conn):
     WHEN the create method is called with a non existent field
     THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
     """
-    global global_wager
-    global global_party
+
     try:
-        _ = participant_service.create(party=global_party, member_uuid=generate_uuid(), status='active', junk='junk')
+        _ = participant_service.create(party=pytest.party, member_uuid=generate_uuid(), status='active', junk='junk')
     except ManualException as ex:
         assert ex.code == 500
 
@@ -441,43 +397,38 @@ def test_participant_create_w_bad_field(kafka_conn):
 ###########
 # Add
 ###########
-def test_participant_add(kafka_conn, reset_db, get_member_uuid, create_wager, create_party):
+def test_participant_add(kafka_conn, reset_db, seed_wager, seed_party):
     """
     GIVEN 0 participant instance in the database
     WHEN the add method is called
     THEN it should return 1 participant and add 0 participant instance into the database
     """
-    global global_wager
-    global global_party
-    member_uuid = get_member_uuid()
-    global_wager = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
-    global_party = create_party(wager_uuid=global_wager.uuid)
-    participant = participant_service.add(party=global_party, member_uuid=member_uuid, status='active')
+
+    member_uuid = pytest.member_uuid
+    participant = participant_service.add(party=pytest.party, member_uuid=member_uuid, status='active')
     assert participant.uuid is not None
     assert participant.member_uuid == member_uuid
-    assert participant.party == global_party
+    assert participant.party == pytest.party
 
     participants = participant_service.find(uuid=participant.uuid)
     assert participants.total == 1
     assert len(participants.items) == 1
 
 
-def test_participant_add_dup_member_uuid_dup_party(kafka_conn, get_member_uuid):
+def test_participant_add_dup_member_uuid_dup_party(kafka_conn):
     """
     GIVEN 1 participant instance in the database
     WHEN the add method is called with duplicate member_uuid and duplicate party
     THEN it should return 1 participant and add 0 participant instance into the database
     """
-    global global_wager
-    global global_party
 
-    member_uuid = get_member_uuid()
+    member_uuid = pytest.member_uuid
 
     participants = participant_service.find(member_uuid=member_uuid)
     assert participants.total == 1
     assert len(participants.items) == 1
 
-    participant = participant_service.add(party=global_party, member_uuid=member_uuid, status='active')
+    participant = participant_service.add(party=pytest.party, member_uuid=member_uuid, status='active')
     assert participant.party == participants.items[0].party
     assert participant.member_uuid == participants.items[0].member_uuid
 
@@ -490,13 +441,11 @@ def test_participant_add_w_party_uuid(kafka_conn):
     WHEN the add method is called with party_uuid
     THEN it should return 1 participant and add 0 participant instance into the database
     """
-    global global_wager
-    global global_party
 
-    participant = participant_service.add(party_uuid=global_party.uuid, member_uuid=generate_uuid(), status='active')
+    participant = participant_service.add(party_uuid=pytest.party.uuid, member_uuid=generate_uuid(), status='active')
     assert participant.uuid is not None
     assert participant.party is None
-    assert participant.party_uuid == global_party.uuid
+    assert participant.party_uuid == pytest.party.uuid
     participant_service.rollback()
 
 
@@ -506,7 +455,6 @@ def test_participant_add_wo_party(kafka_conn):
     WHEN the add method is called without party
     THEN it should return 1 participant and add 0 participant instance into the database
     """
-    global global_wager
 
     participant = participant_service.add(member_uuid=generate_uuid(), status='active')
     assert participant.uuid is not None
@@ -521,7 +469,6 @@ def test_participant_add_w_non_existent_party_uuid(kafka_conn):
     WHEN the add method is called with non existent party uuid
     THEN it should return 1 participant and add 0 participant instance into the database
     """
-    global global_wager
 
     party_uuid = generate_uuid()
     participant = participant_service.add(party_uuid=party_uuid, member_uuid=generate_uuid(), status='active')
@@ -535,11 +482,10 @@ def test_participant_add_w_bad_stake(kafka_conn):
     WHEN the add method is called with stake array
     THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
     """
-    global global_wager
-    global global_party
+
     try:
-        _ = participant_service.add(party=global_party, member_uuid=generate_uuid(), status='active',
-                                    stake=global_party)
+        _ = participant_service.add(party=pytest.party, member_uuid=generate_uuid(), status='active',
+                                    stake=pytest.party)
     except ManualException as ex:
         assert ex.code == 500
 
@@ -550,10 +496,9 @@ def test_participant_add_w_bad_field(kafka_conn):
     WHEN the add method is called with a non existent field
     THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
     """
-    global global_wager
-    global global_party
+
     try:
-        _ = participant_service.add(party=global_party, member_uuid=generate_uuid(), status='active', junk='junk')
+        _ = participant_service.add(party=pytest.party, member_uuid=generate_uuid(), status='active', junk='junk')
     except ManualException as ex:
         assert ex.code == 500
 
@@ -561,18 +506,15 @@ def test_participant_add_w_bad_field(kafka_conn):
 ###########
 # Commit
 ###########
-def test_participant_commit(kafka_conn, reset_db, get_member_uuid, create_wager, create_party):
+def test_participant_commit(kafka_conn, reset_db, seed_wager, seed_party):
     """
     GIVEN 0 participant instance in the database
     WHEN the commit method is called
     THEN it should return 0 participant and add 1 participant instance into the database
     """
-    global global_wager
-    global global_party
-    member_uuid = get_member_uuid()
-    global_wager = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
-    global_party = create_party(wager_uuid=global_wager.uuid)
-    _ = participant_service.add(party=global_party, member_uuid=member_uuid, status='active')
+
+    member_uuid = pytest.member_uuid
+    _ = participant_service.add(party=pytest.party, member_uuid=member_uuid, status='active')
     _ = participant_service.commit()
 
     participants = participant_service.find()
@@ -580,20 +522,18 @@ def test_participant_commit(kafka_conn, reset_db, get_member_uuid, create_wager,
     assert len(participants.items) == 1
 
 
-def test_participant_commit_dup_member_uuid_dup_party(kafka_conn, get_member_uuid):
+def test_participant_commit_dup_member_uuid_dup_party(kafka_conn):
     """
     GIVEN 1 participant instance in the database
     WHEN the commit method is called with duplicate member_uuid and duplicate party
     THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
     """
-    global global_wager
-    global global_party
 
-    member_uuid = get_member_uuid()
+    member_uuid = pytest.member_uuid
 
     _ = participant_service.find(member_uuid=member_uuid)
 
-    _ = participant_service.add(party=global_party, member_uuid=member_uuid, status='active')
+    _ = participant_service.add(party=pytest.party, member_uuid=member_uuid, status='active')
 
     try:
         _ = participant_service.commit()
@@ -607,11 +547,9 @@ def test_participant_commit_w_party_uuid(kafka_conn):
     WHEN the commit method is called with party_uuid
     THEN it should return 0 participant and add 1 participant instance into the database
     """
-    global global_wager
-    global global_party
 
     member_uuid = generate_uuid()
-    _ = participant_service.add(party_uuid=global_party.uuid, member_uuid=member_uuid, status='active')
+    _ = participant_service.add(party_uuid=pytest.party.uuid, member_uuid=member_uuid, status='active')
 
     _ = participant_service.commit()
 
@@ -626,7 +564,6 @@ def test_participant_commit_wo_party(kafka_conn):
     WHEN the commit method is called without party
     THEN it should return 0 participant and add 0 participant instance into the database and ManualException with code 500
     """
-    global global_wager
 
     _ = participant_service.add(member_uuid=generate_uuid(), status='active')
 
@@ -639,19 +576,19 @@ def test_participant_commit_wo_party(kafka_conn):
 ###########
 # Update
 ###########
-def test_participant_update(kafka_conn, reset_db, seed_participant):
+def test_participant_update(kafka_conn, reset_db, seed_wager, seed_party, seed_participant):
     """
     GIVEN 1 participant instance in the database
     WHEN the update method is called
     THEN it should return 1 participant and update 1 participant instance in the database
     """
-    global global_participant
-    participants = participant_service.find()
-    global_participant = participants.items[0]
-    assert global_participant.status.name == 'pending'
 
-    participant_service.update(uuid=global_participant.uuid, status='active')
-    assert global_participant.status.name == 'active'
+    participants = participant_service.find()
+    pytest.participant = participants.items[0]
+    assert pytest.participant.status.name == 'pending'
+
+    participant_service.update(uuid=pytest.participant.uuid, status='active')
+    assert pytest.participant.status.name == 'active'
 
 
 def test_participant_update_member_uuid(kafka_conn):
@@ -660,10 +597,9 @@ def test_participant_update_member_uuid(kafka_conn):
     WHEN the update method is called with member_uuid
     THEN it should return 0 participant and update 0 participant instance in the database and ManualException with code 400
     """
-    global global_participant
 
     try:
-        _ = participant_service.update(uuid=global_participant.uuid, member_uuid=generate_uuid())
+        _ = participant_service.update(uuid=pytest.participant.uuid, member_uuid=generate_uuid())
     except ManualException as ex:
         assert ex.code == 400
 
@@ -674,10 +610,9 @@ def test_participant_update_party_uuid(kafka_conn):
     WHEN the update method is called with party_uuid
     THEN it should return 0 participant and update 0 participant instance in the database and ManualException with code 500
     """
-    global global_participant
 
     try:
-        _ = participant_service.update(uuid=global_participant.uuid, party_uuid=generate_uuid())
+        _ = participant_service.update(uuid=pytest.participant.uuid, party_uuid=generate_uuid())
     except ManualException as ex:
         assert ex.code == 500
 
@@ -688,10 +623,9 @@ def test_participant_update_party(kafka_conn):
     WHEN the update method is called with party
     THEN it should return 0 participant and update 0 participant instance in the database and ManualException with code 400
     """
-    global global_participant
 
     try:
-        _ = participant_service.update(uuid=global_participant.uuid, party=generate_uuid())
+        _ = participant_service.update(uuid=pytest.participant.uuid, party=generate_uuid())
     except ManualException as ex:
         assert ex.code == 400
 
@@ -702,7 +636,6 @@ def test_participant_update_w_bad_uuid(kafka_conn):
     WHEN the update method is called with random uuid
     THEN it should return 0 participant and update 0 participant instance in the database and ManualException with code 404
     """
-    global global_participant
 
     try:
         _ = participant_service.update(uuid=generate_uuid(), status='inactive')
@@ -716,9 +649,8 @@ def test_participant_update_w_bad_field(kafka_conn):
     WHEN the update method is called with random field
     THEN it should return 0 participant and update 0 participant instance in the database and ManualException with code 400
     """
-    global global_participant
 
     try:
-        _ = participant_service.update(uuid=global_participant.uuid, junk='junk')
+        _ = participant_service.update(uuid=pytest.participant.uuid, junk='junk')
     except ManualException as ex:
         assert ex.code == 400
