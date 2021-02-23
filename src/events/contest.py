@@ -32,3 +32,20 @@ class Contest:
                 participant = self.participant_service.add(member_uuid=data['member_uuid'],
                                                            status='active', party=party)
                 _ = self.stake_service.create(amount=contests.items[0].buy_in, participant=participant)
+        elif key == 'participant_inactive':
+            self.logger.info('participant inactive')
+        elif key == 'contest_pending':
+            self.logger.info('contest pending')
+            contests = self.contest_service.find(contest_uuid=data['uuid'])
+            if contests.total:
+                contest = contests.items[0]
+                wager = contest.wager
+                self.wager_service.check_payout(instance=wager)
+        elif key == 'contest_inactive':
+            self.logger.info('contest inactive')
+            contests = self.contest_service.find(contest_uuid=data['uuid'])
+            if contests.total:
+                contest = contests.items[0]
+                wager = contest.wager
+                self.wager_service.apply(instance=wager, status='inactive')
+                # ensure that all parties get their money back TODO

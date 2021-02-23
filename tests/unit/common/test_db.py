@@ -1,10 +1,11 @@
+import pytest
+
 from src.common import DB, Cleaner
 from src.models import *
 from tests.helpers import generate_uuid
 
 db = DB()
 cleaner = Cleaner()
-global_wager = None
 
 
 def test_init(reset_db):
@@ -162,20 +163,18 @@ def test_run_query(reset_db):
     assert wagers.total == 1
 
 
-def test_equal_filter(reset_db, seed_payouts):
+def test_equal_filter(reset_db, seed_wager, seed_party, seed_participant, seed_payouts):
     """
     GIVEN a db instance
     WHEN calling the find method of the db instance with an equal filter
     THEN it should return the query result
     """
-    global global_wager
-
     wagers = db.find(model=Wager, status='active')
     assert wagers.total == 1
 
-    global_wager = wagers.items[0]
-    wagers = db.find(model=Wager, status='active', uuid=global_wager.uuid)
-    assert wagers.items[0] == global_wager
+    wager = wagers.items[0]
+    wagers = db.find(model=Wager, status='active', uuid=wager.uuid)
+    assert wagers.items[0] == wager
 
 
 def test_nested_filter():
@@ -184,26 +183,23 @@ def test_nested_filter():
     WHEN calling the find method of the db instance with a nested filter
     THEN it should return the query result
     """
-    global global_wager
-
     wagers = db.find(model=Wager, nested={'payout': {'proportion': 0.75}})
     assert wagers.total == 1
 
 
-def test_within_filter(seed_wager):
+def test_within_filter(create_wager):
     """
     GIVEN a db instance
     WHEN calling the find method of the db instance with a within filter
     THEN it should return the query result
     """
-    global global_wager
+    _ = create_wager(contest_uuid=generate_uuid(), buy_in=5.0)
 
     wagers = db.find(model=Wager)
     assert wagers.total == 2
 
-    wagers = db.find(model=Wager, within={'uuid': [global_wager.uuid]})
+    wagers = db.find(model=Wager, within={'uuid': [pytest.wager.uuid]})
     assert wagers.total == 1
-
 
 # def test_has_key_filter():
 #     """
@@ -211,10 +207,10 @@ def test_within_filter(seed_wager):
 #     WHEN calling the find method of the db instance with a has_key filter
 #     THEN it should return the query result
 #     """
-#     global global_wager
+#     
 #
 #     wagers = db.find(model=Wager)
 #     assert wagers.total == 2
 #
-#     wagers = db.find(model=Wager, has_key={'uuid': global_wager.uuid})
+#     wagers = db.find(model=Wager, has_key={'uuid': pytest.wager.uuid})
 #     assert wagers.total == 0

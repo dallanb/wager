@@ -1,25 +1,26 @@
 import json
 
+import pytest
+
 from src import app
+###########
+# Fetch
+###########
+from tests.helpers import generate_uuid
 
 
 #############
 # SUCCESS
 #############
 
-###########
-# Fetch
-###########
-def test_fetch_contest_complete(reset_db, get_contest_uuid, get_participant_uuid, create_wager,
-                                create_party, create_participant):
+
+def test_fetch_contest_complete(reset_db, seed_wager, seed_party, seed_participant):
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'contest_complete' is requested
     THEN check that the response is valid
     """
-    contest_uuid = get_contest_uuid()
-    _ = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
-
+    contest_uuid = pytest.contest.contest_uuid
     # Request
     response = app.test_client().get(f'/contests/{contest_uuid}/complete')
 
@@ -31,9 +32,9 @@ def test_fetch_contest_complete(reset_db, get_contest_uuid, get_participant_uuid
     assert response['data']['contest'] is not None
     contest = response['data']['contest']
     assert contest['uuid'] is not None
-    assert contest['parties'] == 0
-    assert contest['total_payout'] == 0.0
-    assert contest['buy_in'] == 5.0
+    assert contest['parties'] == 1
+    assert contest['total_payout'] == pytest.buy_in
+    assert contest['buy_in'] == pytest.buy_in
     assert contest['party_payouts'] == {}
     assert contest['payout_proportions'] == {}
 
@@ -45,13 +46,13 @@ def test_fetch_contest_complete(reset_db, get_contest_uuid, get_participant_uuid
 ###########
 # Fetch
 ###########
-def test_fetch_contest_complete_fail(reset_db, get_contest_uuid, seed_wager):
+def test_fetch_contest_complete_fail(reset_db, seed_wager, seed_party, seed_participant):
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'contest_complete' is requested with incorrect 'contest_uuid'
     THEN check that the response is valid
     """
-    contest_uuid = get_contest_uuid()
+    contest_uuid = generate_uuid()
 
     # Request
     response = app.test_client().get(f'/contests/{contest_uuid}/complete')

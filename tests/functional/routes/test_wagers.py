@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from src import app
 
 
@@ -10,16 +12,13 @@ from src import app
 ###########
 # Fetch
 ###########
-def test_fetch_wager(reset_db, get_contest_uuid, create_wager):
+def test_fetch_wager(reset_db, seed_wager):
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'wager' is requested
     THEN check that the response is valid
     """
-    contest_uuid = get_contest_uuid()
-
-    wager = create_wager(contest_uuid=contest_uuid, buy_in=5.0)
-    wager_uuid = wager.uuid
+    wager_uuid = pytest.wager.uuid
 
     # Request
     response = app.test_client().get(f'/wagers/{wager_uuid}')
@@ -34,7 +33,7 @@ def test_fetch_wager(reset_db, get_contest_uuid, create_wager):
 ###########
 # Fetch All
 ###########
-def test_fetch_all_wager(reset_db, seed_wager):
+def test_fetch_all_wager():
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'wagers' is requested
@@ -54,7 +53,7 @@ def test_fetch_all_wager(reset_db, seed_wager):
     assert metadata['total_count'] == 1
 
 
-def test_fetch_all_wager_w_pagination(reset_db, seed_wager):
+def test_fetch_all_wager_w_pagination():
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'wagers' is requested with pagination
@@ -98,7 +97,7 @@ def test_fetch_all_wager_empty(reset_db):
     assert metadata['total_count'] == 0
 
 
-def test_fetch_all_wager_include_parties(reset_db, seed_party):
+def test_fetch_all_wager_include_parties(seed_wager, seed_party):
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'wager' with include query param 'parties' is requested
@@ -125,13 +124,13 @@ def test_fetch_all_wager_include_parties(reset_db, seed_party):
 ###########
 # Fetch
 ###########
-def test_fetch_wager_bad_wager_uuid(reset_db, get_member_uuid, seed_wager):
+def test_fetch_wager_bad_wager_uuid(reset_db, seed_wager):
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'wager' is requested with incorrect 'uuid'
     THEN check that the response is valid
     """
-    member_uuid = get_member_uuid()
+    member_uuid = pytest.member_uuid
 
     # Request
     response = app.test_client().get(f'/wagers/{member_uuid}')
@@ -143,7 +142,7 @@ def test_fetch_wager_bad_wager_uuid(reset_db, get_member_uuid, seed_wager):
 ###########
 # Fetch All
 ###########
-def test_fetch_all_wager_w_bad_expand(reset_db, seed_wager):
+def test_fetch_all_wager_w_bad_expand():
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'wagers' is requested with invalid query param 'expand'
@@ -156,7 +155,7 @@ def test_fetch_all_wager_w_bad_expand(reset_db, seed_wager):
     assert response.status_code == 400
 
 
-def test_fetch_all_wager_w_bad_include(reset_db, seed_wager):
+def test_fetch_all_wager_w_bad_include():
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'wagers' is requested with invalid query param 'include'
@@ -169,7 +168,7 @@ def test_fetch_all_wager_w_bad_include(reset_db, seed_wager):
     assert response.status_code == 400
 
 
-def test_fetch_all_wager_w_bad_pagination(reset_db, seed_wager):
+def test_fetch_all_wager_w_bad_pagination():
     """
     GIVEN a Flask application configured for testing
     WHEN the GET endpoint 'wagers' is requested with pagination

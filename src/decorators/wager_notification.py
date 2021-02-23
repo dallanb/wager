@@ -1,16 +1,15 @@
 from functools import wraps
 
+from src.notifications import wager_created
+
 
 class wager_notification:
     def __init__(self, operation):
         self.operation = operation
-        self.topic = 'wagers'
-        self._service = None
 
     def __call__(self, f):
         @wraps(f)
         def wrap(*args, **kwargs):
-            self.service = args[0]
             new_instance = f(*args, **kwargs)
 
             if self.operation == 'create':
@@ -21,17 +20,6 @@ class wager_notification:
         wrap.__name__ = f.__name__
         return wrap
 
-    @property
-    def service(self):
-        return self._service
-
-    @service.setter
-    def service(self, service):
-        self._service = service
-
-    def create(self, new_instance):
-        key = 'wager_created'
-        value = {
-            'uuid': str(new_instance.uuid),
-        }
-        self.service.notify(topic=self.topic, value=value, key=key, )
+    @staticmethod
+    def create(new_instance):
+        wager_created.from_data(wager=new_instance).notify()

@@ -20,23 +20,12 @@ class Payout(db.Model, BaseMixin):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    @validates('rank')
-    def validates_rank(self, key, value):
-        if self.rank:  # Field already exists
-            raise ValueError('rank cannot be modified.')
-
-        return value
-
     @validates('proportion')
     def validates_proportion(self, key, value):
         if value > 1.0:
             raise ValueError('proportion cannot be greater that 1.0.')
         elif value < 0.0:
             raise ValueError('proportion cannot be less than 0.0.')
-
-        if self.proportion:  # Field already exists
-            raise ValueError('proportion cannot be modified.')
-
         return value
 
 
