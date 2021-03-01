@@ -92,6 +92,37 @@ def test_contest_participant_active_sync():
     assert stakes.items[0].amount == stakes.items[1].amount
 
 
+def test_contest_contest_inactive_sync(reset_db, seed_wager, seed_party, seed_participant, seed_payouts, seed_stake):
+    """
+    GIVEN 1 wager instance, 1 contest instance, 1 party instance, 1 participant instance, 2 payout instance, 1 stake
+    instance in the database
+    WHEN directly calling event contest handle_event contest_inactive
+    THEN it should add 1 wager instance, 1 contest instance, 2 payout instance, 1 party
+    service, 1 participant service and 1 stake service
+    """
+    uuid = pytest.contest_uuid
+    league_uuid = generate_uuid()
+    owner_uuid = pytest.user_uuid
+    value = {
+        'uuid': str(uuid),
+        'owner_uuid': str(owner_uuid),
+        'league_uuid': str(league_uuid),
+        'message': ''
+    }
+
+    events.Contest().handle_event(key='contest_inactive', data=value)
+
+    wagers = services.WagerService().find()
+    participants = services.ParticipantService().find()
+
+    assert wagers.total == 1
+    wager = wagers.items[0]
+    assert wager.status.name == 'inactive'
+    assert participants.total == 1
+    participant = participants.items[0]
+    assert participant.status.name == 'inactive'
+
+
 def test_contest_owner_active_async(reset_db, kafka_conn_custom_topics):
     """
     GIVEN 0 instance in the database

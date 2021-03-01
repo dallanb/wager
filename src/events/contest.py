@@ -48,4 +48,9 @@ class Contest:
                 contest = contests.items[0]
                 wager = contest.wager
                 self.wager_service.apply(instance=wager, status='inactive')
-                # ensure that all parties get their money back TODO
+                parties = wager.parties
+                for party in parties:
+                    participants = party.participants
+                    for participant in participants:
+                        self.participant_service.apply(instance=participant, status='inactive')
+
