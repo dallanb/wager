@@ -8,7 +8,7 @@ participant_service = services.ParticipantService()
 
 
 def test_participant_notification_participant_active(reset_db, kafka_conn_last_msg, seed_wager, seed_party,
-                                                     seed_participant):
+                                                     seed_participant, seed_stake):
     """
     GIVEN 1 wager instance, 1 contest instance, 1 party instance, 1 participant instance in the database
     WHEN the participant service update method is called with status active
@@ -21,10 +21,11 @@ def test_participant_notification_participant_active(reset_db, kafka_conn_last_m
     assert msg.value is not None
     assert msg.value['uuid'] == str(participant.uuid)
     assert msg.value['member_uuid'] == str(participant.member_uuid)
+    assert msg.value['stake'] == pytest.buy_in
 
 
 def test_participant_notification_participant_inactive(reset_db, kafka_conn_last_msg, seed_wager, seed_party,
-                                                       seed_participant):
+                                                       seed_participant, seed_stake):
     """
     GIVEN 1 wager instance, 1 contest instance, 1 party instance, 1 participant instance in the database
     WHEN the participant service update method is called with status inactive
@@ -38,3 +39,4 @@ def test_participant_notification_participant_inactive(reset_db, kafka_conn_last
     assert msg.value is not None
     assert msg.value['uuid'] == str(participant.uuid)
     assert msg.value['member_uuid'] == str(participant.member_uuid)
+    assert msg.value['stake'] == pytest.buy_in

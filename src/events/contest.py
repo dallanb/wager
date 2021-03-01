@@ -52,5 +52,5 @@ class Contest:
                 for party in parties:
                     participants = party.participants
                     for participant in participants:
-                        self.participant_service.apply(instance=participant, status='inactive')
-
+                        if participant.status.name == 'active':
+                            self.participant_service.apply(instance=participant, status='inactive')

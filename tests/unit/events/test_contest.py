@@ -100,6 +100,7 @@ def test_contest_contest_inactive_sync(reset_db, seed_wager, seed_party, seed_pa
     THEN it should add 1 wager instance, 1 contest instance, 2 payout instance, 1 party
     service, 1 participant service and 1 stake service
     """
+    services.ParticipantService().update(uuid=pytest.participant.uuid, status='active')
     uuid = pytest.contest_uuid
     league_uuid = generate_uuid()
     owner_uuid = pytest.user_uuid
