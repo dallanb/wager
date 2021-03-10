@@ -92,6 +92,62 @@ def test_contest_participant_active_sync():
     assert stakes.items[0].amount == stakes.items[1].amount
 
 
+def test_contest_contest_ready_sync(reset_db):
+    """
+    GIVEN 1 wager instance, 1 contest instance, 3 party instance, 3 participant instance, 3 payout instance, 3 stake
+    instance in the database
+    WHEN directly calling event contest handle_event contest_ready
+    THEN it should update the payouts
+    """
+    uuid = pytest.contest_uuid
+    league_uuid = generate_uuid()
+    owner_uuid = pytest.user_uuid
+    payout_list = [0.85, 0.1, 0.05]
+
+    # create wager
+    wager = services.WagerService().create(status='active')
+    # create contest
+    _ = services.ContestService().create(contest_uuid=uuid, buy_in=pytest.buy_in,
+                                         wager=wager)
+    # create payout
+    services.WagerService().validate_and_create_payout(instance=wager,
+                                                       payout_list=payout_list)
+
+    # create party
+    for idx, _ in enumerate(payout_list):
+        if idx % 2 == 0:
+            party = services.PartyService().add(wager=wager)
+            participant = services.ParticipantService().add(member_uuid=generate_uuid(),
+                                                            status='active', party=party)
+            _ = services.StakeService().create(amount=pytest.buy_in, participant=participant)
+
+    value = {
+        'uuid': str(uuid),
+        'owner_uuid': str(owner_uuid),
+        'league_uuid': str(league_uuid),
+        'message': ''
+    }
+
+    events.Contest().handle_event(key='contest_ready', data=value)
+
+    wagers = services.WagerService().find()
+    participants = services.ParticipantService().find()
+    payouts = services.PayoutService().find()
+
+    assert wagers.total == 1
+    wager = wagers.items[0]
+    assert wager.status.name == 'active'
+    assert participants.total == 2
+    participant = participants.items[0]
+    assert participant.status.name == 'active'
+    assert payouts.total == 2
+    for payout in payouts.items:
+        if payout.rank == 1:
+            assert payout.proportion == 0.875
+        else:
+            assert payout.proportion == 0.125
+
+
 def test_contest_contest_inactive_sync(reset_db, seed_wager, seed_party, seed_participant, seed_payouts, seed_stake):
     """
     GIVEN 1 wager instance, 1 contest instance, 1 party instance, 1 participant instance, 2 payout instance, 1 stake

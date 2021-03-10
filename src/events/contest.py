@@ -34,8 +34,8 @@ class Contest:
                 _ = self.stake_service.create(amount=contests.items[0].buy_in, participant=participant)
         elif key == 'participant_inactive':
             self.logger.info('participant inactive')
-        elif key == 'contest_pending':
-            self.logger.info('contest pending')
+        elif key == 'contest_ready':
+            self.logger.info('contest ready')
             contests = self.contest_service.find(contest_uuid=data['uuid'])
             if contests.total:
                 contest = contests.items[0]
