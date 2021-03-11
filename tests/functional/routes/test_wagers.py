@@ -19,7 +19,6 @@ def test_fetch_wager(reset_db, seed_wager):
     THEN check that the response is valid
     """
     wager_uuid = pytest.wager.uuid
-
     # Request
     response = app.test_client().get(f'/wagers/{wager_uuid}')
 

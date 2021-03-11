@@ -1,20 +1,22 @@
+import pytest
+
 from src.common import Cleaner
-from src.services import WagerService, PartyService
+from src.services import ContestService, PartyService
 from tests.helpers import generate_uuid
 
 cleaner = Cleaner()
-wager_service = WagerService()
+contest_service = ContestService()
 party_service = PartyService()
 
 
 def test_cleaner_is_mapped_pass():
     """
-    GIVEN a cleaner instance and wager instance
-    WHEN calling the is_mapped method of the cleaner instance on the wager instance
-    THEN it should return the wager instance
+    GIVEN a cleaner instance and contest instance
+    WHEN calling the is_mapped method of the cleaner instance on the contest instance
+    THEN it should return the contest instance
     """
-    wager = wager_service.create(status='active')
-    assert cleaner.is_mapped(wager) == wager
+    contest = contest_service.create(contest_uuid=pytest.contest_uuid)
+    assert cleaner.is_mapped(contest) == contest
 
 
 def test_cleaner_is_mapped_fail():
@@ -220,38 +222,6 @@ def test_is_list_fail():
 
     random_list = 0
     assert cleaner.is_list(random_list) is None
-
-
-def test_is_currency_pass():
-    """
-    GIVEN a cleaner instance and currency variable
-    WHEN calling the is_currency method of the cleaner instance on the currency variable
-    THEN it should return the currency variable
-    """
-    random_currency = []
-    assert cleaner.is_currency(random_currency) == random_currency
-
-    random_currency = [1, 2, 3]
-    assert cleaner.is_currency(random_currency) == random_currency
-
-    random_currency = ['1', '2', '3']
-    assert cleaner.is_currency(random_currency) == random_currency
-
-
-def test_is_currency_fail():
-    """
-    GIVEN a cleaner instance and currency variable
-    WHEN calling the is_currency method of the cleaner instance on the currency variable
-    THEN it should return the None
-    """
-    random_currency = ()
-    assert cleaner.is_currency(random_currency) is None
-
-    random_currency = 'one'
-    assert cleaner.is_currency(random_currency) is None
-
-    random_currency = 0
-    assert cleaner.is_currency(random_currency) is None
 
 
 def test_is_dict_pass():
