@@ -17,7 +17,7 @@ def test_init(reset_db):
     """
     instance = db.init(model=Contest, contest_uuid=contest_uuid)
     assert cleaner.is_mapped(instance) == instance
-    assert cleaner.is_uuid(instance.uuid) is not None
+    assert cleaner.is_uuid(instance.contest_uuid) is not None
     assert instance.contest_uuid == contest_uuid
 
     db.rollback()
@@ -46,7 +46,7 @@ def test_add(reset_db):
     """
     instance = db.init(model=Contest, contest_uuid=contest_uuid)
     contest = db.add(instance=instance)
-    assert cleaner.is_uuid(contest.uuid) is not None
+    assert cleaner.is_uuid(contest.contest_uuid) is not None
     assert contest.contest_uuid == contest_uuid
 
     db.rollback()
@@ -61,7 +61,7 @@ def test_commit(reset_db):
     """
     instance = db.init(model=Contest, contest_uuid=contest_uuid)
     contest = db.add(instance=instance)
-    assert cleaner.is_uuid(contest.uuid) is not None
+    assert cleaner.is_uuid(contest.contest_uuid) is not None
     assert contest.contest_uuid == contest_uuid
 
     db.rollback()
@@ -89,7 +89,7 @@ def test_save(reset_db):
     THEN it should add a contest instance to the database
     """
     instance = db.init(model=Contest, contest_uuid=contest_uuid)
-    assert cleaner.is_uuid(instance.uuid) is not None
+    assert cleaner.is_uuid(instance.contest_uuid) is not None
     assert instance.contest_uuid == contest_uuid
     contest = db.save(instance=instance)
     assert db.count(model=Contest) == 1
@@ -106,7 +106,7 @@ def test_find():
     assert result.total == 1
     assert len(result.items) == 1
 
-    result = db.find(model=Contest, uuid=generate_uuid())
+    result = db.find(model=Contest, contest_uuid=generate_uuid())
     assert result.total == 0
 
 
@@ -175,7 +175,7 @@ def test_equal_filter(reset_db, seed_wager, seed_party, seed_participant, seed_p
     assert contests.total == 1
 
     contest = contests.items[0]
-    contests = db.find(model=Contest, contest_uuid=contest_uuid, uuid=contest.uuid)
+    contests = db.find(model=Contest, contest_uuid=contest_uuid)
     assert contests.items[0] == contest
 
 
@@ -216,5 +216,5 @@ def test_within_filter(create_wager):
 #     contests = db.find(model=Contest)
 #     assert contests.total == 2
 #
-#     contests = db.find(model=Contest, has_key={'uuid': pytest.contest.uuid})
+#     contests = db.find(model=Contest, has_key={'uuid': pytest.contest.contest_uuid})
 #     assert contests.total == 0

@@ -21,27 +21,13 @@ def test_contest_find_by_contest_uuid(kafka_conn, reset_db, seed_wager):
     assert contests.items[0].contest_uuid == pytest.contest_uuid
 
 
-def test_contest_find_by_uuid(kafka_conn):
-    """
-    GIVEN 1 contest instance in the database
-    WHEN the find method is called with uuid
-    THEN it should return 1 contest
-    """
-
-    contests = contest_service.find(uuid=pytest.contest.uuid)
-    assert contests.total == 1
-    assert len(contests.items) == 1
-    contest = contests.items[0]
-    assert contest.uuid == pytest.contest.uuid
-
-
 def test_contest_find_expand_wager(kafka_conn):
     """
     GIVEN 1 contest instance in the database
     WHEN the find method is called with uuid with include argument to also return wager
     THEN it should return 1 contest
     """
-    contests = contest_service.find(uuid=pytest.contest.uuid, expand=['wager'])
+    contests = contest_service.find(contest_uuid=pytest.contest.contest_uuid, expand=['wager'])
     assert contests.total == 1
     assert len(contests.items) == 1
     contest = contests.items[0]
@@ -150,7 +136,7 @@ def test_contest_create(kafka_conn, reset_db):
     """
     contest_uuid = pytest.contest_uuid
     contest = contest_service.create(contest_uuid=contest_uuid, buy_in=pytest.buy_in)
-    assert contest.uuid is not None
+    assert contest.contest_uuid is not None
     assert contest.contest_uuid == contest_uuid
     assert contest.buy_in == 5.0
 
@@ -163,7 +149,7 @@ def test_contest_create_dup_contest_uuid(kafka_conn):
     """
     GIVEN 1 contest instance in the database
     WHEN the create method is called with contest_uuid of contest already in the database
-    THEN it should return 0 contest and add 1 contest instance into the database and ManualException with code 500
+    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
     """
     contest_uuid = pytest.contest_uuid
     try:
@@ -180,33 +166,19 @@ def test_contest_create_int_buy_in(kafka_conn, reset_db):
     """
     contest_uuid = pytest.contest_uuid
     contest = contest_service.create(contest_uuid=contest_uuid, buy_in=5)
-    assert contest.uuid is not None
+    assert contest.contest_uuid is not None
     assert contest.contest_uuid == contest_uuid
     assert contest.buy_in == 5.0
     assert type(contest.buy_in) == float
 
 
-def test_contest_create_wo_contest_uuid(kafka_conn, reset_db):
-    """
-    GIVEN 0 contest instance in the database
-    WHEN the create method is called without contest_uuid
-    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
-    """
-
-    try:
-        _ = contest_service.create(buy_in=5.0)
-    except ManualException as ex:
-        assert ex.code == 500
-
-
-def test_contest_create_wo_buy_in(kafka_conn):
+def test_contest_create_wo_buy_in(kafka_conn, reset_db):
     """
     GIVEN 0 contest instance in the database
     WHEN the create method is called without buy in
     THEN it should return 1 contest and add 1 contest instance into the database
     """
     contest_uuid = pytest.contest_uuid
-
     contest = contest_service.create(contest_uuid=contest_uuid)
     assert contest.buy_in == 0.0
     assert type(contest.buy_in) == float
@@ -267,7 +239,7 @@ def test_contest_add(kafka_conn, reset_db):
 
     contest_uuid = pytest.contest_uuid
     contest = contest_service.add(contest_uuid=contest_uuid, buy_in=5.0)
-    assert contest.uuid is not None
+    assert contest.contest_uuid is not None
     assert contest.contest_uuid == contest_uuid
     assert contest.buy_in == 5.0
 
@@ -286,7 +258,7 @@ def test_contest_add_dup_contest_uuid(kafka_conn, reset_db):
     _ = contest_service.create(contest_uuid=contest_uuid, buy_in=5.0)
 
     contest = contest_service.add(contest_uuid=contest_uuid, buy_in=5.0)
-    assert contest.uuid is not None
+    assert contest.contest_uuid is not None
 
     contest_service.rollback()
 
@@ -300,7 +272,7 @@ def test_contest_add_int_buy_in(kafka_conn, reset_db):
 
     contest_uuid = pytest.contest_uuid
     contest = contest_service.add(contest_uuid=contest_uuid, buy_in=5)
-    assert contest.uuid is not None
+    assert contest.contest_uuid is not None
     assert contest.contest_uuid == contest_uuid
     assert contest.buy_in == 5
     assert type(contest.buy_in) == int
@@ -308,19 +280,6 @@ def test_contest_add_int_buy_in(kafka_conn, reset_db):
     contests = contest_service.find(contest_uuid=contest_uuid)
     assert contests.total == 1
     assert len(contests.items) == 1
-
-
-def test_contest_add_wo_contest_uuid(kafka_conn, reset_db):
-    """
-    GIVEN 0 contest instance in the database
-    WHEN the add method is called without contest_uuid
-    THEN it should return 1 contest and add 0 contest instance into the database
-    """
-
-    contest = contest_service.add(buy_in=5.0)
-    assert contest.uuid is not None
-    assert contest.contest_uuid is None
-    contest_service.rollback()
 
 
 def test_contest_add_wo_buy_in(kafka_conn, reset_db):
@@ -333,12 +292,13 @@ def test_contest_add_wo_buy_in(kafka_conn, reset_db):
     contest_uuid = pytest.contest_uuid
 
     contest = contest_service.add(contest_uuid=contest_uuid)
-    assert contest.uuid is not None
+    assert contest.contest_uuid is not None
     assert contest.buy_in is None
 
     contests = contest_service.find(contest_uuid=contest_uuid)
     assert contests.total == 1
     assert len(contests.items) == 1
+
 
 def test_contest_add_w_bad_field(kafka_conn):
     """
@@ -365,7 +325,7 @@ def test_contest_add_w_bad_buy_in(kafka_conn):
     contest_uuid = pytest.contest_uuid
 
     contest = contest_service.add(contest_uuid=contest_uuid, buy_in='five')
-    assert contest.uuid is not None
+    assert contest.contest_uuid is not None
     assert contest.buy_in == 'five'
     contest_service.rollback()
 
@@ -378,7 +338,7 @@ def test_contest_add_w_bad_contest_uuid(kafka_conn):
     """
 
     contest = contest_service.add(contest_uuid=1, buy_in=5.0)
-    assert contest.uuid is not None
+    assert contest.contest_uuid is not None
     assert contest.contest_uuid == 1
     contest_service.rollback()
 
@@ -402,24 +362,6 @@ def test_contest_commit(kafka_conn, reset_db):
     assert len(contests.items) == 1
 
 
-def test_contest_commit_dup_contest_uuid(kafka_conn, reset_db):
-    """
-    GIVEN 1 contest instance in the database
-    WHEN the commit method is called with contest_uuid of contest already in the database
-    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
-    """
-    contest_uuid = pytest.contest_uuid
-    contest = contest_service.create(contest_uuid=contest_uuid, buy_in=5.0)
-    assert contest.uuid is not None
-
-    _ = contest_service.add(contest_uuid=contest_uuid, buy_in=5.0)
-
-    try:
-        _ = contest_service.commit()
-    except ManualException as ex:
-        assert ex.code == 500
-
-
 def test_contest_commit_int_buy_in(kafka_conn, reset_db):
     """
     GIVEN 0 contest instance in the database
@@ -434,21 +376,6 @@ def test_contest_commit_int_buy_in(kafka_conn, reset_db):
     contests = contest_service.find(contest_uuid=contest_uuid)
     assert contests.total == 1
     assert len(contests.items) == 1
-
-
-def test_contest_commit_wo_contest_uuid(kafka_conn, reset_db):
-    """
-    GIVEN 0 contest instance in the database
-    WHEN the commit method is called without contest_uuid
-    THEN it should return 0 contest and add 0 contest instance into the database and ManualException with code 500
-    """
-
-    _ = contest_service.add(buy_in=5.0)
-
-    try:
-        _ = contest_service.commit()
-    except ManualException as ex:
-        assert ex.code == 500
 
 
 def test_contest_commit_wo_buy_in(kafka_conn, reset_db):
