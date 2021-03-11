@@ -10,7 +10,7 @@ class Contest(db.Model, BaseMixin):
     contest_uuid = db.Column(UUIDType(binary=False), nullable=False, unique=True)
 
     # Relationship
-    wager = db.relationship("Wager")
+    wager = db.relationship("Wager", uselist=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
