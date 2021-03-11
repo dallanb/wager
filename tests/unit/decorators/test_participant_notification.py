@@ -15,6 +15,7 @@ def test_participant_notification_participant_active(reset_db, kafka_conn_last_m
     THEN it should allow the participant_notification decorator to send an event
     """
     participant = participant_service.update(uuid=pytest.participant.uuid, status='active')
+    time.sleep(0.2)
     msg = kafka_conn_last_msg('wagers')
     assert msg.key is not None
     assert msg.key == 'participant_active'
@@ -31,8 +32,8 @@ def test_participant_notification_participant_inactive(reset_db, kafka_conn_last
     WHEN the participant service update method is called with status inactive
     THEN it should allow the participant_notification decorator to send an event
     """
-    time.sleep(0.5)
     participant = participant_service.update(uuid=pytest.participant.uuid, status='inactive')
+    time.sleep(0.2)
     msg = kafka_conn_last_msg('wagers')
     assert msg.key is not None
     assert msg.key == 'participant_inactive'

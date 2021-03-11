@@ -9,7 +9,7 @@ contest_service = ContestService()
 party_service = PartyService()
 
 
-def test_cleaner_is_mapped_pass():
+def test_cleaner_is_mapped_pass(reset_db):
     """
     GIVEN a cleaner instance and contest instance
     WHEN calling the is_mapped method of the cleaner instance on the contest instance
