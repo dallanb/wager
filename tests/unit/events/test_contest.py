@@ -104,11 +104,10 @@ def test_contest_contest_ready_sync(reset_db):
     owner_uuid = pytest.user_uuid
     payout_list = [0.85, 0.1, 0.05]
 
-    # create wager
-    wager = services.WagerService().create(status='active')
     # create contest
-    _ = services.ContestService().create(contest_uuid=uuid, buy_in=pytest.buy_in,
-                                         wager=wager)
+    contest = services.ContestService().create(contest_uuid=uuid, buy_in=pytest.buy_in)
+    # create wager
+    wager = services.WagerService().create(status='active', contest=contest)
     # create payout
     services.WagerService().validate_and_create_payout(instance=wager,
                                                        payout_list=payout_list)
@@ -146,7 +145,6 @@ def test_contest_contest_ready_sync(reset_db):
             assert payout.proportion == 0.875
         else:
             assert payout.proportion == 0.125
-
 
 def test_contest_contest_inactive_sync(reset_db, seed_wager, seed_party, seed_participant, seed_payouts, seed_stake):
     """

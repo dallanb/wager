@@ -25,27 +25,25 @@ class Contest:
 
         elif key == 'participant_active':
             self.logger.info('participant active')
-            contests = self.contest_service.find(contest_uuid=data['contest_uuid'])
-            if contests.total:
-                party = self.party_service.add(wager=contests.items[0].wager)
+            wagers = self.wager_service.find(contest_uuid=data['contest_uuid'])
+            if wagers.total:
+                wager = wagers.items[0]
+                party = self.party_service.add(wager=wager)
                 participant = self.participant_service.add(member_uuid=data['member_uuid'],
                                                            status='active', party=party)
-                _ = self.stake_service.create(amount=contests.items[0].buy_in, participant=participant)
+                _ = self.stake_service.create(amount=wager.contest.buy_in, participant=participant)
         elif key == 'participant_inactive':
             self.logger.info('participant inactive')
         elif key == 'contest_ready':
             self.logger.info('contest ready')
-            contests = self.contest_service.find(contest_uuid=data['uuid'])
-            if contests.total:
-                contest = contests.items[0]
-                wager = contest.wager
-                self.wager_service.check_payout(instance=wager)
+            wagers = self.wager_service.find(contest_uuid=data['uuid'])
+            if wagers.total:
+                self.wager_service.check_payout(instance=wagers.items[0])
         elif key == 'contest_inactive':
             self.logger.info('contest inactive')
-            contests = self.contest_service.find(contest_uuid=data['uuid'])
-            if contests.total:
-                contest = contests.items[0]
-                wager = contest.wager
+            wagers = self.wager_service.find(contest_uuid=data['uuid'])
+            if wagers.total:
+                wager = wagers.items[0]
                 self.wager_service.apply(instance=wager, status='inactive')
                 parties = wager.parties
                 for party in parties:

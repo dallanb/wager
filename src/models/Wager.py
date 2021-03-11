@@ -9,7 +9,7 @@ class Wager(db.Model, BaseMixin):
     # FK
     status = db.Column(db.Enum(WagerStatusEnum), db.ForeignKey('wager_status.name'), nullable=False,
                        default=WagerStatusEnum['pending'])
-    contest_uuid = db.Column(UUIDType(binary=False), db.ForeignKey('contest.uuid'), nullable=False)
+    contest_uuid = db.Column(UUIDType(binary=False), db.ForeignKey('contest.contest_uuid'), nullable=False)
 
     # Relationship
     wager_status = db.relationship("WagerStatus")
