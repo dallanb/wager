@@ -1,18 +1,25 @@
+from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import validates
 from sqlalchemy_utils import UUIDType
 
-from .mixins import BaseMixin
 from .. import db
+from ..common import time_now, camel_to_snake
 
 
-class Contest(db.Model, BaseMixin):
+# This is almost a materialized model
+class Contest(db.Model):
+    @declared_attr
+    def __tablename__(cls):
+        return camel_to_snake(cls.__name__)
+
+    contest_uuid = db.Column(UUIDType(binary=False), primary_key=True, unique=True,
+                             nullable=False)  # this is the contest uuid from the Contest SERVICE
+    ctime = db.Column(db.BigInteger, default=time_now)
+    mtime = db.Column(db.BigInteger, onupdate=time_now)
     buy_in = db.Column(db.Float, default=0.0)
-    contest_uuid = db.Column(UUIDType(binary=False), nullable=False, unique=True)
-    # FK
-    wager_uuid = db.Column(UUIDType(binary=False), db.ForeignKey('wager.uuid'), nullable=False)
 
     # Relationship
-    wager = db.relationship("Wager", lazy="joined")
+    wager = db.relationship("Wager", uselist=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,6 +30,3 @@ class Contest(db.Model, BaseMixin):
             raise ValueError('buy_in cannot be modified.')
 
         return value
-
-
-Contest.register()

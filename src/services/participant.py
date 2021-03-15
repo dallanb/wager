@@ -2,6 +2,7 @@ import logging
 from http import HTTPStatus
 
 from .base import Base
+from ..decorators import participant_notification
 from ..models import Participant as ParticipantModel
 
 
@@ -29,7 +30,11 @@ class Participant(Base):
         participants = self.find(uuid=uuid)
         if not participants.total:
             self.error(code=HTTPStatus.NOT_FOUND)
-        participant = self._assign_attr(instance=participants.items[0], attr=kwargs)
+        return self.apply(instance=participants.items[0], **kwargs)
+
+    @participant_notification(operation='update')
+    def apply(self, instance, **kwargs):
+        participant = self._assign_attr(instance=instance, attr=kwargs)
         return self._save(instance=participant)
 
     def rollback(self):

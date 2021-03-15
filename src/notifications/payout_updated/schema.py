@@ -2,7 +2,7 @@ from marshmallow import Schema, pre_dump
 from webargs import fields
 
 
-class WagerCreatedSchema(Schema):
+class PayoutUpdatedSchema(Schema):
     uuid = fields.UUID(attribute='wager.uuid')
     contest_uuid = fields.UUID(attribute='contest.contest_uuid')
 

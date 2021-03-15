@@ -48,6 +48,8 @@ class Wager(Base):
         return payouts
 
     # check if payout associated with this wager instance is still valid
+    # will return the number of payout updated # TODO: fix this return value to be something better
+    @wager_notification(operation='payout_update')
     def check_payout(self, instance):
         parties = instance.parties
         payouts = self.payout_service.find(wager=instance, sort_by='rank.asc')
@@ -67,3 +69,5 @@ class Wager(Base):
             for invalid_payout in invalid_payouts:
                 self._delete(instance=invalid_payout)
             self._commit()
+            return len(valid_payouts)
+        return 0

@@ -22,13 +22,12 @@ def test_wager_find(kafka_conn, reset_db, seed_wager):
     assert len(wagers.items) == 1
 
 
-def test_wager_find_by_uuid(kafka_conn):
+def test_wager_find_by_uuid(kafka_conn, reset_db, seed_wager):
     """
     GIVEN 1 wager instance in the database
     WHEN the find method is called with uuid
     THEN it should return 1 wager
     """
-
     wagers = wager_service.find(uuid=pytest.wager.uuid)
 
     assert wagers.total == 1
@@ -36,7 +35,21 @@ def test_wager_find_by_uuid(kafka_conn):
     assert wagers.items[0].uuid == pytest.wager.uuid
 
 
-def test_wager_find_include_parties(kafka_conn, create_party):
+def test_wager_find_by_contest_uuid(kafka_conn, reset_db, seed_wager):
+    """
+    GIVEN 1 wager instance in the database
+    WHEN the find method is called with contest_uuid
+    THEN it should return 1 wager
+    """
+
+    wagers = wager_service.find(contest_uuid=pytest.contest_uuid)
+
+    assert wagers.total == 1
+    assert len(wagers.items) == 1
+    assert wagers.items[0].uuid == pytest.wager.uuid
+
+
+def test_wager_find_include_parties(kafka_conn, reset_db, seed_wager, create_party):
     """
     GIVEN 1 wager instance in the database
     WHEN the find method is called with include argument to return parties
@@ -52,7 +65,7 @@ def test_wager_find_include_parties(kafka_conn, create_party):
     assert wager.parties[0].uuid == party.uuid
 
 
-def test_wager_find_include_payouts(kafka_conn):
+def test_wager_find_include_payouts(kafka_conn, reset_db, seed_wager):
     """
     GIVEN 1 wager instance in the database
     WHEN the find method is called with include argument to return payouts
@@ -68,7 +81,20 @@ def test_wager_find_include_payouts(kafka_conn):
     assert len(wager.payouts) == 2
 
 
-def test_wager_find_include_parties_and_payouts(kafka_conn):
+def test_wager_find_expand_contest(kafka_conn, reset_db, seed_wager):
+    """
+    GIVEN 1 wager instance in the database
+    WHEN the find method is called with expand argument to return contest
+    THEN it should return 1 wager
+    """
+
+    wagers = wager_service.find(expand=['contest'])
+
+    wager = wagers.items[0]
+    assert wager.contest is not None
+
+
+def test_wager_find_include_parties_and_payouts(kafka_conn, reset_db, seed_wager, seed_party, seed_payouts):
     """
     GIVEN 1 wager instance in the database
     WHEN the find method is called with include argument to return parties and payouts
@@ -84,7 +110,25 @@ def test_wager_find_include_parties_and_payouts(kafka_conn):
     assert len(wager.payouts) == 2
 
 
-def test_wager_find_w_pagination(kafka_conn, create_wager):
+def test_wager_find_include_parties_and_payouts_expand_contest(kafka_conn, reset_db, seed_wager, seed_party,
+                                                               seed_payouts):
+    """
+    GIVEN 1 wager instance in the database
+    WHEN the find method is called with include argument to return parties and payouts and expand argument to return contest
+    THEN it should return 1 wager
+    """
+
+    wagers = wager_service.find(include=['parties', 'payouts'], expand=['contest'])
+
+    wager = wagers.items[0]
+    assert wager.parties is not None
+    assert len(wager.parties) == 1
+    assert wager.payouts is not None
+    assert len(wager.payouts) == 2
+    assert wager.contest is not None
+
+
+def test_wager_find_w_pagination(kafka_conn, reset_db, seed_wager, create_wager):
     """
     GIVEN 2 wager instance in the database
     WHEN the find method is called with valid pagination
@@ -162,11 +206,47 @@ def test_wager_create(kafka_conn, reset_db):
     WHEN the create method is called
     THEN it should return 1 wager and add 1 wager instance into the database
     """
-
-    wager = wager_service.create(status='active')
+    contest = services.ContestService().create(contest_uuid=pytest.contest_uuid)
+    wager = wager_service.create(status='active', contest=contest)
 
     assert wager.uuid is not None
     assert wager.status.name == 'active'
+
+
+def test_wager_create_w_contest_uuid(kafka_conn, reset_db):
+    """
+    GIVEN 1 wager instance in the database
+    WHEN the create method is called without status
+    THEN it should return 1 wager and add 1 wager instance into the database
+    """
+    contest = services.ContestService().create(contest_uuid=pytest.contest_uuid)
+    wager = wager_service.create(status='active', contest_uuid=contest.contest_uuid)
+
+    assert wager.uuid is not None
+
+
+def test_wager_create_wo_contest(kafka_conn, reset_db):
+    """
+    GIVEN 1 wager instance in the database
+    WHEN the create method is called without status
+    THEN it should return 0 wager and add 0 wager instance into the database and ManualException with code 500
+    """
+    try:
+        _ = wager_service.create(status='active')
+    except ManualException as ex:
+        assert ex.code == 500
+
+
+def test_wager_create_w_non_existent_contest(kafka_conn):
+    """
+    GIVEN 1 wager instance in the database
+    WHEN the create method is called with a non existent contest
+    THEN it should return 0 wager and add 0 wager instance into the database and ManualException with code 500
+    """
+    try:
+        _ = wager_service.create(status='active', contest_uuid=generate_uuid())
+    except ManualException as ex:
+        assert ex.code == 500
 
 
 def test_wager_create_wo_status(kafka_conn, reset_db):
@@ -175,7 +255,8 @@ def test_wager_create_wo_status(kafka_conn, reset_db):
     WHEN the create method is called without status
     THEN it should return 1 wager and add 1 wager instance into the database
     """
-    wager = wager_service.create()
+    pytest.contest = services.ContestService().create(contest_uuid=pytest.contest_uuid)
+    wager = wager_service.create(contest=pytest.contest)
 
     assert wager.uuid is not None
     assert wager.status.name == 'pending'
@@ -188,7 +269,7 @@ def test_wager_create_w_non_existent_status(kafka_conn):
     THEN it should return 0 wager and add 0 wager instance into the database and ManualException with code 500
     """
     try:
-        _ = wager_service.create(status='junk')
+        _ = wager_service.create(status='junk', contest=pytest.contest)
     except ManualException as ex:
         assert ex.code == 500
 
@@ -200,7 +281,7 @@ def test_wager_create_w_bad_parties(kafka_conn):
     THEN it should return 0 wager and add 0 wager instance into the database and ManualException with code 500
     """
     try:
-        _ = wager_service.create(status='active', parties=[generate_uuid()])
+        _ = wager_service.create(status='active', contest=pytest.contest, parties=[generate_uuid()])
     except ManualException as ex:
         assert ex.code == 500
 
@@ -212,7 +293,7 @@ def test_wager_create_w_bad_payouts(kafka_conn):
     THEN it should return 0 wager and add 0 wager instance into the database and ManualException with code 500
     """
     try:
-        _ = wager_service.create(status='active', payouts=[generate_uuid()])
+        _ = wager_service.create(status='active', contest=pytest.contest, payouts=[generate_uuid()])
     except ManualException as ex:
         assert ex.code == 500
 
@@ -294,8 +375,8 @@ def test_party_check_payout(kafka_conn, reset_db):
     buy_in = 5.0
     payout = [0.70, 0.20, 0.10]
     contest_uuid = pytest.contest_uuid
-    wager = wager_service.create(status='active')
-    _ = services.ContestService().create(contest_uuid=contest_uuid, buy_in=buy_in, wager=wager)
+    contest = services.ContestService().create(contest_uuid=contest_uuid, buy_in=buy_in)
+    wager = wager_service.create(status='active', contest=contest)
     wager_service.validate_and_create_payout(instance=wager, payout_list=payout)
     for index in range(2):
         party = services.PartyService().add(wager=wager)
