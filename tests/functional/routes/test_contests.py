@@ -20,7 +20,7 @@ def test_fetch_contest_complete(reset_db, seed_wager, seed_party, seed_participa
     WHEN the GET endpoint 'contest_complete' is requested
     THEN check that the response is valid
     """
-    contest_uuid = pytest.contest.contest_uuid
+    contest_uuid = pytest.contest_uuid
     # Request
     response = app.test_client().get(f'/contests/{contest_uuid}/complete')
 
