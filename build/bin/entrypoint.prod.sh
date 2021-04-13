@@ -1,14 +1,26 @@
 #!/bin/sh
 
+. ~/.bashrc
 
-if [ ! -d "migrations/prod/versions" ]; then
-  echo "Directory migrations/prod/versions does not exist."
-  flask db init --directory=migrations/prod
-  sed -i '/import sqlalchemy as sa/a import sqlalchemy_utils' migrations/prod/script.py.mako
-  flask db migrate --directory=migrations/prod
+pip install -e .
+
+if [ "$DATABASE" = "wager" ]; then
+  echo "Waiting for wager..."
+
+  while ! nc -z $SQL_HOST $SQL_PORT; do
+    sleep 0.1
+  done
+
+  echo "PostgreSQL started"
 fi
 
-flask db upgrade --directory=migrations/prod
+if [ ! -d "migrations/versions" ]; then
+  echo "Directory migrations/versions does not exist."
+  flask db init --directory=migrations
+  sed -i '/import sqlalchemy as sa/a import sqlalchemy_utils' migrations/script.py.mako
+fi
 
+flask db migrate --directory=migrations
+flask db upgrade --directory=migrations
 
 gunicorn --bind 0.0.0.0:5000 manage:app
