@@ -11,4 +11,5 @@ CACHE_PORT=6379
 SECRET_KEY=dallanbhatti
 KAFKA_URL=kafka:9092
 KAFKA_TOPICS=contests
+KAFKA_GROUP_ID=app
 CONTEST_URL=http://contest:5000
