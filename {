@@ -1,0 +1,66 @@
+Script started on 2021-04-20 14:06:01-0700
+                    httpRequest url: 'http://10.0.0.200:10001/hooks/redeploy', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody: """
+                        {
+                            "project": {
+                                "name": "$container",
+                                "env": "$BRANCH_NAME"
+                            }
+                        }
+                    """
+                }
+            }
+        }
+    }
+    post {
+        success {
+          slackSend (color: '#00FF00', message: "SUCCESSFUL: Completed Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
+
+        failure {
+          slackSend (color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+        }
+    }
+}]0;dallanbhatti@super: ~/Documents/Personal/techtapir/services/wager[01;32mdallanbhatti@super[00m:[01;34m~/Documents/Personal/techtapir/services/wager[00m$                     httpRequest url: 'http://10.0.0.200:10001/hooks/redeploy', contentType: 'APPLICATION_JSON', httpMode: 'POST', requestBody: """
+>                         {
+>                             "project": {
+>                                 "name": "$container",
+>                                 "env": "$BRANCH_NAME"
+>                             }
+>                         }
+>                     """
+httpRequest: command not found
+]0;dallanbhatti@super: ~/Documents/Personal/techtapir/services/wager[01;32mdallanbhatti@super[00m:[01;34m~/Documents/Personal/techtapir/services/wager[00m$                 }
+bash: syntax error near unexpected token `}'
+]0;dallanbhatti@super: ~/Documents/Personal/techtapir/services/wager[01;32mdallanbhatti@super[00m:[01;34m~/Documents/Personal/techtapir/services/wager[00m$             }
+bash: syntax error near unexpected token `}'
+]0;dallanbhatti@super: ~/Documents/Personal/techtapir/services/wager[01;32mdallanbhatti@super[00m:[01;34m~/Documents/Personal/techtapir/services/wager[00m$         }
+bash: syntax error near unexpected token `}'
+]0;dallanbhatti@super: ~/Documents/Personal/techtapir/services/wager[01;32mdallanbhatti@super[00m:[01;34m~/Documents/Personal/techtapir/services/wager[00m$     }
+bash: syntax error near unexpected token `}'
+]0;dallanbhatti@super: ~/Documents/Personal/techtapir/services/wager[01;32mdallanbhatti@super[00m:[01;34m~/Documents/Personal/techtapir/services/wager[00m$     post {
+
+Command 'post' not found, did you mean:
+
+  command 'psst' from snap psst (0.1-8)
+  command 'gost' from snap gost (2.11.1)
+  command 'rpost' from deb suck
+  command 'most' from deb most
+  command 'psst' from deb psst
+  command 'epost' from deb ncbi-entrez-direct
+  command 'spost' from deb mmh
+  command 'poet' from deb libpoet-perl
+  command 'posh' from deb posh
+  command 'host' from deb bind9-host
+  command 'postr' from deb postr
+  command 'mpost' from deb texlive-binaries
+
+See 'snap info <snapname>' for additional versions.
+
+]0;dallanbhatti@super: ~/Documents/Personal/techtapir/services/wager[01;32mdallanbhatti@super[00m:[01;34m~/Documents/Personal/techtapir/services/wager[00m$         success {
+success: command not found
+]0;dallanbhatti@super: ~/Documents/Personal/techtapir/services/wager[01;32mdallanbhatti@super[00m:[01;34m~/Documents/Personal/techtapir/services/wager[00m$           slackSend (color: '#00FF00', message: "SUCCESSFUL: Completed Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+bash: syntax error near unexpected token `color:'
+]0;dallanbhatti@super: ~/Documents/Personal/techtapir/services/wager[01;32mdallanbhatti@super[00m:[01;34m~/Documents/Personal/techtapir/services/wager[00m$         }
+bash: syntax error near unexpected token `}'
+]0;dallanbhatti@super: ~/Documents/Personal/techtapir/services/wager[01;32mdallanbhatti@super[00m:[01;34m~/Documents/Personal/techtapir/services/wager[00m$ 
+]0;dallanbhatti@super: ~/Documents/Personal/techtapir/services/wager[01;32mdal
