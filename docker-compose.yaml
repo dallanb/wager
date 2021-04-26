@@ -21,6 +21,7 @@ services:
       - ${HUNCHO_DIR}/services/wager/tests:/home/app/tests
       - ${HUNCHO_DIR}/services/wager/seeds:/home/app/seeds
       - ${HUNCHO_DIR}/services/wager/src:/home/app/src
+      - ${HUNCHO_DIR}/services/wager/logs:/home/app/logs
       - ${HUNCHO_DIR}/services/wager/statics:/home/app/statics
       - ${HUNCHO_DIR}/services/wager/manage.py:/home/app/manage.py
       - ${HUNCHO_DIR}/services/wager/setup.py:/home/app/setup.py
