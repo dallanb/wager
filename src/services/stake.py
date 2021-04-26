@@ -1,7 +1,7 @@
 import logging
 
 from .base import Base
-from ..decorators import stake_notification
+from ..decorators.notifications import stake_notification
 from ..models import Stake as StakeModel
 
 

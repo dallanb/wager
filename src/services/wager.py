@@ -3,7 +3,7 @@ import math
 from http import HTTPStatus
 
 from .base import Base
-from ..decorators import wager_notification
+from ..decorators.notifications import wager_notification
 from ..models import Wager as WagerModel
 from ..services import PayoutService
 

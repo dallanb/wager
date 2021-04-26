@@ -2,7 +2,7 @@ import logging
 from http import HTTPStatus
 
 from .base import Base
-from ..decorators import participant_notification
+from ..decorators.notifications import participant_notification
 from ..models import Participant as ParticipantModel
 
 
