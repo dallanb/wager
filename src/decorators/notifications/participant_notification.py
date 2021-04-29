@@ -1,7 +1,7 @@
 import logging
 from functools import wraps
 
-from src.notifications import participant_active, participant_inactive
+from ...notifications import participant_active, participant_inactive
 
 
 class participant_notification:
