@@ -9,6 +9,12 @@ class Config(object):
     TESTING = os.getenv("TESTING", False)
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite://")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": os.getenv("POOL_PRE_PING", True),
+        "pool_size": os.getenv("POOL_SIZE", 5),
+        "pool_recycle": os.getenv("POOL_RECYCLE", 1800),
+        "max_overflow": os.getenv("MAX_OVERFLOW", 20),
+    }
     SECRET_KEY = os.getenv("SECRET_KEY")
     KAFKA_URL = os.getenv("KAFKA_URL")
     KAFKA_TOPICS = os.getenv("KAFKA_TOPICS").split(",")
